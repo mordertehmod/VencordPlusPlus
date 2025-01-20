@@ -62,7 +62,7 @@ const settings = definePluginSettings({
     maxNumberOfConnections: {
         type: OptionType.NUMBER,
         description: "Max number of connections to show",
-        default: 20,
+        default: 13,
     }
 });
 
