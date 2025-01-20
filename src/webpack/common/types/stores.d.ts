@@ -228,6 +228,91 @@ export class ThemeStore extends FluxStore {
     systemTheme: null;
 }
 
+export type Badge = {
+    description: string;
+    icon: string;
+    id: string;
+    link: string;
+};
+
+export type Connection = {
+    id: string;
+    name: string;
+    type: string;
+    verified: boolean;
+};
+
+export type Application = {
+    customInstallUrl: never | undefined;
+    flags: number;
+    id: string;
+    installParams: never | undefined;
+    integrationTypesConfig: Record<number, object>;
+    name: string;
+    popularApplicationCommands: never | undefined;
+    primarySkuId: undefined | never;
+    storefront_available: boolean;
+};
+
+export enum PremiumType {
+    NONE,
+    NITRO_CLASSIC,
+    NITRO,
+    NITRO_BASIC
+}
+export type BaseProfile = {
+    accentColor: number;
+    badges: Badge[];
+    banner: string | null;
+    bio: string;
+    popoutAnimationParticleType: never;
+    profileEffectExpiresAt: never;
+    profileEffectId: string;
+    pronouns: string;
+    themeColors: number[] | null;
+    userId: string;
+};
+
+export type UserProfile = BaseProfile & {
+    application: Application;
+    applicationRoleConnections: never[];
+    connectedAccounts: Connection[];
+    fetchError: never;
+    lastFetched: number;
+    legacyUsername: string;
+    premiumGuildSince: Data | null;
+    premiumSince: Date | null;
+    premiumType: PremiumType;
+};
+
+export type GuildProfile = BaseProfile & {
+    guildId: string;
+};
+
+export type Mutualfriend = {
+    key: string;
+    status: "offline" | "online" | "idle" | "dnd";
+};
+
+export type MutualGuild = {
+    nick: string | null;
+    guild: Guild;
+};
+
+export class UserProfileStore extends FluxStore {
+    isFetchingProfile(userId: string, guildId?: string);
+    /**
+     * Fetching mutual friends
+     */
+    isFetchingFriends(userId: string);
+    get isSubmitting(): boolean;
+    getUserProfile(userId: string): UserProfile | undefined;
+    getGuildMemberProfile(userId: string, guildId: string): GuildProfile | null | undefined;
+    getMutualFriends(userId: string): MutualFriend[];
+    getMutualFriendsCount(userId: string): number | undefined;
+    getMutualGuilds(userId: string): MutualGuild[] | undefined;
+}
+
 export type useStateFromStores = <T>(
     stores: t.FluxStore[],
     mapper: () => T,

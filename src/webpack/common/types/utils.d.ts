@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Section, SubSection } from "@webpack/common/utils";
 import { Channel, Guild, GuildMember, User } from "discord-types/general";
 import type { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
@@ -323,4 +324,21 @@ export class DisplayProfile {
 export interface DisplayProfileUtils {
     getDisplayProfile(userId: string, guildId?: string, customStores?: any): DisplayProfile | null;
     useDisplayProfile(userId: string, guildId?: string, customStores?: any): DisplayProfile | null;
+}
+
+export type OpenUserProfileModalProps = {
+    userId: string;
+    guildId: string;
+    showGuildProfile?: boolean;
+    channelId: string;
+    analyticsLocation: {
+        page: string;
+        section: string;
+    };
+    section?: Section;
+    subsection?: SubSection;
+};
+
+export interface UserProfileActions {
+    openUserProfileModal(props: OpenUserProfileModalProps): Promise<void>;
 }

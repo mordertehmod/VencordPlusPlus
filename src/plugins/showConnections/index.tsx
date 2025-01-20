@@ -27,7 +27,8 @@ import { openUserProfile } from "@utils/discord";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Icons, Tooltip, UserProfileStore } from "@webpack/common";
+import { Icons, Section, SubSection, Tooltip, UserProfileStore } from "@webpack/common";
+import { Connection } from "@webpack/types";
 import { User } from "discord-types/general";
 
 import { VerifiedIcon } from "./VerifiedIcon";
@@ -60,18 +61,12 @@ const settings = definePluginSettings({
         ]
     },
     maxNumberOfConnections: {
-        type: OptionType.NUMBER,
+        type: OptionType.SLIDER,
         description: "Max number of connections to show",
         default: 13,
+        markers: [6, 13, 20, 26, 34, 41, 48],
     }
 });
-
-interface Connection {
-    type: string;
-    id: string;
-    name: string;
-    verified: boolean;
-}
 
 interface ConnectionPlatform {
     getPlatformUserUrl(connection: Connection): string;
@@ -90,19 +85,22 @@ const profilePopoutComponent = ErrorBoundary.wrap(
 );
 
 function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
-    const profile: { connectedAccounts: Connection[]; } = UserProfileStore.getUserProfile(id);
+    const profile = UserProfileStore.getUserProfile(id);
     if (!profile)
         return null;
 
     const { connectedAccounts } = profile;
     if (!connectedAccounts?.length)
         return null;
-    let connections: React.JSX.Element[];
+
+    const connections = connectedAccounts.map(connection => <CompactConnectionComponent connection={connection} theme={theme} key={connection.id} />);
+
     if (connectedAccounts.length > settings.store.maxNumberOfConnections) {
-        connections = connectedAccounts.slice(0, settings.store.maxNumberOfConnections).map(connection => <CompactConnectionComponent connection={connection} theme={theme} key={connection.id} />);
-        connections.push(<ConnectionsMoreIcon onClick={() => openUserProfile(id)} />);
-    } else {
-        connections = connectedAccounts.map(connection => <CompactConnectionComponent connection={connection} theme={theme} key={connection.id} />);
+        connections.length = settings.store.maxNumberOfConnections;
+        connections.push(<ConnectionsMoreIcon key="more-connections" onClick={() => openUserProfile(id, {
+            section: Section.USER_INFO,
+            subsection: SubSection.CONNECTIONS
+        })} />);
     }
     return (
         <Flex style={{
@@ -198,7 +196,7 @@ function CompactConnectionComponent({ connection, theme }: { connection: Connect
 export default definePlugin({
     name: "ShowConnections",
     description: "Show connected accounts in user popouts",
-    authors: [Devs.TheKodeToad],
+    authors: [Devs.TheKodeToad, Devs.sadan],
     settings,
 
     patches: [
