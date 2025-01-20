@@ -228,21 +228,21 @@ export class ThemeStore extends FluxStore {
     systemTheme: null;
 }
 
-export type ProfileBadge = {
+export interface ProfileBadge {
     description: string;
     icon: string;
     id: string;
     link?: string;
-};
+}
 
-export type Connection = {
+export interface Connection {
     id: string;
     name: string;
     type: string;
     verified: boolean;
-};
+}
 
-export type Application = {
+export interface Application {
     customInstallUrl: never | undefined;
     flags: number;
     id: string;
@@ -252,15 +252,16 @@ export type Application = {
     popularApplicationCommands: never | undefined;
     primarySkuId: undefined | never;
     storefront_available: boolean;
-};
+}
 
-export enum PremiumType {
+export const enum PremiumType {
     NONE,
     NITRO_CLASSIC,
     NITRO,
     NITRO_BASIC
 }
-export type BaseProfile = {
+
+export interface BaseProfile {
     accentColor: number;
     badges: ProfileBadge[];
     banner: string | null;
@@ -271,9 +272,9 @@ export type BaseProfile = {
     pronouns: string;
     themeColors: number[] | null;
     userId: string;
-};
+}
 
-export type UserProfile = BaseProfile & {
+export interface UserProfile extends BaseProfile {
     application: Application;
     applicationRoleConnections: never[];
     connectedAccounts: Connection[];
@@ -283,21 +284,21 @@ export type UserProfile = BaseProfile & {
     premiumGuildSince: Data | null;
     premiumSince: Date | null;
     premiumType: PremiumType;
-};
+}
 
-export type GuildProfile = BaseProfile & {
+export interface GuildProfile extends BaseProfile {
     guildId: string;
-};
+}
 
-export type Mutualfriend = {
+export interface MutualFriend {
     key: string;
     status: "offline" | "online" | "idle" | "dnd";
-};
+}
 
-export type MutualGuild = {
+export interface MutualGuild {
     nick: string | null;
     guild: Guild;
-};
+}
 
 export class UserProfileStore extends FluxStore {
     isFetchingProfile(userId: string, guildId?: string);
