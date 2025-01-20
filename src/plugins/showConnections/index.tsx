@@ -22,12 +22,14 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { CopyIcon, LinkIcon } from "@components/Icons";
+import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
+import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Clickable, Tooltip, UserProfileStore } from "@webpack/common";
+import { Clickable, Forms, Slider, Tooltip, UserProfileStore, useState } from "@webpack/common";
 import { Connection } from "@webpack/types";
 import { User } from "discord-types/general";
 
@@ -61,9 +63,39 @@ const settings = definePluginSettings({
         ]
     },
     maxNumberOfConnections: {
-        type: OptionType.NUMBER,
+        type: OptionType.COMPONENT,
         description: "Max number of connections to show",
-        default: 13,
+        component: props => {
+            const [value, setValue] = useState(settings.store.maxNumberOfConnections || 13);
+            const range = makeRange(6, 48, 7);
+            return (
+                <Forms.FormSection>
+                    <Forms.FormTitle>
+                        Max Number Of Connections
+                    </Forms.FormTitle>
+                    <Forms.FormText
+                        className={Margins.bottom20}
+                        type="description"
+                    >
+                        Max number of connections to show
+                    </Forms.FormText>
+                    <Slider
+                        initialValue={value}
+                        markers={range}
+                        keyboardStep={1}
+                        minValue={range[0]}
+                        maxValue={range.at(-1)}
+                        onValueChange={value => {
+                            const rounded = Math.round(value);
+                            setValue(rounded);
+                            props.setValue(rounded);
+                        }}
+                        onValueRender={value => String(Math.round(value))}
+                        onMarkerRender={value => String(value)}
+                    />
+                </Forms.FormSection>
+            );
+        }
     }
 });
 
