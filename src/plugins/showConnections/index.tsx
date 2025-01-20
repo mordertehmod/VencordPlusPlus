@@ -22,6 +22,7 @@ import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { CopyIcon, LinkIcon } from "@components/Icons";
+import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import { copyWithToast } from "@utils/misc";
@@ -64,7 +65,7 @@ const settings = definePluginSettings({
         type: OptionType.SLIDER,
         description: "Max number of connections to show",
         default: 13,
-        markers: [6, 13, 20, 26, 34, 41, 48],
+        markers: makeRange(6, 48, 7),
     }
 });
 
