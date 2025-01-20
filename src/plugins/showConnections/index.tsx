@@ -28,7 +28,7 @@ import { openUserProfile } from "@utils/discord";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Clickable, Icons, Tooltip, UserProfileStore } from "@webpack/common";
+import { Clickable, Tooltip, UserProfileStore } from "@webpack/common";
 import { Connection } from "@webpack/types";
 import { User } from "discord-types/general";
 
@@ -98,10 +98,14 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
 
     if (connectedAccounts.length > settings.store.maxNumberOfConnections) {
         connections.length = settings.store.maxNumberOfConnections;
-        connections.push(<ConnectionsMoreIcon key="more-connections" onClick={() => openUserProfile(id, {
-            section: "USER_INFO",
-            subsection: "CONNECTIONS"
-        })} />);
+        connections.push(<ConnectionsMoreIcon
+            key="more-connections"
+            numExtra={connectedAccounts.length - settings.store.maxNumberOfConnections}
+            onClick={() => openUserProfile(id, {
+                section: "USER_INFO",
+                subsection: "CONNECTIONS"
+            })}
+        />);
     }
     return (
         <Flex style={{
@@ -113,25 +117,18 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
     );
 }
 
-function ConnectionsMoreIcon({ onClick }: { onClick: () => void; }) {
+function ConnectionsMoreIcon({ numExtra, onClick }: { numExtra: number; onClick: () => void; }) {
     return (
-        <Tooltip
-            text={
-                <span className="vc-sc-tooltip">
-                    <span className="vc-sc-connection-name">
-                        View All Connections
-                    </span>
-                </span>
-            }
-        >
+        <Tooltip text="View all Connections">
             {props => (
                 <Clickable
+                    {...props}
                     onClick={onClick}
                 >
-                    <Icons.MoreHorizontalIcon
-                        {...props}
-                        className="vc-user-connection"
-                    />
+                    {/* discords icon refuses to work with a custom width/height for some reason */}
+                    <svg width={settings.store.iconSize} height={settings.store.iconSize} viewBox="0 0 24 24">
+                        <path fill="var(--interactive-normal)" fillRule="evenodd" d="M4 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm10-2a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm8 0a2 2 0 1 1-4 0 2 2 0 0 1 4 0Z" clipRule="evenodd"></path>
+                    </svg>
                 </Clickable>
             )}
         </Tooltip>
