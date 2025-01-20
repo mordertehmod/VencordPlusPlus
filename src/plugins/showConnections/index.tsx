@@ -28,7 +28,7 @@ import { openUserProfile } from "@utils/discord";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Icons, Tooltip, UserProfileStore } from "@webpack/common";
+import { Clickable, Icons, Tooltip, UserProfileStore } from "@webpack/common";
 import { Connection } from "@webpack/types";
 import { User } from "discord-types/general";
 
@@ -125,11 +125,14 @@ function ConnectionsMoreIcon({ onClick }: { onClick: () => void; }) {
             }
         >
             {props => (
-                <Icons.MoreHorizontalIcon
-                    {...props}
+                <Clickable
                     onClick={onClick}
-                    className="vc-user-connection"
-                />
+                >
+                    <Icons.MoreHorizontalIcon
+                        {...props}
+                        className="vc-user-connection"
+                    />
+                </Clickable>
             )}
         </Tooltip>
     );
