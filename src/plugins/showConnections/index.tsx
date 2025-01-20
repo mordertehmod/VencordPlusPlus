@@ -23,10 +23,11 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { CopyIcon, LinkIcon } from "@components/Icons";
 import { Devs } from "@utils/constants";
+import { openUserProfile } from "@utils/discord";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Tooltip, UserProfileStore } from "@webpack/common";
+import { Icons, Tooltip, UserProfileStore } from "@webpack/common";
 import { User } from "discord-types/general";
 
 import { VerifiedIcon } from "./VerifiedIcon";
@@ -57,6 +58,11 @@ const settings = definePluginSettings({
             { label: "Cozy", value: Spacing.COZY }, // US Spelling :/
             { label: "Roomy", value: Spacing.ROOMY }
         ]
+    },
+    maxNumberOfConnections: {
+        type: OptionType.NUMBER,
+        description: "Max number of connections to show",
+        default: 20,
     }
 });
 
@@ -84,21 +90,49 @@ const profilePopoutComponent = ErrorBoundary.wrap(
 );
 
 function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
-    const profile = UserProfileStore.getUserProfile(id);
+    const profile: { connectedAccounts: Connection[]; } = UserProfileStore.getUserProfile(id);
     if (!profile)
         return null;
 
-    const connections: Connection[] = profile.connectedAccounts;
-    if (!connections?.length)
+    const { connectedAccounts } = profile;
+    if (!connectedAccounts?.length)
         return null;
-
+    let connections: React.JSX.Element[];
+    if (connectedAccounts.length > settings.store.maxNumberOfConnections) {
+        connections = connectedAccounts.slice(0, settings.store.maxNumberOfConnections).map(connection => <CompactConnectionComponent connection={connection} theme={theme} key={connection.id} />);
+        connections.push(<ConnectionsMoreIcon onClick={() => openUserProfile(id)} />);
+    } else {
+        connections = connectedAccounts.map(connection => <CompactConnectionComponent connection={connection} theme={theme} key={connection.id} />);
+    }
     return (
         <Flex style={{
             gap: getSpacingPx(settings.store.iconSpacing),
             flexWrap: "wrap"
         }}>
-            {connections.map(connection => <CompactConnectionComponent connection={connection} theme={theme} key={connection.id} />)}
+            {connections}
         </Flex>
+    );
+}
+
+function ConnectionsMoreIcon({ onClick }: { onClick: () => void; }) {
+    return (
+        <Tooltip
+            text={
+                <span className="vc-sc-tooltip">
+                    <span className="vc-sc-connection-name">
+                        View All Connections
+                    </span>
+                </span>
+            }
+        >
+            {props => (
+                <Icons.MoreHorizontalIcon
+                    {...props}
+                    onClick={onClick}
+                    className="vc-user-connection"
+                />
+            )}
+        </Tooltip>
     );
 }
 
