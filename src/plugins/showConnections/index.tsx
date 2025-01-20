@@ -27,7 +27,7 @@ import { openUserProfile } from "@utils/discord";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Icons, Section, SubSection, Tooltip, UserProfileStore } from "@webpack/common";
+import { Icons, Tooltip, UserProfileStore } from "@webpack/common";
 import { Connection } from "@webpack/types";
 import { User } from "discord-types/general";
 
@@ -98,8 +98,8 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
     if (connectedAccounts.length > settings.store.maxNumberOfConnections) {
         connections.length = settings.store.maxNumberOfConnections;
         connections.push(<ConnectionsMoreIcon key="more-connections" onClick={() => openUserProfile(id, {
-            section: Section.USER_INFO,
-            subsection: SubSection.CONNECTIONS
+            section: "USER_INFO",
+            subsection: "CONNECTIONS"
         })} />);
     }
     return (

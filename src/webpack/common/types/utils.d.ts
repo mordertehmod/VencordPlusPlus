@@ -16,7 +16,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Section, SubSection } from "@webpack/common/utils";
 import { Channel, Guild, GuildMember, User } from "discord-types/general";
 import type { ReactNode } from "react";
 import { LiteralUnion } from "type-fest";
@@ -335,8 +334,8 @@ export type OpenUserProfileModalProps = {
         page: string;
         section: string;
     };
-    section?: Section;
-    subsection?: SubSection;
+    section?: "USER_INFO" | "BOT_INFO" | "ACTIVITY" | "MUTUAL_GUILDS" | "MUTUAL_FRIENDS" | "BOT_DATA_ACCESS";
+    subsection?: "ROLES" | "CONNECTIONS" | "NOTE" | "RECENT_ACTIVITY";
 };
 
 export interface UserProfileActions {

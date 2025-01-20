@@ -199,19 +199,3 @@ export const DisplayProfileUtils: t.DisplayProfileUtils = mapMangledModuleLazy(/
     getDisplayProfile: filters.byCode(".getGuildMemberProfile("),
     useDisplayProfile: filters.byCode(/\[\i\.\i,\i\.\i],\(\)=>/)
 });
-
-export enum Section {
-    USER_INFO = "USER_INFO",
-    BOT_INFO = "BOT_INFO",
-    ACTIVITY = "ACTIVITY",
-    MUTUAL_GUILDS = "MUTUAL_GUILDS",
-    MUTUAL_FRIENDS = "MUTUAL_FRIENDS",
-    BOT_DATA_ACCESS = "BOT_DATA_ACCESS"
-}
-
-export enum SubSection {
-    ROLES = "ROLES",
-    CONNECTIONS = "CONNECTIONS",
-    NOTE = "NOTE",
-    RECENT_ACTIVITY = "RECENT_ACTIVITY"
-}

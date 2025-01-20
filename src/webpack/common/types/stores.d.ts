@@ -228,11 +228,11 @@ export class ThemeStore extends FluxStore {
     systemTheme: null;
 }
 
-export type Badge = {
+export type ProfileBadge = {
     description: string;
     icon: string;
     id: string;
-    link: string;
+    link?: string;
 };
 
 export type Connection = {
@@ -262,7 +262,7 @@ export enum PremiumType {
 }
 export type BaseProfile = {
     accentColor: number;
-    badges: Badge[];
+    badges: ProfileBadge[];
     banner: string | null;
     bio: string;
     popoutAnimationParticleType: never;
