@@ -308,7 +308,7 @@ export class UserProfileStore extends FluxStore {
     isFetchingFriends(userId: string);
     get isSubmitting(): boolean;
     getUserProfile(userId: string): UserProfile | undefined;
-    getGuildMemberProfile(userId: string, guildId: string): GuildProfile | null | undefined;
+    getGuildMemberProfile(userId: string, guildId?: string): GuildProfile | null | undefined;
     getMutualFriends(userId: string): MutualFriend[];
     getMutualFriendsCount(userId: string): number | undefined;
     getMutualGuilds(userId: string): MutualGuild[] | undefined;
