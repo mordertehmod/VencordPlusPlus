@@ -341,6 +341,7 @@ export type OpenUserProfileModalProps = {
 export interface UserProfileActions {
     openUserProfileModal(props: OpenUserProfileModalProps): Promise<void>;
 }
+
 export interface DateUtils {
     isSameDay(date1: Date, date2: Date): boolean;
     calendarFormat(date: Date): string;

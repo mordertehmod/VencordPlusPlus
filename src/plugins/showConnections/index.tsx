@@ -130,7 +130,6 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
         connections.length = settings.store.maxNumberOfConnections;
         connections.push(<ConnectionsMoreIcon
             key="more-connections"
-            numExtra={connectedAccounts.length - settings.store.maxNumberOfConnections}
             onClick={() => openUserProfile(id, {
                 section: "USER_INFO",
                 subsection: "CONNECTIONS"
@@ -147,7 +146,7 @@ function ConnectionsComponent({ id, theme }: { id: string, theme: string; }) {
     );
 }
 
-function ConnectionsMoreIcon({ numExtra, onClick }: { numExtra: number; onClick: () => void; }) {
+function ConnectionsMoreIcon({ onClick }: { onClick: () => void; }) {
     return (
         <Tooltip text="View all Connections">
             {props => (
