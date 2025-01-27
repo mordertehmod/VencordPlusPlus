@@ -63,39 +63,12 @@ const settings = definePluginSettings({
         ]
     },
     maxNumberOfConnections: {
-        type: OptionType.COMPONENT,
+        type: OptionType.SLIDER,
         description: "Max number of connections to show",
-        component: props => {
-            const [value, setValue] = useState(settings.store.maxNumberOfConnections || 13);
-            const range = makeRange(6, 48, 7);
-            return (
-                <Forms.FormSection>
-                    <Forms.FormTitle>
-                        Max Number Of Connections
-                    </Forms.FormTitle>
-                    <Forms.FormText
-                        className={Margins.bottom20}
-                        type="description"
-                    >
-                        Max number of connections to show
-                    </Forms.FormText>
-                    <Slider
-                        initialValue={value}
-                        markers={range}
-                        keyboardStep={1}
-                        minValue={range[0]}
-                        maxValue={range.at(-1)}
-                        onValueChange={value => {
-                            const rounded = Math.round(value);
-                            setValue(rounded);
-                            props.setValue(rounded);
-                        }}
-                        onValueRender={value => String(Math.round(value))}
-                        onMarkerRender={value => String(value)}
-                    />
-                </Forms.FormSection>
-            );
-        }
+        markers: makeRange(6, 48, 7),
+        default: 13,
+        stickToMarkers: false,
+        onlyInts: true,
     }
 });
 
