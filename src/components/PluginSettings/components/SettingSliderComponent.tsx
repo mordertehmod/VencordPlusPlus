@@ -19,7 +19,7 @@
 import { Margins } from "@utils/margins";
 import { wordsFromCamel, wordsToTitle } from "@utils/text";
 import { PluginOptionSlider } from "@utils/types";
-import { Forms, React, Slider, useState } from "@webpack/common";
+import { Forms, React, Slider } from "@webpack/common";
 
 import { ISettingElementProps } from ".";
 
