@@ -25,11 +25,10 @@ import { CopyIcon, LinkIcon } from "@components/Icons";
 import { makeRange } from "@components/PluginSettings/components";
 import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
-import { Margins } from "@utils/margins";
 import { copyWithToast } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { findByCodeLazy, findByPropsLazy } from "@webpack";
-import { Clickable, Forms, Slider, Tooltip, UserProfileStore, useState } from "@webpack/common";
+import { Clickable, Tooltip, UserProfileStore } from "@webpack/common";
 import { Connection } from "@webpack/types";
 import { User } from "discord-types/general";
 
