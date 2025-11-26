@@ -5,32 +5,38 @@
  */
 
 import { showNotice } from "@api/Notices";
+import { isPluginEnabled, startDependenciesRecursive, startPlugin, stopPlugin } from "@api/PluginManager";
+import { classNameFactory } from "@api/Styles";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
-import { proxyLazy } from "@utils/lazy";
-import { classes, isObjectEmpty } from "@utils/misc";
+import { Logger } from "@utils/Logger";
+import { isObjectEmpty } from "@utils/misc";
 import { Plugin } from "@utils/types";
-import { findByPropsLazy } from "@webpack";
 import { React, showToast, Toasts } from "@webpack/common";
 import { Settings } from "Vencord";
 
-import { cl, logger } from ".";
+import { PluginMeta } from "~plugins";
+
 import { openPluginModal } from "./PluginModal";
 
-// Avoid circular dependency
-const { startDependenciesRecursive, startPlugin, stopPlugin, isPluginEnabled } = proxyLazy(() => require("plugins") as typeof import("plugins"));
-
-export const ButtonClasses = findByPropsLazy("button", "disabled", "enabled");
-
+const logger = new Logger("PluginCard");
+const cl = classNameFactory("vc-plugins-");
 interface PluginCardProps extends React.HTMLProps<HTMLDivElement> {
     plugin: Plugin;
-    disabled: boolean;
+    disabled?: boolean;
     onRestartNeeded(name: string, key: string): void;
     isNew?: boolean;
+    onMouseEnter?: React.MouseEventHandler<HTMLDivElement>;
+    onMouseLeave?: React.MouseEventHandler<HTMLDivElement>;
 }
 
 export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, onMouseLeave, isNew }: PluginCardProps) {
     const settings = Settings.plugins[plugin.name];
+    const pluginMeta = PluginMeta[plugin.name];
+    const isCustomPlugin = pluginMeta.folderName.startsWith("src/zaddyplugins/") ?? false;
+    const isVencordPlugin = pluginMeta.folderName.startsWith("src/plugins/") ?? false;
+    const isUserPlugin = pluginMeta?.userPlugin ?? false;
+    const isModifiedPlugin = plugin.isModified ?? false;
 
     const isEnabled = () => isPluginEnabled(plugin.name);
 
@@ -84,9 +90,50 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
         settings.enabled = !wasEnabled;
     }
 
+    const pluginInfo = [
+        {
+            condition: isModifiedPlugin,
+            src: "https://equicord.org/assets/icons/equicord/modified.png",
+            alt: "Modified",
+            title: "Modified Vencord Plugin"
+        },
+        {
+            condition: isCustomPlugin,
+            src: "https://equicord.org/assets/icons/equicord/icon.png",
+            alt: "Custom",
+            title: "Custom Plugin"
+        },
+        {
+            condition: isVencordPlugin,
+            src: "https://equicord.org/assets/icons/vencord/icon-light.png",
+            alt: "Vencord",
+            title: "Vencord Plugin"
+        },
+        {
+            condition: isUserPlugin,
+            src: "https://equicord.org/assets/icons/misc/userplugin.png",
+            alt: "User",
+            title: "User Plugin"
+        }
+    ];
+
+    const pluginDetails = pluginInfo.find(p => p.condition);
+
+    const sourceBadge = pluginDetails ? (
+        <img
+            src={pluginDetails.src}
+            alt={pluginDetails.alt}
+            className={cl("source")}
+        />
+    ) : null;
+
+    const tooltip = pluginDetails?.title || "Unknown Plugin";
+
     return (
         <AddonCard
             name={plugin.name}
+            sourceBadge={sourceBadge}
+            tooltip={tooltip}
             description={plugin.description}
             isNew={isNew}
             enabled={isEnabled()}
@@ -98,7 +145,7 @@ export function PluginCard({ plugin, disabled, onRestartNeeded, onMouseEnter, on
                 <button
                     role="switch"
                     onClick={() => openPluginModal(plugin, onRestartNeeded)}
-                    className={classes(ButtonClasses.button, cl("info-button"))}
+                    className={cl("info-button")}
                 >
                     {plugin.options && !isObjectEmpty(plugin.options)
                         ? <CogWheel className={cl("info-icon")} />

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Notices } from "@api/index";
+import { currentNotice, noticesQueue, popNotice, showNotice } from "@api/Notices";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
@@ -62,12 +62,12 @@ export default definePlugin({
 
         const backOnlineMessage = "Welcome back! Click the button to go online. Click the X to stay idle until reload.";
         if (
-            Notices.currentNotice?.[1] === backOnlineMessage ||
-            Notices.noticesQueue.some(([, noticeMessage]) => noticeMessage === backOnlineMessage)
+            currentNotice?.[1] === backOnlineMessage ||
+            noticesQueue.some(([, noticeMessage]) => noticeMessage === backOnlineMessage)
         ) return;
 
-        Notices.showNotice(backOnlineMessage, "Exit idle", () => {
-            Notices.popNotice();
+        showNotice(backOnlineMessage, "Exit idle", () => {
+            popNotice();
             FluxDispatcher.dispatch({
                 type: "IDLE",
                 idle: false
@@ -75,7 +75,8 @@ export default definePlugin({
         });
     },
 
-    getIdleTimeout() { // milliseconds, default is 6e5
+    getIdleTimeout() {
+        // milliseconds, default is 6e5
         const { idleTimeout } = settings.store;
         return idleTimeout === 0 ? Infinity : idleTimeout * 60000;
     }

@@ -1,24 +1,48 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build",
+            "label": "Vencord Reporter",
             "type": "shell",
-            "command": "pnpm build",
+            "command": "pnpm build --dev --reporter --companion-test",
             "group": {
                 "kind": "build",
-                "isDefault": true
+                "isDefault": false
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "isBackground": false,
+            "problemMatcher": [],
+            "runOptions": {
+                "runOn": "default"
             }
         },
         {
-            "label": "Watch",
+            "label": "Vencord Build",
             "type": "shell",
-            "command": "pnpm watch",
-            "problemMatcher": [],
+            "command": "pnpm build --dev",
             "group": {
-                "kind": "build"
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "isBackground": false,
+            "problemMatcher": [],
+            "runOptions": {
+                "runOn": "default"
             }
         }
     ]

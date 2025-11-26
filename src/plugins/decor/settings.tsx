@@ -1,30 +1,32 @@
 /*
  * Vencord, a Discord client mod
- * Copyright (c) 2023 Vendicated and contributors
+ * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { definePluginSettings } from "@api/Settings";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
 import { closeAllModals } from "@utils/modal";
 import { OptionType } from "@utils/types";
-import { FluxDispatcher, Forms } from "@webpack/common";
+import { FluxDispatcher } from "@webpack/common";
 
+import DecorPlugin from ".";
 import DecorSection from "./ui/components/DecorSection";
 
 export const settings = definePluginSettings({
     changeDecoration: {
         type: OptionType.COMPONENT,
         component() {
-            if (!Vencord.Plugins.plugins.Decor.started) return <Forms.FormText>
+            if (!DecorPlugin.started) return <Paragraph>
                 Enable Decor and restart your client to change your avatar decoration.
-            </Forms.FormText>;
+            </Paragraph>;
 
             return <div>
                 <DecorSection hideTitle hideDivider noMargin />
-                <Forms.FormText className={classes(Margins.top8, Margins.bottom8)}>
+                <Paragraph className={classes(Margins.top8, Margins.bottom8)}>
                     You can also access Decor decorations from the <Link
                         href="/settings/profile-customization"
                         onClick={e => {
@@ -33,9 +35,15 @@ export const settings = definePluginSettings({
                             FluxDispatcher.dispatch({ type: "USER_SETTINGS_MODAL_SET_SECTION", section: "Profile Customization" });
                         }}
                     >Profiles</Link> page.
-                </Forms.FormText>
+                </Paragraph>
             </div>;
         }
+    },
+    baseUrl: {
+        type: OptionType.STRING,
+        hidden: true,
+        description: "Decor api url",
+        default: "https://decor.fieryflames.dev"
     },
     agreedToGuidelines: {
         type: OptionType.BOOLEAN,

@@ -17,10 +17,11 @@
 */
 
 import { Heart } from "@components/Heart";
+import { openInviteModal } from "@utils/discord";
 import { ButtonProps } from "@vencord/discord-types";
-import { Button } from "@webpack/common";
+import { Button, showToast } from "@webpack/common";
 
-export default function DonateButton({
+export function DonateButton({
     look = Button.Looks.LINK,
     color = Button.Colors.TRANSPARENT,
     ...props
@@ -30,11 +31,34 @@ export default function DonateButton({
             {...props}
             look={look}
             color={color}
-            onClick={() => VencordNative.native.openExternal("https://github.com/sponsors/Vendicated")}
-            innerClassName="vc-donate-button"
+            onClick={() => VencordNative.native.openExternal("https://github.com/sponsors/thororen1234")}
+            className="vc-donate-button"
         >
             <Heart />
             Donate
+        </Button>
+    );
+}
+
+export function InviteButton({
+    look = Button.Looks.LINK,
+    color = Button.Colors.TRANSPARENT,
+    ...props
+}: Partial<ButtonProps>) {
+    return (
+        <Button
+            {...props}
+            look={look}
+            color={color}
+            onClick={async e => {
+                e.preventDefault();
+                openInviteModal("equicord-1173279886065029291").catch(() =>
+                    showToast("Invalid or expired invite"),
+                );
+            }}
+            className="vc-donate-button"
+        >
+            Invite
         </Button>
     );
 }

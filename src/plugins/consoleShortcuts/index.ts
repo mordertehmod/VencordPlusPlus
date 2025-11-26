@@ -93,6 +93,8 @@ function makeShortcuts() {
     let fakeRenderWin: WeakRef<Window> | undefined;
     const find = newFindWrapper(f => f);
     const findByProps = newFindWrapper(filters.byProps);
+    const testFind = findAll(filters.byStoreName("UserStore"));
+
 
     return {
         ...Object.fromEntries(Object.keys(Common).map(key => [key, { getter: () => Common[key] }])),
@@ -104,7 +106,7 @@ function makeShortcuts() {
         wpsearch: search,
         wpex: extract,
         wpexs: (code: string) => extract(findModuleId(code)!),
-        loadLazyChunks: IS_DEV ? loadLazyChunks : () => { throw new Error("loadLazyChunks is dev only."); },
+        loadLazyChunks: loadLazyChunks,
         find,
         findAll: findAll,
         findByProps,
@@ -170,7 +172,7 @@ function makeShortcuts() {
         openModal: { getter: () => ModalAPI.openModal },
         openModalLazy: { getter: () => ModalAPI.openModalLazy },
 
-        Stores: Webpack.fluxStores,
+        Stores: { getter: () => Object.fromEntries(Webpack.fluxStores) },
 
         // e.g. "2024-05_desktop_visual_refresh", 0
         setExperiment: (id: string, bucket: number) => {
@@ -179,6 +181,12 @@ function makeShortcuts() {
                 experimentId: id,
                 experimentBucket: bucket,
             });
+        },
+        switchBranch: (branch: string) => {
+            if (!IS_VESKTOP) throw new Error("This function only works on plextron.");
+            if (Vencord.Settings.store.discordBranch === branch) throw new Error(`Already on ${branch}.`);
+            Vencord.Settings.store.discordBranch = branch;
+            VencordNative.app.relaunch();
         },
     };
 }

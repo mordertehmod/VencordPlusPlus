@@ -16,16 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { showNotification } from "@api/Notifications";
-import { Settings, useSettings } from "@api/Settings";
+import { useSettings } from "@api/Settings";
+import { authorizeCloud, deauthorizeCloud } from "@api/SettingsSync/cloudSetup";
+import { deleteCloudSettings, eraseAllCloudData, getCloudSettings, putCloudSettings } from "@api/SettingsSync/cloudSync";
 import { CheckedTextInput } from "@components/CheckedTextInput";
+import { Divider } from "@components/Divider";
+import { FormSwitch } from "@components/FormSwitch";
 import { Grid } from "@components/Grid";
+import { Heading } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
-import { authorizeCloud, checkCloudUrlCsp, cloudLogger, deauthorizeCloud, getCloudAuth, getCloudUrl } from "@utils/cloud";
 import { Margins } from "@utils/margins";
-import { deleteCloudSettings, getCloudSettings, putCloudSettings } from "@utils/settingsSync";
-import { Alerts, Button, Forms, Switch, Tooltip } from "@webpack/common";
+import { Alerts, Button, Tooltip, useState } from "@webpack/common";
 
 function validateUrl(url: string) {
     try {
@@ -36,52 +39,25 @@ function validateUrl(url: string) {
     }
 }
 
-async function eraseAllData() {
-    if (!await checkCloudUrlCsp()) return;
-
-    const res = await fetch(new URL("/v1/", getCloudUrl()), {
-        method: "DELETE",
-        headers: { Authorization: await getCloudAuth() }
-    });
-
-    if (!res.ok) {
-        cloudLogger.error(`Failed to erase data, API returned ${res.status}`);
-        showNotification({
-            title: "Cloud Integrations",
-            body: `Could not erase all data (API returned ${res.status}), please contact support.`,
-            color: "var(--red-360)"
-        });
-        return;
-    }
-
-    Settings.cloud.authenticated = false;
-    await deauthorizeCloud();
-
-    showNotification({
-        title: "Cloud Integrations",
-        body: "Successfully erased all data.",
-        color: "var(--green-360)"
-    });
-}
-
 function SettingsSyncSection() {
     const { cloud } = useSettings(["cloud.authenticated", "cloud.settingsSync"]);
     const sectionEnabled = cloud.authenticated && cloud.settingsSync;
 
     return (
-        <Forms.FormSection title="Settings Sync" className={Margins.top16}>
-            <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
+        <section className={Margins.top16}>
+            <Heading>Settings Sync</Heading>
+
+            <Paragraph size="md" className={Margins.bottom20}>
                 Synchronize your settings to the cloud. This allows easy synchronization across multiple devices with
                 minimal effort.
-            </Forms.FormText>
-            <Switch
+            </Paragraph>
+            <FormSwitch
                 key="cloud-sync"
-                disabled={!cloud.authenticated}
+                title="Settings Sync"
                 value={cloud.settingsSync}
                 onChange={v => { cloud.settingsSync = v; }}
-            >
-                Settings Sync
-            </Switch>
+                disabled={!cloud.authenticated}
+            />
             <div className="vc-cloud-settings-sync-grid">
                 <Button
                     size={Button.Sizes.SMALL}
@@ -113,24 +89,41 @@ function SettingsSyncSection() {
                     Delete Cloud Settings
                 </Button>
             </div>
-        </Forms.FormSection>
+        </section>
     );
 }
 
 function CloudTab() {
     const settings = useSettings(["cloud.authenticated", "cloud.url"]);
+    const [inputKey, setInputKey] = useState(0);
+
+    async function changeUrl(url: string) {
+        settings.cloud.url = url;
+        settings.cloud.authenticated = false;
+
+        await deauthorizeCloud();
+        await authorizeCloud();
+
+        setInputKey(prev => prev + 1);
+    }
 
     return (
         <SettingsTab title="Vencord Cloud">
-            <Forms.FormSection title="Cloud Settings" className={Margins.top16}>
-                <Forms.FormText variant="text-md/normal" className={Margins.bottom20}>
-                    Vencord comes with a cloud integration that adds goodies like settings sync across devices.
+            <section className={Margins.top16}>
+                <Heading>Cloud Settings</Heading>
+
+                <Paragraph size="md" className={Margins.bottom20}>
+                    Vencord comes with a cloud integration allowing settings to be synced across apps and devices.
+                    <br />
                     It <Link href="https://vencord.dev/cloud/privacy">respects your privacy</Link>, and
+                    <br />
                     the <Link href="https://github.com/Vencord/Backend">source code</Link> is AGPL 3.0 licensed so you
                     can host it yourself.
-                </Forms.FormText>
-                <Switch
+                </Paragraph>
+                <FormSwitch
                     key="backend"
+                    title="Enable Cloud Integrations"
+                    description="This will request authorization if you have not yet set up cloud integrations."
                     value={settings.cloud.authenticated}
                     onChange={v => {
                         if (v)
@@ -138,21 +131,18 @@ function CloudTab() {
                         else
                             settings.cloud.authenticated = v;
                     }}
-                    note="This will request authorization if you have not yet set up cloud integrations."
-                >
-                    Enable Cloud Integrations
-                </Switch>
-                <Forms.FormTitle tag="h5">Backend URL</Forms.FormTitle>
-                <Forms.FormText className={Margins.bottom8}>
+                />
+                <Heading>Backend URL</Heading>
+                <Paragraph className={Margins.bottom8}>
                     Which backend to use when using cloud integrations.
-                </Forms.FormText>
+                </Paragraph>
                 <CheckedTextInput
-                    key="backendUrl"
+                    key={`backendUrl-${inputKey}`}
                     value={settings.cloud.url}
                     onChange={async v => {
                         settings.cloud.url = v;
                         settings.cloud.authenticated = false;
-                        deauthorizeCloud();
+                        await deauthorizeCloud();
                     }}
                     validate={validateUrl}
                 />
@@ -162,12 +152,12 @@ function CloudTab() {
                         size={Button.Sizes.MEDIUM}
                         disabled={!settings.cloud.authenticated}
                         onClick={async () => {
-                            await deauthorizeCloud();
                             settings.cloud.authenticated = false;
+                            await deauthorizeCloud();
                             await authorizeCloud();
                         }}
                     >
-                        Reauthorise
+                        Reauthorize
                     </Button>
                     <Button
                         size={Button.Sizes.MEDIUM}
@@ -176,7 +166,7 @@ function CloudTab() {
                         onClick={() => Alerts.show({
                             title: "Are you sure?",
                             body: "Once your data is erased, we cannot recover it. There's no going back!",
-                            onConfirm: eraseAllData,
+                            onConfirm: eraseAllCloudData,
                             confirmText: "Erase it!",
                             confirmColor: "vc-cloud-erase-data-danger-btn",
                             cancelText: "Nevermind"
@@ -186,8 +176,8 @@ function CloudTab() {
                     </Button>
                 </Grid>
 
-                <Forms.FormDivider className={Margins.top16} />
-            </Forms.FormSection >
+                <Divider className={Margins.top16} />
+            </section >
             <SettingsSyncSection />
         </SettingsTab>
     );

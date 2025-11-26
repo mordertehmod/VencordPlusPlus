@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Paragraph } from "@components/Paragraph";
 import { useAwaiter, useForceUpdater } from "@utils/react";
 import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
-import { Forms, React, RelationshipStore, useRef, UserStore } from "@webpack/common";
+import { React, RelationshipStore, useRef, UserStore } from "@webpack/common";
 
 import { Auth, authorize } from "../auth";
 import { Review, ReviewType } from "../entities";
@@ -113,9 +114,9 @@ function ReviewList({ refetch, reviews, hideOwnReview, profileId, type }: { refe
             )}
 
             {reviews?.length === 0 && (
-                <Forms.FormText className={cl("placeholder")}>
+                <Paragraph className={cl("placeholder")}>
                     Looks like nobody reviewed this {type === ReviewType.User ? "user" : "server"} yet. You could be the first!
-                </Forms.FormText>
+                </Paragraph>
             )}
         </div>
     );
@@ -123,7 +124,7 @@ function ReviewList({ refetch, reviews, hideOwnReview, profileId, type }: { refe
 
 
 export function ReviewsInputComponent(
-    { discordId, isAuthor, refetch, name, modalKey }: { discordId: string, name: string; isAuthor: boolean; refetch(): void; modalKey?: string; }
+    { discordId, isAuthor, refetch, name, modalKey, repliesTo }: { discordId: string, name: string; isAuthor: boolean; refetch(): void; modalKey?: string; repliesTo?: number; }
 ) {
     const { token } = Auth;
     const editorRef = useRef<any>(null);
@@ -146,9 +147,10 @@ export function ReviewsInputComponent(
                     placeholder={
                         !token
                             ? "You need to authorize to review users!"
-                            : isAuthor
-                                ? `Update review for @${name}`
-                                : `Review @${name}`
+                            : repliesTo ? `Reply to @${name}`
+                                : isAuthor
+                                    ? `Update review for @${name}`
+                                    : `Review @${name}`
                     }
                     type={inputType}
                     disableThemedBackground={true}
@@ -157,9 +159,12 @@ export function ReviewsInputComponent(
                     textValue=""
                     onSubmit={
                         async res => {
+                            // I know this naming is deranged, but for compatibility it has to stay this way
+
                             const response = await addReview({
                                 userid: discordId,
                                 comment: res.value,
+                                repliesto: repliesTo,
                             });
 
                             if (response) {

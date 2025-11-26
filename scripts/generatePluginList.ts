@@ -41,6 +41,7 @@ interface PluginData {
     enabledByDefault: boolean;
     target: "discordDesktop" | "vesktop" | "desktop" | "web" | "dev";
     filePath: string;
+    isModified: boolean;
 }
 
 const devs = {} as Record<string, Dev>;
@@ -66,28 +67,24 @@ function parseDevs() {
         if (!isVariableStatement(child)) continue;
 
         const devsDeclaration = child.declarationList.declarations.find(d => hasName(d, "Devs"));
-        if (!devsDeclaration?.initializer || !isCallExpression(devsDeclaration.initializer)) continue;
+        if (devsDeclaration?.initializer && isCallExpression(devsDeclaration.initializer)) {
+            const value = devsDeclaration.initializer.arguments[0];
 
-        const value = devsDeclaration.initializer.arguments[0];
+            if (!isSatisfiesExpression(value) || !isObjectLiteralExpression(value.expression)) throw new Error("Failed to parse devs: not an object literal");
 
-        if (!isSatisfiesExpression(value) || !isObjectLiteralExpression(value.expression)) throw new Error("Failed to parse devs: not an object literal");
+            for (const prop of value.expression.properties) {
+                const name = (prop.name as Identifier).text;
+                const value = isPropertyAssignment(prop) ? prop.initializer : prop;
 
-        for (const prop of value.expression.properties) {
-            const name = (prop.name as Identifier).text;
-            const value = isPropertyAssignment(prop) ? prop.initializer : prop;
+                if (!isObjectLiteralExpression(value)) throw new Error(`Failed to parse devs: ${name} is not an object literal`);
 
-            if (!isObjectLiteralExpression(value)) throw new Error(`Failed to parse devs: ${name} is not an object literal`);
-
-            devs[name] = {
-                name: (getObjectProp(value, "name") as StringLiteral).text,
-                id: (getObjectProp(value, "id") as BigIntLiteral).text.slice(0, -1)
-            };
+                devs[name] = {
+                    name: (getObjectProp(value, "name") as StringLiteral).text,
+                    id: (getObjectProp(value, "id") as BigIntLiteral).text.slice(0, -1)
+                };
+            }
         }
-
-        return;
-    }
-
-    throw new Error("Could not find Devs constant");
+    if (Object.keys(devs).length === 0) throw new Error("Failed to parse devs: no devs found");
 }
 
 async function parseFile(fileName: string) {
@@ -111,6 +108,7 @@ async function parseFile(fileName: string) {
             hasCommands: false,
             enabledByDefault: false,
             required: false,
+            isModified: false,
             tags: [] as string[]
         } as PluginData;
 
@@ -135,7 +133,7 @@ async function parseFile(fileName: string) {
                     data.authors = value.elements.map(e => {
                         if (!isPropertyAccessExpression(e)) throw fail("authors array contains non-property access expressions");
                         const d = devs[getName(e)!];
-                        if (!d) throw fail(`couldn't look up author ${getName(e)}`);
+                        if (!d) throw fail(`couldn't look up author ${getName(e)!}`);
                         return d;
                     });
                     break;
@@ -153,6 +151,7 @@ async function parseFile(fileName: string) {
                     data.dependencies = (elements as NodeArray<StringLiteral>).map(e => e.text);
                     break;
                 case "required":
+                case "isModified":
                 case "enabledByDefault":
                     data[key] = value.kind === SyntaxKind.TrueKeyword;
                     break;
@@ -173,11 +172,7 @@ async function parseFile(fileName: string) {
             .replace(/\/index\.([jt]sx?)$/, "")
             .replace(/^src\/plugins\//, "");
 
-        let readme = "";
-        try {
-            readme = readFileSync(join(fileName, "..", "README.md"), "utf-8");
-        } catch { }
-        return [data, readme] as const;
+        return [data] as const;
     }
 
     throw fail("no default export called 'definePlugin' found");
@@ -207,24 +202,22 @@ function isPluginFile({ name }: { name: string; }) {
     parseDevs();
 
     const plugins = [] as PluginData[];
-    const readmes = {} as Record<string, string>;
 
     await Promise.all(["src/plugins", "src/plugins/_core"].flatMap(dir =>
         readdirSync(dir, { withFileTypes: true })
             .filter(isPluginFile)
             .map(async dirent => {
-                const [data, readme] = await parseFile(await getEntryPoint(dir, dirent));
-                plugins.push(data);
-                if (readme) readmes[data.name] = readme;
+                const [data] = await parseFile(await getEntryPoint(dir, dirent));
+                plugins.sort().push(data);
             })
     ));
 
     const data = JSON.stringify(plugins);
 
-    if (process.argv.length > 3) {
+    if (process.argv.length > 2) {
         writeFileSync(process.argv[2], data);
-        writeFileSync(process.argv[3], JSON.stringify(readmes));
     } else {
         console.log(data);
+        writeFileSync("dist/plugins.json", data);
     }
 })();

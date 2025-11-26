@@ -6,13 +6,17 @@ import type { FluxEvents } from "./fluxEvents";
 
 export { FluxEvents };
 
+type FluxEventsAutoComplete = LiteralUnion<FluxEvents, string>;
+
 export interface FluxDispatcher {
     _actionHandlers: any;
+    _interceptors: any;
     _subscriptions: any;
-    dispatch(event: { [key: string]: unknown; type: FluxEvents; }): Promise<void>;
+    addInterceptor(interceptor: any): void;
+    dispatch(event: { [key: string]: unknown; type: FluxEventsAutoComplete; }): Promise<void>;
     isDispatching(): boolean;
-    subscribe(event: FluxEvents, callback: (data: any) => void): void;
-    unsubscribe(event: FluxEvents, callback: (data: any) => void): void;
+    subscribe(event: FluxEventsAutoComplete, callback: (data: any) => void): void;
+    unsubscribe(event: FluxEventsAutoComplete, callback: (data: any) => void): void;
     wait(callback: () => void): void;
 }
 
@@ -333,3 +337,32 @@ export interface CommandOptions {
     max_value?: number;
     autocomplete?: boolean;
 }
+
+export enum GlobalShortcutKeyOS {
+    WINDOWS = 1,
+    MACOS = 2,
+    LINUX = 3,
+    BROWSER = 4
+}
+export enum GlobalShortcutKeyType {
+    KEYBOARD_KEY = 0,
+    MOUSE_BUTTON = 1,
+    KEYBOARD_MODIFIER_KEY = 2,
+    GAMEPAD_BUTTON = 3
+}
+export type GlobalShortcutKey = [GlobalShortcutKeyType, number] | [GlobalShortcutKeyType, number, GlobalShortcutKeyOS | `${number}:${number}`];
+export type GlobalShortcut = GlobalShortcutKey[];
+export type GlobalShortcutOptions = {
+    blurred: boolean;
+    focused: boolean;
+    keydown: boolean;
+    keyup: boolean;
+};
+
+export type DiscordUtils = {
+    inputCaptureRegisterElement(elementId: string, callback: (keys: GlobalShortcut) => void): () => void;
+    inputGetRegisteredEvents(callback: (keys: GlobalShortcut) => void): undefined;
+    inputEventRegister(id: number, keys: GlobalShortcut, callback: () => void, options: GlobalShortcutOptions): undefined;
+    inputEventUnregister(id: number): undefined;
+    inputSetFocused(focused: boolean): undefined;
+};

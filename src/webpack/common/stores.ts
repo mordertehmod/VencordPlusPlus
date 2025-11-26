@@ -34,7 +34,7 @@ export let MessageStore: Omit<t.MessageStore, "getMessages"> & GenericStore & {
 export let PermissionStore: GenericStore;
 export let GuildChannelStore: GenericStore;
 export let ReadStateStore: GenericStore;
-export let PresenceStore: GenericStore;
+export let PresenceStore: t.PresenceStore;
 
 export let GuildStore: t.GuildStore;
 export let GuildRoleStore: t.GuildRoleStore;
@@ -47,12 +47,17 @@ export let SelectedGuildStore: t.SelectedGuildStore;
 export let ChannelStore: t.ChannelStore;
 export let TypingStore: t.TypingStore;
 export let RelationshipStore: t.RelationshipStore;
+export let MediaEngineStore: t.MediaEngineStore;
+export let SpellCheckStore: t.SpellCheckStore;
+export let VoiceStateStore: t.VoiceStateStore;
 
 export let EmojiStore: t.EmojiStore;
 export let StickersStore: t.StickersStore;
 export let ThemeStore: t.ThemeStore;
 export let WindowStore: t.WindowStore;
 export let DraftStore: t.DraftStore;
+export let StreamerModeStore: t.StreamerModeStore;
+export let OverridePremiumTypeStore: GenericStore;
 
 /**
  * @see jsdoc of {@link t.useStateFromStores}
@@ -67,8 +72,11 @@ waitForStore("ChannelStore", m => ChannelStore = m);
 waitForStore("SelectedChannelStore", m => SelectedChannelStore = m);
 waitForStore("SelectedGuildStore", m => SelectedGuildStore = m);
 waitForStore("GuildStore", m => GuildStore = m);
+waitForStore("GuildRoleStore", m => GuildRoleStore = m);
 waitForStore("GuildMemberStore", m => GuildMemberStore = m);
 waitForStore("RelationshipStore", m => RelationshipStore = m);
+waitForStore("MediaEngineStore", m => MediaEngineStore = m);
+waitForStore("SpellcheckStore", m => SpellCheckStore = m);
 waitForStore("PermissionStore", m => PermissionStore = m);
 waitForStore("PresenceStore", m => PresenceStore = m);
 waitForStore("ReadStateStore", m => ReadStateStore = m);
@@ -79,6 +87,9 @@ waitForStore("WindowStore", m => WindowStore = m);
 waitForStore("EmojiStore", m => EmojiStore = m);
 waitForStore("StickersStore", m => StickersStore = m);
 waitForStore("TypingStore", m => TypingStore = m);
+waitForStore("VoiceStateStore", m => VoiceStateStore = m);
+waitForStore("StreamerModeStore", m => StreamerModeStore = m);
+waitForStore("OverridePremiumTypeStore", m => OverridePremiumTypeStore = m);
 waitForStore("ThemeStore", m => {
     ThemeStore = m;
     // Importing this directly can easily cause circular imports. For this reason, use a non import access here.

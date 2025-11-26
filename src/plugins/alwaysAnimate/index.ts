@@ -16,17 +16,60 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
+
+const settings = definePluginSettings({
+    icons: {
+        type: OptionType.BOOLEAN,
+        description: "Always animate server icons, avatars, decor and more",
+        default: true,
+    },
+    statusEmojis: {
+        type: OptionType.BOOLEAN,
+        description: "Always animate status emojis",
+        default: true,
+    },
+    serverBanners: {
+        type: OptionType.BOOLEAN,
+        description: "Always animate server banners",
+        default: true,
+    },
+    nameplates: {
+        type: OptionType.BOOLEAN,
+        description: "Always animate nameplates",
+        default: true,
+    },
+    roleGradients: {
+        type: OptionType.BOOLEAN, // make select menu
+        description: "Always animate role gradients",
+        default: true,
+
+        roleGradientsInChat: {
+            type: OptionType.BOOLEAN,
+            description: "Always animate role gradients in chat",
+            default: false,
+        },
+
+        roleGradientsInMemberList: {
+            type: OptionType.BOOLEAN,
+            description: "Always animate role gradients in member list",
+            default: false,
+        },
+    }
+});
 
 export default definePlugin({
     name: "AlwaysAnimate",
     description: "Animates anything that can be animated",
-    authors: [Devs.FieryFlames],
-
+    authors: [Devs.FieryFlames, Devs.LSDZaddi],
+    isModified: true, // Adds gradient role color support
+    settings,
     patches: [
         {
             find: "canAnimate:",
+            predicate: () => settings.store.icons,
             all: true,
             // Some modules match the find but the replacement is returned untouched
             noWarn: true,
@@ -42,6 +85,7 @@ export default definePlugin({
         {
             // Status emojis
             find: "#{intl::GUILD_OWNER}),children:",
+            predicate: () => settings.store.statusEmojis,
             replacement: {
                 match: /(\.CUSTOM_STATUS.+?animateEmoji:)\i/,
                 replace: "$1!0"
@@ -50,10 +94,51 @@ export default definePlugin({
         {
             // Guild Banner
             find: ".animatedBannerHoverLayer,onMouseEnter:",
+            predicate: () => settings.store.serverBanners,
             replacement: {
                 match: /(\.headerContent.+?guildBanner:\i,animate:)\i/,
                 replace: "$1!0"
             }
-        }
+        },
+        {
+            // Nameplates
+            find: ".MINI_PREVIEW,[",
+            predicate: () => settings.store.nameplates,
+            replacement: {
+                match: /animate:\i,loop:.{0,15}===\i/,
+                replace: "animate:true,loop:true"
+            },
+        },
+        {
+            // Gradient roles in chat
+            find: "=!1,contentOnly:",
+            replacement: {
+                match: /animate:\i/,
+                replace: "animate:!0"
+            }
+        },
+        {
+            // Gradient roles in member list
+            find: '="left",className:',
+            replacement: {
+                match: /,animateGradient:[^)]+\)/,
+                replace: ",animateGradient:!0"
+            }
+        },
+        {
+            // Role Gradients
+            find: "animateGradient:",
+            predicate: () => settings.store.roleGradients,
+            all: true,
+            noWarn: true,
+            replacement: {
+                match: /animateGradient:.+?([,}].*?\))/g,
+                replace: (m, rest) => {
+                    const destructuringMatch = rest.match(/}=.+/);
+                    if (destructuringMatch == null) return `animateGradient:!0${rest}`;
+                    return m;
+                }
+            }
+        },
     ]
 });

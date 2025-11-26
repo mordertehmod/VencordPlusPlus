@@ -20,7 +20,8 @@
 /// <reference types="../src/modules" />
 
 import { createHmac } from "crypto";
-import { readFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
+import { join } from "path";
 import pup, { JSHandle } from "puppeteer-core";
 
 const logStderr = (...data: any[]) => console.error(`${CANARY ? "CANARY" : "STABLE"} ---`, ...data);
@@ -41,7 +42,7 @@ let metaData = {
 const browser = await pup.launch({
     headless: true,
     executablePath: process.env.CHROMIUM_BIN,
-    args: ["--no-sandbox"]
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
 });
 
 const page = await browser.newPage();
@@ -91,6 +92,9 @@ function toCodeBlock(s: string, indentation = 0, isDiscord = false) {
 }
 
 async function printReport() {
+    const filePath = join("dist", (CANARY ? "reporter-canary.json" : "reporter-stable.json"));
+    writeFileSync(filePath, JSON.stringify(report, null, 2));
+
     console.log();
 
     console.log("# Vencord Report" + (CANARY ? " (Canary)" : ""));
@@ -339,7 +343,7 @@ page.on("console", async e => {
 });
 
 page.on("error", e => logStderr("[Error]", e.message));
-page.on("pageerror", e => {
+page.on("pageerror", (e: any) => {
     if (e.message.includes("Sentry successfully disabled")) return;
 
     if (!e.message.startsWith("Object") && !e.message.includes("Cannot find module") && !/^.{1,2}$/.test(e.message)) {

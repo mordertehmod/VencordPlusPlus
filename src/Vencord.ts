@@ -20,8 +20,8 @@
 import "~plugins";
 
 export * as Api from "./api";
+export * as Plugins from "./api/PluginManager";
 export * as Components from "./components";
-export * as Plugins from "./plugins";
 export * as Util from "./utils";
 export * as QuickCss from "./utils/quickCss";
 export * as Updater from "./utils/updater";
@@ -32,30 +32,51 @@ export { PlainSettings, Settings };
 import "./utils/quickCss";
 import "./webpack/patchWebpack";
 
-import { openUpdaterModal } from "@components/settings/tabs/updater";
+import { addVencordUiStyles } from "@components/css";
+import { openSettingsTabModal, UpdaterTab } from "@components/settings";
+import { debounce } from "@shared/debounce";
 import { IS_WINDOWS } from "@utils/constants";
+import { createAndAppendStyle } from "@utils/css";
 import { StartAt } from "@utils/types";
 
 import { get as dsGet } from "./api/DataStore";
 import { NotificationData, showNotification } from "./api/Notifications";
-import { PlainSettings, Settings } from "./api/Settings";
-import { patches, PMLogger, startAllPlugins } from "./plugins";
+import { initPluginManager, PMLogger, startAllPlugins } from "./api/PluginManager";
+import { PlainSettings, Settings, SettingsStore } from "./api/Settings";
+import { getCloudSettings, putCloudSettings } from "./api/SettingsSync/cloudSync";
 import { localStorage } from "./utils/localStorage";
 import { relaunch } from "./utils/native";
-import { getCloudSettings, putCloudSettings } from "./utils/settingsSync";
 import { checkForUpdates, update, UpdateLogger } from "./utils/updater";
 import { onceReady } from "./webpack";
 import { SettingsRouter } from "./webpack/common";
+import { patches } from "./webpack/patchWebpack";
 
 if (IS_REPORTER) {
     require("./debug/runReporter");
 }
 
 async function syncSettings() {
+    // Check if cloud auth exists for current user before attempting sync
+    const hasCloudAuth = await dsGet("Vencord_cloudSecret");
+    if (!hasCloudAuth) {
+        if (Settings.cloud.authenticated) {
+            // User switched to an account that isn't connected to cloud
+            showNotification({
+                title: "Cloud Settings",
+                body: "Cloud sync was disabled because this account isn't connected to the Vencord Cloud App. You can enable it again by connecting this account in Cloud Settings. (note: it will store your preferences separately)",
+                color: "var(--yellow-360)",
+                onClick: () => SettingsRouter.open("VencordCloud")
+            });
+            // Disable cloud sync globally
+            Settings.cloud.authenticated = false;
+        }
+        return;
+    }
+
     // pre-check for local shared settings
     if (
         Settings.cloud.authenticated &&
-        !await dsGet("Vencord_cloudSecret") // this has been enabled due to local settings share or some other bug
+        !hasCloudAuth // this has been enabled due to local settings share or some other bug
     ) {
         // show a notification letting them know and tell them how to fix it
         showNotification({
@@ -75,7 +96,8 @@ async function syncSettings() {
         if (localStorage.Vencord_settingsDirty) {
             await putCloudSettings();
             delete localStorage.Vencord_settingsDirty;
-        } else if (await getCloudSettings(false)) { // if we synchronized something (false means no sync)
+        } else if (await getCloudSettings(false)) {
+            // if we synchronized something (false means no sync)
             // we show a notification here instead of allowing getCloudSettings() to show one to declutter the amount of
             // potential notifications that might occur. getCloudSettings() will always send a notification regardless if
             // there was an error to notify the user, but besides that we only want to show one notification instead of all
@@ -88,11 +110,25 @@ async function syncSettings() {
             });
         }
     }
+
+    const saveSettingsOnFrequentAction = debounce(async () => {
+        if (Settings.cloud.settingsSync && Settings.cloud.authenticated) {
+            await putCloudSettings();
+            delete localStorage.Vencord_settingsDirty;
+        }
+    }, 60_000);
+
+    SettingsStore.addGlobalChangeListener(() => {
+        localStorage.Vencord_settingsDirty = true;
+        saveSettingsOnFrequentAction();
+    });
 }
 
 let notifiedForUpdatesThisSession = false;
 
 async function runUpdateCheck() {
+    if (IS_UPDATER_DISABLED) return;
+
     const notify = (data: NotificationData) => {
         if (notifiedForUpdatesThisSession) return;
         notifiedForUpdatesThisSession = true;
@@ -123,7 +159,7 @@ async function runUpdateCheck() {
         notify({
             title: "A Vencord update is available!",
             body: "Click here to view the update",
-            onClick: openUpdaterModal!
+            onClick: () => openSettingsTabModal(UpdaterTab!)
         });
     } catch (err) {
         UpdateLogger.error("Failed to check for updates", err);
@@ -136,7 +172,7 @@ async function init() {
 
     syncSettings();
 
-    if (!IS_WEB && !IS_UPDATER_DISABLED) {
+    if (!IS_DEV && !IS_WEB && !IS_UPDATER_DISABLED) {
         runUpdateCheck();
 
         // this tends to get really annoying, so only do this if the user has auto-update without notification enabled
@@ -159,16 +195,17 @@ async function init() {
     }
 }
 
+initPluginManager();
 startAllPlugins(StartAt.Init);
 init();
 
 document.addEventListener("DOMContentLoaded", () => {
+    addVencordUiStyles();
+
     startAllPlugins(StartAt.DOMContentLoaded);
 
+    // FIXME
     if (IS_DISCORD_DESKTOP && Settings.winNativeTitleBar && IS_WINDOWS) {
-        document.head.append(Object.assign(document.createElement("style"), {
-            id: "vencord-native-titlebar-style",
-            textContent: "[class*=titleBar]{display: none!important}"
-        }));
+        createAndAppendStyle("vencord-native-titlebar-style").textContent = "[class*=titleBar]{display: none!important}";
     }
 }, { once: true });

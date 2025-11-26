@@ -20,11 +20,13 @@ import { addProfileBadge, removeProfileBadge } from "@api/Badges";
 import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
+import keybindsManager from "@api/Keybinds/keybindManager";
 import { addMemberListDecorator, removeMemberListDecorator } from "@api/MemberListDecorators";
 import { addMessageAccessory, removeMessageAccessory } from "@api/MessageAccessories";
 import { addMessageDecoration, removeMessageDecoration } from "@api/MessageDecorations";
 import { addMessageClickListener, addMessagePreEditListener, addMessagePreSendListener, removeMessageClickListener, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
 import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/MessagePopover";
+import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
 import { Logger } from "@utils/Logger";
@@ -96,7 +98,7 @@ function isReporterTestable(p: Plugin, part: ReporterTestable) {
 
 const pluginKeysToBind: Array<keyof PluginDef & `${"on" | "render"}${string}`> = [
     "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
-    "renderChatBarButton", "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration", "renderMessagePopoverButton"
+    "renderChatBarButton", "renderMemberListDecorator", "renderNicknameIcon", "renderMessageAccessory", "renderMessageDecoration", "renderMessagePopoverButton"
 ];
 
 const neededApiPlugins = new Set<string>();
@@ -124,14 +126,24 @@ for (const p of pluginsValues) if (isPluginEnabled(p.name)) {
         dep.isDependency = true;
     });
 
+    if (p.userProfileBadge) {
+        if (!p.userProfileBadges) {
+            p.userProfileBadges = [p.userProfileBadge];
+        } else {
+            p.userProfileBadges = [p.userProfileBadge, ...p.userProfileBadges];
+        }
+    }
+
     if (p.commands?.length) neededApiPlugins.add("CommandsAPI");
     if (p.onBeforeMessageEdit || p.onBeforeMessageSend || p.onMessageClick) neededApiPlugins.add("MessageEventsAPI");
     if (p.renderChatBarButton) neededApiPlugins.add("ChatInputButtonAPI");
     if (p.renderMemberListDecorator) neededApiPlugins.add("MemberListDecoratorsAPI");
+    if (p.renderNicknameIcon) neededApiPlugins.add("NicknameIconsAPI");
     if (p.renderMessageAccessory) neededApiPlugins.add("MessageAccessoriesAPI");
     if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
     if (p.renderMessagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
     if (p.userProfileBadge) neededApiPlugins.add("BadgeAPI");
+    if (p.userProfileContributorBadge) neededApiPlugins.add("BadgeAPI");
 
     for (const key of pluginKeysToBind) {
         p[key] &&= p[key].bind(p) as any;
@@ -221,8 +233,9 @@ export function subscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof Flux
         logger.debug("Subscribing to flux events of plugin", p.name);
         for (const [event, handler] of Object.entries(p.flux)) {
             const wrappedHandler = p.flux[event] = function () {
+                if (p.name === "Encryptcord" && event === "MESSAGE_CREATE") return;
                 try {
-                    const res = handler.apply(p, arguments as any);
+                    const res = handler!.apply(p, arguments as any);
                     return res instanceof Promise
                         ? res.catch(e => logger.error(`${p.name}: Error while handling ${event}\n`, e))
                         : res;
@@ -242,7 +255,7 @@ export function unsubscribePluginFluxEvents(p: Plugin, fluxDispatcher: typeof Fl
 
         logger.debug("Unsubscribing from flux events of plugin", p.name);
         for (const [event, handler] of Object.entries(p.flux)) {
-            fluxDispatcher.unsubscribe(event as FluxEvents, handler);
+            fluxDispatcher.unsubscribe(event as FluxEvents, handler!);
         }
     }
 }
@@ -258,9 +271,9 @@ export function subscribeAllPluginsFluxEvents(fluxDispatcher: typeof FluxDispatc
 
 export const startPlugin = traceFunction("startPlugin", function startPlugin(p: Plugin) {
     const {
-        name, commands, contextMenus, managedStyle, userProfileBadge,
+        name, commands, keybinds, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
+        renderChatBarButton, renderMemberListDecorator, renderNicknameIcon, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
     } = p;
 
     if (p.start) {
@@ -291,6 +304,30 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         }
     }
 
+    if (keybinds && Object.keys(keybinds).length) {
+        logger.debug("Registering keybinds of plugin", name);
+        let warned = false;
+        for (const keybind of keybinds) {
+            try {
+                if (!IS_DISCORD_DESKTOP && keybind.global) { // TODO: maybe check for IS_VESKTOP
+                    if (!warned) {
+                        logger.warn(`${name}: Global keybinds are only supported on desktop`);
+                        warned = true;
+                    }
+                    continue;
+                }
+                const keys = settings[name]?.[keybind.event] ?? [];
+                if (keybindsManager.registerKeybind(keybind, keys)) {
+                    keybindsManager.enableKeybind(keybind.event, keybind.global);
+                }
+            } catch (e) {
+                logger.error(`Failed to register keybind ${keybind.event}\n`, e);
+                return false;
+            }
+        }
+    }
+
+
     if (enabledPluginsSubscribedFlux) {
         subscribePluginFluxEvents(p, FluxDispatcher);
     }
@@ -312,6 +349,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 
     if (renderChatBarButton) addChatBarButton(name, renderChatBarButton);
     if (renderMemberListDecorator) addMemberListDecorator(name, renderMemberListDecorator);
+    if (renderNicknameIcon) addNicknameIcon(name, renderNicknameIcon);
     if (renderMessageDecoration) addMessageDecoration(name, renderMessageDecoration);
     if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
     if (renderMessagePopoverButton) addMessagePopoverButton(name, renderMessagePopoverButton);
@@ -321,9 +359,9 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
 
 export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plugin) {
     const {
-        name, commands, contextMenus, managedStyle, userProfileBadge,
+        name, commands, keybinds, contextMenus, managedStyle, userProfileBadge,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
+        renderChatBarButton, renderMemberListDecorator, renderNicknameIcon, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton
     } = p;
 
     if (p.stop) {
@@ -354,6 +392,21 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
         }
     }
 
+    if (keybinds?.length) {
+        logger.debug("Unregistering keybinds of plugin", name);
+        for (const keybind of keybinds) {
+            try {
+                if (!IS_DISCORD_DESKTOP && keybind.global) { // TODO: maybe check for IS_VESKTOP
+                    continue;
+                }
+                keybindsManager.unregisterKeybind(keybind.event, keybind.global);
+            } catch (e) {
+                logger.error(`Failed to unregister keybind ${keybind.event}\n`, e);
+                return false;
+            }
+        }
+    }
+
     unsubscribePluginFluxEvents(p, FluxDispatcher);
 
     if (contextMenus) {
@@ -373,6 +426,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
 
     if (renderChatBarButton) removeChatBarButton(name);
     if (renderMemberListDecorator) removeMemberListDecorator(name);
+    if (renderNicknameIcon) removeNicknameIcon(name);
     if (renderMessageDecoration) removeMessageDecoration(name);
     if (renderMessageAccessory) removeMessageAccessory(name);
     if (renderMessagePopoverButton) removeMessagePopoverButton(name);

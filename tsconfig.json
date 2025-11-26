@@ -14,7 +14,7 @@
             "esnext.symbol"
         ],
         "module": "esnext",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "strict": true,
         "noImplicitAny": false,
         "target": "ESNEXT",
@@ -26,6 +26,7 @@
             "@api/*": ["./api/*"],
             "@components/*": ["./components/*"],
             "@utils/*": ["./utils/*"],
+			"@plugins/*": ["./plugins/*"],
             "@shared/*": ["./shared/*"],
             "@webpack/common": ["./webpack/common"],
             "@webpack": ["./webpack/webpack"],

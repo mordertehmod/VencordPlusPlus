@@ -15,9 +15,20 @@
     flex-direction: row;
 }
 
+.vc-settings-discordinvite {
+    display: flex;
+    flex-direction: row;
+}
+
 .vc-settings-card {
     padding: 1em;
     margin-bottom: 1em;
+}
+
+.vc-settings-card-buttons {
+    display: flex;
+    margin-top: 1.5em;
+    gap: 0.5em;
 }
 
 .vc-warning-card {
@@ -60,7 +71,7 @@
 .vc-cloud-settings-sync-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-gap: 1em;
+    gap: 1em;
 }
 
 .vc-cloud-erase-data-danger-btn {
@@ -68,10 +79,10 @@
     background-color: var(--button-danger-background);
 }
 
-.vc-updater-modal {
+.vc-settings-modal {
     padding: 1.5em !important;
 }
 
-.vc-updater-modal-close-button {
+.vc-settings-modal-close {
     float: right;
 }

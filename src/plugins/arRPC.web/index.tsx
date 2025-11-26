@@ -17,13 +17,13 @@
 */
 
 import { popNotice, showNotice } from "@api/Notices";
+import { migratePluginSettings } from "@api/Settings";
+import { HeadingSecondary } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { Devs } from "@utils/constants";
 import definePlugin, { ReporterTestable } from "@utils/types";
-import { findByCodeLazy } from "@webpack";
-import { ApplicationAssetUtils, FluxDispatcher, Forms, Toasts } from "@webpack/common";
-
-const fetchApplicationsRPC = findByCodeLazy('"Invalid Origin"', ".application");
+import { ApplicationAssetUtils, fetchApplicationsRPC, FluxDispatcher, Toasts } from "@webpack/common";
 
 async function lookupAsset(applicationId: string, key: string): Promise<string> {
     return (await ApplicationAssetUtils.fetchAssetIds(applicationId, [key]))[0];
@@ -37,8 +37,10 @@ async function lookupApp(applicationId: string): Promise<string> {
 }
 
 let ws: WebSocket;
+
+migratePluginSettings("WebRichPresence", "WebRichPresence (arRPC)");
 export default definePlugin({
-    name: "WebRichPresence (arRPC)",
+    name: "WebRichPresence",
     description: "Client plugin for arRPC to enable RPC on Discord Web (experimental)",
     authors: [Devs.Ducko],
     reporterTestable: ReporterTestable.None,
@@ -46,10 +48,10 @@ export default definePlugin({
 
     settingsAboutComponent: () => (
         <>
-            <Forms.FormTitle tag="h3">How to use arRPC</Forms.FormTitle>
-            <Forms.FormText>
+            <HeadingSecondary>How to use arRPC</HeadingSecondary>
+            <Paragraph>
                 <Link href="https://github.com/OpenAsar/arrpc/tree/main#server">Follow the instructions in the GitHub repo</Link> to get the server running, and then enable the plugin.
-            </Forms.FormText>
+            </Paragraph>
         </>
     ),
 
@@ -79,16 +81,18 @@ export default definePlugin({
 
         ws.onmessage = this.handleEvent;
 
-        const connectionSuccessful = await new Promise(res => setTimeout(() => res(ws.readyState === WebSocket.OPEN), 1000)); // check if open after 1s
+        const connectionSuccessful = await new Promise(res => setTimeout(() => res(ws.readyState === WebSocket.OPEN), 5000)); // check if open after 5s
         if (!connectionSuccessful) {
-            showNotice("Failed to connect to arRPC, is it running?", "Retry", () => { // show notice about failure to connect, with retry/ignore
+            showNotice("Failed to connect to arRPC, is it running?", "Retry", () => {
+                // show notice about failure to connect, with retry/ignore
                 popNotice();
                 this.start();
             });
             return;
         }
 
-        Toasts.show({ // show toast on success
+        Toasts.show({
+            // show toast on success
             message: "Connected to arRPC",
             type: Toasts.Type.SUCCESS,
             id: Toasts.genId(),

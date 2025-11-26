@@ -4,16 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { BaseText } from "@components/BaseText";
+import { Button as NewButton } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import { openInviteModal } from "@utils/discord";
-import { Margins } from "@utils/margins";
-import { classes, copyWithToast } from "@utils/misc";
-import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Queue } from "@utils/Queue";
-import { User } from "@vencord/discord-types";
-import { Alerts, Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Text, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
-
+import { Heading } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
 import { Decoration, getPresets, Preset } from "../../lib/api";
 import { GUILD_ID, INVITE_KEY } from "../../lib/constants";
 import { useAuthorizationStore } from "../../lib/stores/AuthorizationStore";
@@ -26,6 +22,13 @@ import DecorationGridCreate from "../components/DecorationGridCreate";
 import DecorationGridNone from "../components/DecorationGridNone";
 import DecorDecorationGridDecoration from "../components/DecorDecorationGridDecoration";
 import SectionedGridList from "../components/SectionedGridList";
+import { copyWithToast, openInviteModal } from "@utils/discord";
+import { Margins } from "@utils/margins";
+import { closeAllModals, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { Queue } from "@utils/Queue";
+import { User } from "@vencord/discord-types";
+import { Alerts, Button, FluxDispatcher, Forms, GuildStore, NavigationRouter, Parser, Tooltip, useEffect, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+
 import { openCreateDecorationModal } from "./CreateDecorationModal";
 import { openGuidelinesModal } from "./GuidelinesModal";
 
@@ -83,9 +86,9 @@ function SectionHeader({ section }: SectionHeaderProps) {
             />}
         </Flex>
         {hasSubtitle &&
-            <Forms.FormText className={Margins.bottom8}>
+            <Paragraph className={Margins.bottom8}>
                 {section.subtitle}
-            </Forms.FormText>
+            </Paragraph>
         }
     </div>;
 }
@@ -95,7 +98,7 @@ function ChangeDecorationModal(props: ModalProps) {
     const [tryingDecoration, setTryingDecoration] = useState<Decoration | null | undefined>(undefined);
     const isTryingDecoration = typeof tryingDecoration !== "undefined";
 
-    const avatarDecorationOverride = tryingDecoration != null ? decorationToAvatarDecoration(tryingDecoration) : tryingDecoration;
+    const avatarDecoration = tryingDecoration != null ? decorationToAvatarDecoration(tryingDecoration) : tryingDecoration;
 
     const {
         decorations,
@@ -142,14 +145,15 @@ function ChangeDecorationModal(props: ModalProps) {
         className={DecorationModalStyles.modal}
     >
         <ModalHeader separator={false} className={cl("modal-header")}>
-            <Text
+            <BaseText
+                size="lg"
+                weight="semibold"
                 color="header-primary"
-                variant="heading-lg/semibold"
                 tag="h1"
                 style={{ flexGrow: 1 }}
             >
                 Change Decoration
-            </Text>
+            </BaseText>
             <ModalCloseButton onClick={props.onClose} />
         </ModalHeader>
         <ModalContent
@@ -197,22 +201,23 @@ function ChangeDecorationModal(props: ModalProps) {
                 />
                 <div className={cl("change-decoration-modal-preview")}>
                     <AvatarDecorationModalPreview
-                        avatarDecorationOverride={avatarDecorationOverride}
+                        avatarDecoration={avatarDecoration}
                         user={UserStore.getCurrentUser()}
                     />
-                    {isActiveDecorationPreset && <Forms.FormTitle className="">Part of the {activeDecorationPreset.name} Preset</Forms.FormTitle>}
+                    {isActiveDecorationPreset && <Heading className="">Part of the {activeDecorationPreset.name} Preset</Heading>}
                     {typeof activeSelectedDecoration === "object" &&
-                        <Text
-                            variant="text-sm/semibold"
+                        <BaseText
+                            size="sm"
+                            weight="semibold"
                             color="header-primary"
                         >
                             {activeSelectedDecoration?.alt}
-                        </Text>
+                        </BaseText>
                     }
                     {activeDecorationHasAuthor && (
-                        <Text key={`createdBy-${activeSelectedDecoration.authorId}`}>
+                        <BaseText key={`createdBy-${activeSelectedDecoration.authorId}`}>
                             Created by {Parser.parse(`<@${activeSelectedDecoration.authorId}>`)}
-                        </Text>
+                        </BaseText>
                     )}
                     {isActiveDecorationPreset && (
                         <Button onClick={() => copyWithToast(activeDecorationPreset.id)}>
@@ -222,8 +227,14 @@ function ChangeDecorationModal(props: ModalProps) {
                 </div>
             </ErrorBoundary>
         </ModalContent>
-        <ModalFooter className={classes(cl("change-decoration-modal-footer", cl("modal-footer")))}>
-            <div className={cl("change-decoration-modal-footer-btn-container")}>
+        <ModalFooter className={cl("change-decoration-modal-footer", "modal-footer")}>
+            <div className={cl("modal-footer-btn-container")}>
+                <Button
+                    onClick={props.onClose}
+                    color={Button.Colors.PRIMARY}
+                >
+                    Cancel
+                </Button>
                 <Button
                     onClick={() => {
                         selectDecoration(tryingDecoration!).then(props.onClose);
@@ -232,34 +243,10 @@ function ChangeDecorationModal(props: ModalProps) {
                 >
                     Apply
                 </Button>
-                <Button
-                    onClick={props.onClose}
-                    color={Button.Colors.PRIMARY}
-                    look={Button.Looks.LINK}
-                >
-                    Cancel
-                </Button>
             </div>
-            <div className={cl("change-decoration-modal-footer-btn-container")}>
-                <Button
-                    onClick={() => Alerts.show({
-                        title: "Log Out",
-                        body: "Are you sure you want to log out of Decor?",
-                        confirmText: "Log Out",
-                        confirmColor: cl("danger-btn"),
-                        cancelText: "Cancel",
-                        onConfirm() {
-                            useAuthorizationStore.getState().remove(UserStore.getCurrentUser().id);
-                            props.onClose();
-                        }
-                    })}
-                    color={Button.Colors.PRIMARY}
-                    look={Button.Looks.LINK}
-                >
-                    Log Out
-                </Button>
+            <div className={cl("modal-footer-btn-container")}>
                 <Tooltip text="Join Decor's Discord Server for notifications on your decoration's review, and when new presets are released">
-                    {tooltipProps => <Button
+                    {tooltipProps => <NewButton
                         {...tooltipProps}
                         onClick={async () => {
                             if (!GuildStore.getGuild(GUILD_ID)) {
@@ -274,12 +261,27 @@ function ChangeDecorationModal(props: ModalProps) {
                                 NavigationRouter.transitionToGuild(GUILD_ID);
                             }
                         }}
-                        color={Button.Colors.PRIMARY}
-                        look={Button.Looks.LINK}
+                        variant="link"
                     >
                         Discord Server
-                    </Button>}
+                    </NewButton>}
                 </Tooltip>
+                <NewButton
+                    onClick={() => Alerts.show({
+                        title: "Log Out",
+                        body: "Are you sure you want to log out of Decor?",
+                        confirmText: "Log Out",
+                        confirmColor: cl("danger-btn"),
+                        cancelText: "Cancel",
+                        onConfirm() {
+                            useAuthorizationStore.getState().remove(UserStore.getCurrentUser().id);
+                            props.onClose();
+                        }
+                    })}
+                    variant="dangerSecondary"
+                >
+                    Log Out
+                </NewButton>
             </div>
         </ModalFooter>
     </ModalRoot>;

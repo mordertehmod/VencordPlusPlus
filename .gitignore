@@ -1,5 +1,6 @@
 dist
 node_modules
+.modules
 
 *.exe
 vencord_installer
@@ -23,3 +24,5 @@ src/userplugins
 
 ExtensionCache/
 /settings
+
+TODO.txt

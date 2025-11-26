@@ -28,20 +28,30 @@ import definePlugin from "@utils/types";
 import { Message } from "@vencord/discord-types";
 import { ChannelStore } from "@webpack/common";
 
-const KEY = "HideAttachments_HiddenIds";
+const KEY = "HideMedia_HiddenIds";
 
 let hiddenMessages = new Set<string>();
 
 async function getHiddenMessages() {
-    hiddenMessages = await get(KEY) ?? new Set();
+    const stored = await get(KEY);
+    hiddenMessages = new Set(stored ?? []);
     return hiddenMessages;
 }
 
-const saveHiddenMessages = (ids: Set<string>) => set(KEY, ids);
+const saveHiddenMessages = (ids: Set<string>) => set(KEY, [...ids]);
 
 migratePluginSettings("HideMedia", "HideAttachments");
 
 const hasMedia = (msg: Message) => msg.attachments.length > 0 || msg.embeds.length > 0 || msg.stickerItems.length > 0;
+
+async function toggleHide(channelId: string, messageId: string) {
+    const ids = await getHiddenMessages();
+    if (!ids.delete(messageId))
+        ids.add(messageId);
+
+    await saveHiddenMessages(ids);
+    updateMessage(channelId, messageId);
+}
 
 export default definePlugin({
     name: "HideMedia",
@@ -57,18 +67,21 @@ export default definePlugin({
         }
     }],
 
-    renderMessagePopoverButton(msg) {
-        if (!hasMedia(msg) && !msg.messageSnapshots.some(s => hasMedia(s.message))) return null;
+    messagePopoverButton: {
+        icon: ImageInvisible,
+        render(msg) {
+            if (!hasMedia(msg) && !msg.messageSnapshots.some(s => hasMedia(s.message))) return null;
 
-        const isHidden = hiddenMessages.has(msg.id);
+            const isHidden = hiddenMessages.has(msg.id);
 
-        return {
-            label: isHidden ? "Show Media" : "Hide Media",
-            icon: isHidden ? ImageVisible : ImageInvisible,
-            message: msg,
-            channel: ChannelStore.getChannel(msg.channel_id),
-            onClick: () => this.toggleHide(msg.channel_id, msg.id)
-        };
+            return {
+                label: isHidden ? "Show Media" : "Hide Media",
+                icon: isHidden ? ImageVisible : ImageInvisible,
+                message: msg,
+                channel: ChannelStore.getChannel(msg.channel_id),
+                onClick: () => toggleHide(msg.channel_id, msg.id)
+            };
+        },
     },
 
     renderMessageAccessory({ message }) {
@@ -92,13 +105,4 @@ export default definePlugin({
     shouldHide(messageId: string) {
         return hiddenMessages.has(messageId);
     },
-
-    async toggleHide(channelId: string, messageId: string) {
-        const ids = await getHiddenMessages();
-        if (!ids.delete(messageId))
-            ids.add(messageId);
-
-        await saveHiddenMessages(ids);
-        updateMessage(channelId, messageId);
-    }
 });

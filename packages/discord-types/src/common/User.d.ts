@@ -11,6 +11,7 @@ export class User extends DiscordRecord {
     bot: boolean;
     desktop: boolean;
     discriminator: string;
+    displayNameStyles: Record<string, string>;
     email: string | undefined;
     flags: number;
     globalName: string | undefined;
@@ -62,4 +63,5 @@ export interface UserJSON {
     id: string;
     publicFlags: number;
     username: string;
+    globalName: string | undefined;
 }

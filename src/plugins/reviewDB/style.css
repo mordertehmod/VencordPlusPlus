@@ -1,5 +1,6 @@
-[class|="section"]:not([class|="lastSection"]) + .vc-rdb-view {
-    margin-top: 12px;
+:root {
+    --vc-rdb-avatar-size: 40px;
+    --vc-rdb-spacing-size: 8px;
 }
 
 .vc-rdb-badge {
@@ -54,13 +55,13 @@
     margin-top: 16px;
 }
 
-.vc-rdb-review {
-    padding-top: 8px !important;
-    padding-bottom: 8px !important;
+.vc-rdb-review-container {
+    padding-top: var(--vc-rdb-spacing-size) !important;
+    padding-bottom: var(--vc-rdb-spacing-size) !important;
     padding-right: 32px !important;
 }
 
-.vc-rdb-review:hover {
+.vc-rdb-review-container:hover {
     background: var(--background-message-hover) !important;
     border-radius: 8px;
 }

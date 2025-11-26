@@ -16,12 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { getUserSettingLazy } from "@api/UserSettings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
+import { Menu } from "@webpack/common";
 
 import managedStyle from "./style.css?managed";
 
@@ -60,7 +62,7 @@ function makeIcon(showCurrentGame?: boolean) {
     };
 }
 
-function GameActivityToggleButton() {
+function GameActivityToggleButton(props: { nameplate?: any; }) {
     const showCurrentGame = ShowCurrentGame.useSetting();
 
     return (
@@ -70,6 +72,7 @@ function GameActivityToggleButton() {
             role="switch"
             aria-checked={!showCurrentGame}
             redGlow={!showCurrentGame}
+            plated={props?.nameplate != null}
             onClick={() => ShowCurrentGame.updateSetting(old => !old)}
         />
     );
@@ -97,7 +100,7 @@ export default definePlugin({
             find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
             replacement: {
                 match: /className:\i\.buttons,.{0,50}children:\[/,
-                replace: "$&$self.GameActivityToggleButton(),"
+                replace: "$&$self.GameActivityToggleButton(arguments[0]),"
             }
         }
     ],

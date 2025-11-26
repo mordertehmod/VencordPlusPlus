@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import "./styles.css";
+
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
@@ -31,7 +33,7 @@ import { fetchNamesFromDataStore, getDefaultName, GetOsColor, GetPlatformIcon, s
 const AuthSessionsStore = findStoreLazy("AuthSessionsStore");
 const UserSettingsModal = findByPropsLazy("saveAccountChanges", "open");
 
-const TimestampClasses = findByPropsLazy("timestampTooltip", "blockquoteContainer");
+const TimestampClasses = findByPropsLazy("timestamp", "blockquoteContainer");
 const SessionIconClasses = findByPropsLazy("sessionIcon");
 
 const BlobMask = findComponentByCodeLazy("!1,lowerBadgeSize:");
@@ -77,6 +79,14 @@ export default definePlugin({
                     replace: "$& $self.renderIcon({ ...arguments[0], DeviceIcon: $1 }), false &&"
                 }
             ]
+        },
+        // Allow passing custom size to BlobMask
+        {
+            find: "!1,lowerBadgeSize:",
+            replacement: {
+                match: /\i.modules.guildbar.FOLDER_SIZE\),\i=/,
+                replace: "$& arguments[0].size != null ? arguments[0].size : "
+            }
         }
     ],
 
@@ -108,7 +118,7 @@ export default definePlugin({
 
     renderTimestamp: ErrorBoundary.wrap(({ session, timeLabel }: { session: Session, timeLabel: string; }) => {
         return (
-            <Tooltip text={session.approx_last_used_time.toLocaleString()} tooltipClassName={TimestampClasses.timestampTooltip}>
+            <Tooltip text={session.approx_last_used_time.toLocaleString()}>
                 {props => (
                     <span {...props} className={TimestampClasses.timestamp}>
                         {timeLabel}
@@ -125,6 +135,7 @@ export default definePlugin({
             <BlobMask
                 isFolder
                 style={{ cursor: "unset" }}
+                size={48}
                 selected={false}
                 lowerBadge={
                     <div

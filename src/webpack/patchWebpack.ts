@@ -8,9 +8,9 @@ import { Settings } from "@api/Settings";
 import { makeLazy } from "@utils/lazy";
 import { Logger } from "@utils/Logger";
 import { interpolateIfDefined } from "@utils/misc";
-import { canonicalizeReplacement } from "@utils/patches";
 import { Patch, PatchReplacement } from "@utils/types";
 import { WebpackRequire } from "@vencord/discord-types/webpack";
+import { reporterData } from "debug/reporterData";
 
 import { traceFunctionWithResults } from "../debug/Tracer";
 import { AnyModuleFactory, AnyWebpackRequire, MaybePatchedModuleFactory, PatchedModuleFactory } from "./types";
@@ -538,7 +538,7 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
         const previousFactory = originalFactory;
         let markedAsPatched = false;
 
-        // We change all patch.replacement to array in plugins/index
+        // We change all patch.replacement to array in PluginManager
         for (const replacement of patch.replacement as PatchReplacement[]) {
             if (
                 shouldCheckBuildNumber &&
@@ -546,11 +546,6 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                 (replacement.toBuild != null && buildNumber > replacement.toBuild)
             ) {
                 continue;
-            }
-
-            // TODO: remove once Vesktop has been updated to use addPatch
-            if (patch.plugin === "Vesktop") {
-                canonicalizeReplacement(replacement, "VCDP");
             }
 
             const lastCode = code;
@@ -569,6 +564,11 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                         if (IS_DEV) {
                             logger.debug("Function Source:\n", code);
                         }
+                        if (IS_COMPANION_TEST)
+                            reporterData.failedPatches.hadNoEffect.push({
+                                ...patch,
+                                id: moduleId
+                            });
                     }
 
                     if (patch.group) {
@@ -579,6 +579,12 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
                         if (markedAsPatched) {
                             patchedBy.delete(patch.plugin);
                         }
+
+                        if (IS_COMPANION_TEST)
+                            reporterData.failedPatches.undoingPatchGroup.push({
+                                ...patch,
+                                id: moduleId
+                            });
 
                         break;
                     }
@@ -602,6 +608,14 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
             } catch (err) {
                 logger.error(`Patch by ${patch.plugin} errored (Module id is ${String(moduleId)}): ${replacement.match}\n`, err);
 
+                if (IS_COMPANION_TEST)
+                    reporterData.failedPatches.erroredPatch.push({
+                        ...patch,
+                        oldModule: lastCode,
+                        newModule: code,
+                        id: moduleId
+                    });
+
                 if (IS_DEV) {
                     diffErroredPatch(code, lastCode, lastCode.match(replacement.match)!);
                 }
@@ -612,6 +626,11 @@ function patchFactory(moduleId: PropertyKey, originalFactory: AnyModuleFactory):
 
                 if (patch.group) {
                     logger.warn(`Undoing patch group ${patch.find} by ${patch.plugin} because replacement ${replacement.match} errored`);
+                    if (IS_COMPANION_TEST)
+                        reporterData.failedPatches.undoingPatchGroup.push({
+                            ...patch,
+                            id: moduleId
+                        });
                     code = previousCode;
                     patchedFactory = previousFactory;
                     break;

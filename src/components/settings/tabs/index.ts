@@ -6,13 +6,14 @@
 
 import "./styles.css";
 
+export { default as ThemesTab } from "./themes";
 export * from "./BaseTab";
+export { default as ChangelogTab } from "./changelog";
 export { default as PatchHelperTab } from "./patchHelper";
 export { default as PluginsTab } from "./plugins";
 export { openContributorModal } from "./plugins/ContributorModal";
 export { openPluginModal } from "./plugins/PluginModal";
 export { default as BackupAndRestoreTab } from "./sync/BackupAndRestoreTab";
 export { default as CloudTab } from "./sync/CloudTab";
-export { default as ThemesTab } from "./themes";
-export { openUpdaterModal, default as UpdaterTab } from "./updater";
+export { default as UpdaterTab } from "./updater";
 export { default as VencordTab } from "./vencord";

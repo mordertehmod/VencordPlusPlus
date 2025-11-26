@@ -16,24 +16,35 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { debounce } from "@shared/debounce";
 import { SettingsStore as SettingsStoreClass } from "@shared/SettingsStore";
-import { localStorage } from "@utils/localStorage";
 import { Logger } from "@utils/Logger";
 import { mergeDefaults } from "@utils/mergeDefaults";
-import { putCloudSettings } from "@utils/settingsSync";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
 import { React, useEffect } from "@webpack/common";
 
 import plugins from "~plugins";
 
 const logger = new Logger("Settings");
+
+export interface SettingsPluginUiElement {
+    enabled: boolean;
+    // TODO
+    /** not implemented for now */
+    order?: number;
+}
+export type SettingsPluginUiElements = {
+    /** id will be whatever id the element was registered with. Usually, but not always, the plugin name */
+    [id: string]: SettingsPluginUiElement;
+};
+
 export interface Settings {
     autoUpdate: boolean;
-    autoUpdateNotification: boolean,
+    autoUpdateNotification: boolean;
     useQuickCss: boolean;
     eagerPatches: boolean;
     enabledThemes: string[];
+    enabledThemeLinks: string[];
+    themeNames: Record<string, string>;
     enableReactDevtools: boolean;
     themeLinks: string[];
     frameless: boolean;
@@ -62,10 +73,16 @@ export interface Settings {
         };
     };
 
+    uiElements: {
+        messagePopoverButtons: SettingsPluginUiElements;
+        chatBarButtons: SettingsPluginUiElements;
+    },
+
     notifications: {
         timeout: number;
         position: "top-right" | "bottom-right";
         useNative: "always" | "never" | "not-focused";
+        missed: boolean;
         logLimit: number;
     };
 
@@ -74,6 +91,14 @@ export interface Settings {
         url: string;
         settingsSync: boolean;
         settingsSyncVersion: number;
+    };
+
+    ignoreResetWarning: boolean;
+
+    userCssVars: {
+        [themeId: string]: {
+            [varName: string]: string;
+        };
     };
 }
 
@@ -84,6 +109,8 @@ const DefaultSettings: Settings = {
     themeLinks: [],
     eagerPatches: IS_REPORTER,
     enabledThemes: [],
+    enabledThemeLinks: [],
+    themeNames: {},
     enableReactDevtools: false,
     frameless: false,
     transparent: false,
@@ -93,10 +120,16 @@ const DefaultSettings: Settings = {
     winNativeTitleBar: false,
     plugins: {},
 
+    uiElements: {
+        chatBarButtons: {},
+        messagePopoverButtons: {}
+    },
+
     notifications: {
         timeout: 5000,
         position: "bottom-right",
         useNative: "not-focused",
+        missed: true,
         logLimit: 50
     },
 
@@ -105,19 +138,15 @@ const DefaultSettings: Settings = {
         url: "https://api.vencord.dev/",
         settingsSync: false,
         settingsSyncVersion: 0
-    }
+    },
+
+    ignoreResetWarning: false,
+
+    userCssVars: {}
 };
 
 const settings = !IS_REPORTER ? VencordNative.settings.get() : {} as Settings;
 mergeDefaults(settings, DefaultSettings);
-
-const saveSettingsOnFrequentAction = debounce(async () => {
-    if (Settings.cloud.settingsSync && Settings.cloud.authenticated) {
-        await putCloudSettings();
-        delete localStorage.Vencord_settingsDirty;
-    }
-}, 60_000);
-
 
 export const SettingsStore = new SettingsStoreClass(settings, {
     readOnly: true,
@@ -161,8 +190,6 @@ export const SettingsStore = new SettingsStoreClass(settings, {
 if (!IS_REPORTER) {
     SettingsStore.addGlobalChangeListener((_, path) => {
         SettingsStore.plain.cloud.settingsSyncVersion = Date.now();
-        localStorage.Vencord_settingsDirty = true;
-        saveSettingsOnFrequentAction();
         VencordNative.settings.set(SettingsStore.plain, path);
     });
 }
@@ -196,8 +223,21 @@ export function useSettings(paths?: UseSettings<Settings>[]) {
 
     useEffect(() => {
         if (paths) {
-            paths.forEach(p => SettingsStore.addChangeListener(p, forceUpdate));
-            return () => paths.forEach(p => SettingsStore.removeChangeListener(p, forceUpdate));
+            paths.forEach(p => {
+                if (p.endsWith(".*")) {
+                    SettingsStore.addPrefixChangeListener(p.slice(0, -2), forceUpdate);
+                } else {
+                    SettingsStore.addChangeListener(p, forceUpdate);
+                }
+            });
+
+            return () => paths.forEach(p => {
+                if (p.endsWith(".*")) {
+                    SettingsStore.removePrefixChangeListener(p.slice(0, -2), forceUpdate);
+                } else {
+                    SettingsStore.removeChangeListener(p, forceUpdate);
+                }
+            });
         } else {
             SettingsStore.addGlobalChangeListener(forceUpdate);
             return () => SettingsStore.removeGlobalChangeListener(forceUpdate);
@@ -205,6 +245,21 @@ export function useSettings(paths?: UseSettings<Settings>[]) {
     }, [paths]);
 
     return SettingsStore.store;
+}
+
+export function migratePluginToSetting(newName: string, oldName: string, settingName: string) {
+    const { plugins } = SettingsStore.plain;
+    const newPlugin = plugins[newName];
+    const oldPlugin = plugins[oldName];
+
+    if (!newPlugin || !oldPlugin) return;
+
+    if (oldPlugin?.enabled) {
+        newPlugin[settingName] = true;
+        oldPlugin.enabled = false;
+        if (!newPlugin?.enabled) newPlugin.enabled = true;
+        SettingsStore.markAsChanged();
+    }
 }
 
 export function migratePluginSettings(name: string, ...oldNames: string[]) {
@@ -222,7 +277,7 @@ export function migratePluginSettings(name: string, ...oldNames: string[]) {
     }
 }
 
-export function migratePluginSetting(pluginName: string, oldSetting: string, newSetting: string) {
+export function migratePluginSetting(pluginName: string, newSetting: string, oldSetting: string) {
     const settings = SettingsStore.plain.plugins[pluginName];
     if (!settings) return;
 
@@ -230,6 +285,19 @@ export function migratePluginSetting(pluginName: string, oldSetting: string, new
 
     settings[newSetting] = settings[oldSetting];
     delete settings[oldSetting];
+    SettingsStore.markAsChanged();
+}
+
+export function migrateSettingFromPlugin(newPlugin: string, newSetting: string, oldPlugin: string, oldSetting: string) {
+    const newSettings = SettingsStore.plain.plugins[newPlugin];
+    const oldSettings = SettingsStore.plain.plugins[oldPlugin];
+    if (!oldSettings || !Object.hasOwn(oldSettings, oldSetting)) return;
+    if (!newSettings || (Object.hasOwn(newSettings, newSetting))) return;
+
+    if (Object.hasOwn(newSettings, newSetting)) return;
+
+    newSettings[newSetting] = oldSettings[oldSetting];
+    delete oldSettings[oldSetting];
     SettingsStore.markAsChanged();
 }
 
@@ -247,9 +315,11 @@ export function definePluginSettings<
             if (!definedSettings.pluginName) throw new Error("Cannot access settings before plugin is initialized");
             return PlainSettings.plugins[definedSettings.pluginName] as any;
         },
-        use: settings => useSettings(
-            settings?.map(name => `plugins.${definedSettings.pluginName}.${name}`) as UseSettings<Settings>[]
-        ).plugins[definedSettings.pluginName] as any,
+        use: settings => useSettings((
+            settings
+                ? settings.map(name => `plugins.${definedSettings.pluginName}.${name}`)
+                : [`plugins.${definedSettings.pluginName}.*`]
+        ) as UseSettings<Settings>[]).plugins[definedSettings.pluginName] as any,
         def,
         checks: checks ?? {} as any,
         pluginName: "",
@@ -269,7 +339,7 @@ type ResolveUseSettings<T extends object> = {
     Key extends string
     ? T[Key] extends Record<string, unknown>
     // @ts-expect-error "Type instantiation is excessively deep and possibly infinite"
-    ? UseSettings<T[Key]> extends string ? `${Key}.${UseSettings<T[Key]>}` : never
+    ? `${Key}.*` | (ResolveUseSettings<T[Key]> extends Record<string, string> ? `${Key}.${ResolveUseSettings<T[Key]>[keyof T[Key]]}` : never)
     : Key
     : never;
 };

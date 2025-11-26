@@ -78,6 +78,7 @@ const settings = definePluginSettings({
     tagsList: {
         type: OptionType.CUSTOM,
         default: {} as Record<string, Tag>,
+        description: ""
     }
 });
 
