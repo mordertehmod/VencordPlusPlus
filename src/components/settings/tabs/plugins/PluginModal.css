@@ -1,7 +1,147 @@
-.vc-plugin-modal-info {
+/* Plugin name */
+.vc-plugin-modal-header-title {
+    display: flex;
     align-items: center;
+    gap: 4px;
+    flex: 1;
+    justify-content: center;
+}
+
+/* Hacky ass spacer to keep the close element in the
+*  flex container and maintain our title centering */
+.vc-plugin-modal-header-spacer {
+    width: 32px;
+}
+
+/* Info toggle button */
+.vc-plugin-modal-info-button {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.vc-plugin-modal-info-button svg {
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.vc-plugin-modal-info-button-expanded svg {
+    transform: rotate(180deg);
+}
+
+/* Plugin info section */
+.vc-plugin-modal-info {
+    flex-grow: 1;
+}
+
+.vc-plugin-modal-info-section {
+    animation: slidedown 0.2s ease;
 }
 
 .vc-plugin-modal-description {
-    flex-grow: 1;
+    text-align: center;
+    margin: auto;
+    max-width: 90%;
+}
+
+/* Authors and source link buttons component */
+.vc-plugin-modal-authorsAndButtons {
+    display: flex;
+    align-items: center;
+    color: var(--text-muted);
+}
+
+.vc-plugin-modal-authors-label {
+    text-align: center;
+    line-height: 28px;
+}
+
+.vc-plugin-modal-links {
+    margin-left: auto;
+}
+
+/* Tab nav */
+.vc-plugin-modal-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--background-modifier-accent);
+    justify-content: center;
+
+    /* Sticky tabs??
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    */
+}
+
+.vc-plugin-modal-tab {
+    flex: 1;
+    padding: 12px 24px;
+    cursor: pointer;
+    border-bottom: 2px solid grey;
+    transition: color 0.15s ease;
+    color: var(--text-muted);
+    text-align: center;
+    position: relative;
+    font-weight: 500;
+}
+
+/* Tab hover effect */
+.vc-plugin-modal-tab::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-color: var(--background-modifier-hover);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    pointer-events: none;
+}
+
+/* Animated tab underline */
+.vc-plugin-modal-tab::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -2px;
+    width: 0;
+    height: 2px;
+    background-color: var(--brand-experiment);
+    transform: translateX(-50%);
+    transition: width 0.15s ease;
+}
+
+.vc-plugin-modal-tab:hover::before {
+    opacity: 1;
+}
+
+.vc-plugin-modal-tab:hover {
+    color: var(--header-primary);
+}
+
+.vc-plugin-modal-tab-active {
+    color: var(--header-primary);
+    border-bottom-color: var(--brand-experiment);
+}
+
+.vc-plugin-modal-tab-active::after {
+    width: 60%
+}
+
+.vc-plugin-modal-tab-active::before {
+    opacity: 0;
+}
+
+.vc-plugin-modal-tab:active {
+    transform: scale(0.98);
+}
+
+@keyframes slidedown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

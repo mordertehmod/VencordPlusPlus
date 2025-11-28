@@ -38,7 +38,7 @@ export function ThemeCard({ theme, enabled, onChange, onDelete }: ThemeCardProps
                 )
             }
             footer={
-                <Flex flexDirection="row" style={{ gap: "0.2em", marginTop: "0.5em" }}>
+                <Flex flexDirection="row" gap="0.2em">
                     {!!themeInfo.website && <Link href={themeInfo.website}>Website</Link>}
                     {!!(themeInfo.website && themeInfo.invite) && " • "}
                     {!!themeInfo.invite && (

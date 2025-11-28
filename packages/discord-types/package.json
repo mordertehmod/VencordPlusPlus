@@ -9,7 +9,7 @@
     "type": "module",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/mordertehmod/VencordPlusPlus",
+        "url": "git+https://github.com/Vendicated/Vencord.git",
         "directory": "packages/discord-types"
     },
     "dependencies": {
