@@ -5,9 +5,9 @@
  */
 
 import { DataStore } from "@api/index";
+import { settings } from "@plugins/musicControls/settings";
+import { Track } from "@plugins/musicControls/spotify/SpotifyStore";
 
-import { settings } from "../../settings";
-import { Track } from "../SpotifyStore";
 import { getLyricsLrclib } from "./providers/lrclibAPI";
 import { getLyricsSpotify } from "./providers/SpotifyAPI";
 import { LyricsData, Provider, SyncedLyric } from "./providers/types";

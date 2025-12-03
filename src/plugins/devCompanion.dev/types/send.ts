@@ -4,10 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// should be the same types as src/server/types/recieve.ts in the companion
-import { ReporterData  } from "debug/reporterData";
+import { ReporterData } from "debug/reporterData";
 
-export type OutgoingMessage = Base<Report | DiffModule | ExtractModule | ModuleList | RawId | I18nValue | VersionResponse>;
+export type OutgoingMessage = Base<DiffModule | ExtractModule | ModuleList | RawId | I18nValue | VersionResponse>;
 export type FullOutgoingMessage = OutgoingMessage & Nonce;
 
 export type Base<T> = ({
@@ -23,9 +22,17 @@ export type Nonce = {
 };
 export type ModuleResult = {
     moduleNumber: number;
+    /**
+     * a list of plugins that patched this module, if it was patched, otherwise an empty array
+     *
+     * if the module was patched, but the returned module is the original, they array will still be empty
+     *
+     * if {@link ExtractModule.data|ExtractModule.data.find} is true, this will be a list of what patched the entire module (not just the part that was found)
+     */
     patchedBy: string[];
 };
 
+// #region valid payloads
 export type I18nValue = {
     type: "i18n";
     data: {
@@ -33,7 +40,6 @@ export type I18nValue = {
     };
 };
 
-// #region valid payloads
 export type Report = {
     type: "report";
     data: ReporterData;
@@ -64,7 +70,13 @@ export type ModuleList = {
         modules: string[];
     };
 };
+/**
+ * @deprecated use extractModule with usePatched instead
+ */
 export type RawId = {
+    /**
+     * @deprecated use extractModule with usePatched instead
+     */
     type: "rawId";
     data: string;
 };

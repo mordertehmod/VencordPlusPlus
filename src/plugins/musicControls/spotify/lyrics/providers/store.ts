@@ -5,12 +5,12 @@
  */
 
 import { showNotification } from "@api/Notifications";
+import { settings } from "plugins/musicControls/settings";
+import { getLyrics, lyricFetchers, providers, updateLyrics } from "@plugins/musicControls/spotify/lyrics/api";
+import { SpotifyStore, type Track } from "@plugins/musicControls/spotify/SpotifyStore";
 import { proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
 
-import { settings } from "../../../settings";
-import { SpotifyStore, type Track } from "../../SpotifyStore";
-import { getLyrics, lyricFetchers, providers, updateLyrics } from "../api";
 import { lyricsAlternativeFetchers } from "./translator";
 import { LyricsData, Provider } from "./types";
 

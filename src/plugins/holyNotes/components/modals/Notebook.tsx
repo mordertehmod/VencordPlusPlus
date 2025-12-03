@@ -6,15 +6,15 @@
 
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Flex } from "@components/Flex";
+import HelpIcon from "@plugins/holyNotes/components/icons/HelpIcon";
+import { noteHandler } from "@plugins/holyNotes/NoteHandler";
+import { HolyNotes } from "@plugins/holyNotes/types";
 import { classes } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { findByProps } from "@webpack";
-import { Flex } from "@components/Flex";
 import { ContextMenuApi, FluxDispatcher, Menu, React, TextInput } from "@webpack/common";
 
-import { noteHandler } from "../../NoteHandler";
-import { HolyNotes } from "../../types";
-import HelpIcon from "../icons/HelpIcon";
 import Errors from "./Error";
 import HelpModal from "./HelpModal";
 import ManageNotebookButton from "./ManageNotebookButton";
@@ -83,7 +83,7 @@ export const NoteModal = (props: ModalProps & { onClose: () => void; }) => {
     return (
         <ErrorBoundary>
             <ModalRoot {...props} className={classes("vc-notebook")} size={ModalSize.LARGE}>
-                <Flex className={classes("vc-notebook-flex")} direction={Flex.Direction.VERTICAL} style={{ width: "100%" }}>
+                <Flex className={classes("vc-notebook-flex")} flexDirection="column" style={{ width: "100%" }}>
                     <div className={classes("vc-notebook-top-section")}>
                         <ModalHeader className={classes("vc-notebook-header-main")}>
                             <BaseText
@@ -127,7 +127,7 @@ export const NoteModal = (props: ModalProps & { onClose: () => void; }) => {
                     <ManageNotebookButton notebook={currentNotebook} setNotebook={setCurrentNotebook} />
                     <div className={classes("sort-button-container", "vc-notebook-display-left")}>
                         <Flex
-                            align={Flex.Align.CENTER}
+                            alignItems="center"
                             className={quickSelect}
                             onClick={(event: React.MouseEvent<HTMLDivElement>) => {
                                 ContextMenuApi.openContextMenu(event, () => (
@@ -167,7 +167,7 @@ export const NoteModal = (props: ModalProps & { onClose: () => void; }) => {
                             }}
                         >
                             <BaseText className={quickSelectLabel}>Change Sorting:</BaseText>
-                            <Flex grow={0} align={Flex.Align.CENTER} className={quickSelectQuick}>
+                            <Flex style={{ flexGrow: 0 }} alignItems="center" className={quickSelectQuick}>
                                 <BaseText className={quickSelectValue}>
                                     {sortDirection ? "Ascending" : "Descending"} /{" "}
                                     {sortType ? "Date Added" : "Message Date"}

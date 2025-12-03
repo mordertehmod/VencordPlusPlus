@@ -6,8 +6,8 @@
 
 import { classNameFactory } from "@api/Styles";
 import { BaseText } from "@components/BaseText";
-import { BasicChannelTabsProps, Bookmark, BookmarkFolder, BookmarkProps, isBookmarkFolder, isTabSelected, navigateToBookmark, openedTabs, settings, switchChannel, useBookmarks } from "../util";
-import { CircleQuestionIcon, DiscoveryIcon, EnvelopeIcon, FriendsIcon, NitroIcon, QuestIcon, ShopIcon } from "../util/icons";
+import { BasicChannelTabsProps, Bookmark, BookmarkFolder, BookmarkProps, isBookmarkFolder, isTabSelected, navigateToBookmark, openedTabs, settings, switchChannel, useBookmarks } from "@plugins/channelTabs/util";
+import { CircleQuestionIcon, DiscoveryIcon, EnvelopeIcon, FriendsIcon, NitroIcon, QuestIcon, ShopIcon } from "@plugins/channelTabs/util/icons";
 import { getGuildAcronym, getIntlMessage } from "@utils/discord";
 import { classes } from "@utils/misc";
 import { closeModal, openModal } from "@utils/modal";

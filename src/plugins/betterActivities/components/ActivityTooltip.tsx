@@ -5,10 +5,9 @@
  */
 
 import ErrorBoundary from "@components/ErrorBoundary";
+import { ActivityTooltipProps } from "@plugins/betterActivities/types";
+import { ActivityView, cl } from "@plugins/betterActivities/utils";
 import { UserStore } from "@webpack/common";
-
-import { ActivityTooltipProps } from "../types";
-import { ActivityView, cl } from "../utils";
 
 export function ActivityTooltip({ activity, application, user }: Readonly<ActivityTooltipProps>) {
     const currentUser = UserStore.getCurrentUser();

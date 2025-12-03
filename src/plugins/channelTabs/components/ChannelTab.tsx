@@ -6,8 +6,8 @@
 
 import { classNameFactory } from "@api/Styles";
 import { BaseText } from "@components/BaseText";
-import { ChannelTabsProps, closeTab, isTabSelected, moveDraggedTabs, moveToTab, openedTabs, settings } from "../util";
-import { ActivityIcon, CircleQuestionIcon, DiscoveryIcon, EnvelopeIcon, FriendsIcon, ICYMIIcon, NitroIcon, QuestIcon, ShopIcon } from "../util/icons";
+import { ChannelTabsProps, closeTab, isTabSelected, moveDraggedTabs, moveToTab, openedTabs, settings } from "@plugins/channelTabs/util";
+import { ActivityIcon, CircleQuestionIcon, DiscoveryIcon, EnvelopeIcon, FriendsIcon, ICYMIIcon, NitroIcon, QuestIcon, ShopIcon } from "@plugins/channelTabs/util/icons";
 import { activeQuestIntervals } from "@plugins/questify"; // sorry murphy!
 import { getGuildAcronym, getIntlMessage, getUniqueUsername } from "@utils/discord";
 import { classes } from "@utils/misc";

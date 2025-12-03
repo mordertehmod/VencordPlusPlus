@@ -23,14 +23,11 @@ export * as Api from "./api";
 export * as Plugins from "./api/PluginManager";
 export * as Components from "./components";
 export * as Util from "./utils";
-export * as QuickCss from "./utils/quickCss";
+export * as QuickCss from "./utils/quickCss"; // removing this crashes vencord entirely.
 export * as Updater from "./utils/updater";
 export * as Webpack from "./webpack";
 export * as WebpackPatcher from "./webpack/patchWebpack";
 export { PlainSettings, Settings };
-
-import "./utils/quickCss";
-import "./webpack/patchWebpack";
 
 import { addVencordUiStyles } from "@components/css";
 import { openSettingsTabModal, UpdaterTab } from "@components/settings";

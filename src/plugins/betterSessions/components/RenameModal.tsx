@@ -17,8 +17,8 @@
 */
 
 import { Heading, HeadingTertiary } from "@components/Heading";
-import { SessionInfo } from "../types";
-import { getDefaultName, savedSessionsCache, saveSessionsToDataStore } from "../utils";
+import { SessionInfo } from "@plugins/betterSessions/types";
+import { getDefaultName, savedSessionsCache, saveSessionsToDataStore } from "@plugins/betterSessions/utils";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
 import { Button, React, TextInput } from "@webpack/common";
 import { KeyboardEvent } from "react";

@@ -5,13 +5,12 @@
  */
 
 import { classNameFactory } from "@api/Styles";
+import { settings } from "@plugins/musicControls/settings";
+import { SpotifyLrcStore } from "@plugins/musicControls/spotify/lyrics/providers/store";
+import { SyncedLyric } from "@plugins/musicControls/spotify/lyrics/providers/types";
+import { SpotifyStore } from "@plugins/musicControls/spotify/SpotifyStore";
 import { findByPropsLazy } from "@webpack";
 import { React, useEffect, useState, useStateFromStores } from "@webpack/common";
-
-import { settings } from "../../../settings";
-import { SpotifyStore } from "../../SpotifyStore";
-import { SpotifyLrcStore } from "../providers/store";
-import { SyncedLyric } from "../providers/types";
 
 export const scrollClasses = findByPropsLazy("auto", "customTheme");
 

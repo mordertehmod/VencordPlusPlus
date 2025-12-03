@@ -5,7 +5,7 @@
  */
 
 import { Button } from "@components/Button";
-import { SessionInfo } from "../types";
+import { SessionInfo } from "@plugins/betterSessions/types";
 import { openModal } from "@utils/modal";
 
 import { RenameModal } from "./RenameModal";

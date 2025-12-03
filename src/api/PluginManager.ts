@@ -41,6 +41,8 @@ import Plugins from "~plugins";
 export { Plugins as plugins };
 
 import { traceFunction } from "../debug/Tracer";
+import { addAudioProcessor, removeAudioProcessor } from "./AudioPlayer";
+import { addHeaderBarButton, removeHeaderBarButton } from "./HeaderBar";
 
 const logger = new Logger("PluginManager", "#a6d189");
 
@@ -189,7 +191,9 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     const {
         name, commands, keybinds, contextMenus, managedStyle, userProfileBadges,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton, renderNicknameIcon
+        renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton,
+        // Additions //
+        renderNicknameIcon, renderHeaderBarButton, audioProcessor
     } = p;
 
     if (p.start) {
@@ -266,12 +270,16 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     // @ts-expect-error: legacy code doesn't have icon
     else if (renderChatBarButton) addChatBarButton(name, renderChatBarButton);
     if (renderMemberListDecorator) addMemberListDecorator(name, renderMemberListDecorator);
-    if (renderNicknameIcon) addNicknameIcon(name, renderNicknameIcon);
     if (renderMessageDecoration) addMessageDecoration(name, renderMessageDecoration);
     if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
     if (messagePopoverButton) addMessagePopoverButton(name, messagePopoverButton.render, messagePopoverButton.icon);
     // @ts-expect-error: legacy code doesn't have icon
     else if (renderMessagePopoverButton) addMessagePopoverButton(name, renderMessagePopoverButton);
+
+    // Additions //
+    if (renderNicknameIcon) addNicknameIcon(name, renderNicknameIcon);
+    if (renderHeaderBarButton) addHeaderBarButton(name, renderHeaderBarButton);
+    if (audioProcessor) addAudioProcessor(name, audioProcessor);
 
     return true;
 }, p => `startPlugin ${p.name}`);
@@ -280,7 +288,9 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     const {
         name, commands, keybinds, contextMenus, managedStyle, userProfileBadges,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
-        renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton, renderNicknameIcon
+        renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton,
+        // Additions //
+        renderNicknameIcon, renderHeaderBarButton, audioProcessor
     } = p;
 
     if (p.stop) {
@@ -345,10 +355,14 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
 
     if (chatBarButton || renderChatBarButton) removeChatBarButton(name);
     if (renderMemberListDecorator) removeMemberListDecorator(name);
-    if (renderNicknameIcon) removeNicknameIcon(name);
     if (renderMessageDecoration) removeMessageDecoration(name);
     if (renderMessageAccessory) removeMessageAccessory(name);
     if (messagePopoverButton || renderMessagePopoverButton) removeMessagePopoverButton(name);
+
+    // Additions //
+    if (renderNicknameIcon) removeNicknameIcon(name);
+    if (renderHeaderBarButton) removeHeaderBarButton(name);
+    if (audioProcessor) removeAudioProcessor(name);
 
     return true;
 }, p => `stopPlugin ${p.name}`);
@@ -359,7 +373,9 @@ export const initPluginManager = onlyOnce(function init() {
 
     const pluginKeysToBind: Array<keyof PluginDef & `${"on" | "render"}${string}`> = [
         "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
-        "renderChatBarButton", "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration", "renderMessagePopoverButton", "renderNicknameIcon"
+        "renderChatBarButton", "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration", "renderMessagePopoverButton",
+        // Additions //
+        "renderNicknameIcon", "renderHeaderBarButton"
     ];
 
     const neededApiPlugins = new Set<string>();
@@ -394,8 +410,12 @@ export const initPluginManager = onlyOnce(function init() {
         if (p.renderMessageAccessory) neededApiPlugins.add("MessageAccessoriesAPI");
         if (p.renderMessageDecoration) neededApiPlugins.add("MessageDecorationsAPI");
         if (p.messagePopoverButton || p.renderMessagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
-        if (p.renderNicknameIcon) neededApiPlugins.add("NicknameIconsAPI");
         if (p.userProfileBadge) neededApiPlugins.add("BadgeAPI");
+
+        // Additions //
+        if (p.renderNicknameIcon) neededApiPlugins.add("NicknameIconsAPI");
+        if (p.renderHeaderBarButton) neededApiPlugins.add("HeaderBarAPI");
+        if (p.audioProcessor) neededApiPlugins.add("AudioPlayerAPI");
 
         for (const key of pluginKeysToBind) {
             p[key] &&= p[key].bind(p) as any;

@@ -5,11 +5,11 @@
  */
 
 import { BaseText } from "@components/BaseText";
+import { getLanguageColor } from "@plugins/githubRepos/colors";
+import { RepoCardProps } from "@plugins/githubRepos/types";
 import { React, Tooltip } from "@webpack/common";
 
 import { cl } from "..";
-import { getLanguageColor } from "../colors";
-import { RepoCardProps } from "../types";
 import { Star } from "./Star";
 
 export function RepoCard({ repo, showStars, showLanguage }: RepoCardProps) {

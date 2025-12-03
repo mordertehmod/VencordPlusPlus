@@ -22,7 +22,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { reverseExtensionMap } from "@plugins/fixFileExtensions";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { CloudUpload } from '@vencord/discord-types';
+import { CloudUpload } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
 import { useState } from "@webpack/common";
 

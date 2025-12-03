@@ -88,26 +88,9 @@ export function findModuleId(find: CodeFilter) {
     return matches[0];
 }
 export function mkRegexFind(idOrSearch: string): RegExp[] {
-    // Check if it's a regex pattern (starts and ends with /)
-    if (idOrSearch.startsWith("/") && idOrSearch.lastIndexOf("/") > 0) {
-        const regex = idOrSearch.substring(1, idOrSearch.lastIndexOf("/"));
-        const flags = idOrSearch.substring(idOrSearch.lastIndexOf("/") + 1);
-        return [canonicalizeMatch(new RegExp(regex, flags))];
-    }
-
-    // Check if it's an intl message pattern (contains #{intl::...})
-    if (idOrSearch.includes("#{intl::")) {
-        // Let canonicalizeMatch handle the intl processing, then convert to regex
-        const canonicalized = canonicalizeMatch(idOrSearch);
-        // If canonicalizeMatch returned a string, convert it to regex
-        if (typeof canonicalized === "string") {
-            return [new RegExp(canonicalized.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))];
-        }
-        return [canonicalized as RegExp];
-    }
-
-    // If not a regex pattern or intl message, create a regex from the literal string
-    return [canonicalizeMatch(new RegExp(idOrSearch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")))];
+    const regex = idOrSearch.substring(1, idOrSearch.lastIndexOf("/"));
+    const flags = idOrSearch.substring(idOrSearch.lastIndexOf("/") + 1);
+    return [canonicalizeMatch(RegExp(regex, flags))];
 }
 // the next two functions are copied from components/pluginSettings
 function showErrorToast(message: string) {

@@ -42,21 +42,12 @@ const settings = definePluginSettings({
         default: true,
     },
     roleGradients: {
-        type: OptionType.BOOLEAN, // make select menu
+        type: OptionType.SELECT,
         description: "Always animate role gradients",
-        default: true,
-
-        roleGradientsInChat: {
-            type: OptionType.BOOLEAN,
-            description: "Always animate role gradients in chat",
-            default: false,
-        },
-
-        roleGradientsInMemberList: {
-            type: OptionType.BOOLEAN,
-            description: "Always animate role gradients in member list",
-            default: false,
-        },
+        options: [
+            { label: "Always animate role gradients in chat", value: "gradientChat" },
+            { label: "Always animate role gradients in member list", value: "gradientMembersList" },
+        ],
     }
 });
 
@@ -112,6 +103,7 @@ export default definePlugin({
         {
             // Gradient roles in chat
             find: "=!1,contentOnly:",
+            predicate: () => settings.store.roleGradients === "gradientChat",
             replacement: {
                 match: /animate:\i/,
                 replace: "animate:!0"
@@ -120,6 +112,7 @@ export default definePlugin({
         {
             // Gradient roles in member list
             find: '="left",className:',
+            predicate: () => settings.store.roleGradients === "gradientMembersList",
             replacement: {
                 match: /,animateGradient:[^)]+\)/,
                 replace: ",animateGradient:!0"

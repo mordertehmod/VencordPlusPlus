@@ -8,6 +8,11 @@ import { classNameFactory } from "@api/Styles";
 import { BaseText } from "@components/BaseText";
 import { Flex } from "@components/Flex";
 import { InfoIcon } from "@components/Icons";
+import { clearMessagesIDB, DBMessageRecord, deleteMessageIDB, deleteMessagesBulkIDB } from "@plugins/messageLoggerEnhanced/db";
+import { settings } from "@plugins/messageLoggerEnhanced/index";
+import { LoggedMessage, LoggedMessageJSON } from "@plugins/messageLoggerEnhanced/types";
+import { messageJsonToMessageClass } from "@plugins/messageLoggerEnhanced/utils";
+import { importLogs } from "@plugins/messageLoggerEnhanced/utils/settingsUtils";
 import { copyWithToast, openUserProfile } from "@utils/discord";
 import { closeAllModals, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { LazyComponent } from "@utils/react";
@@ -15,11 +20,6 @@ import { User } from "@vencord/discord-types";
 import { find, findByCode, findByCodeLazy } from "@webpack";
 import { Alerts, Button, ChannelStore, ContextMenuApi, FluxDispatcher, GuildStore, Menu, NavigationRouter, React, TabBar, TextInput, Tooltip, useMemo, useRef, useState } from "@webpack/common";
 
-import { clearMessagesIDB, DBMessageRecord, deleteMessageIDB, deleteMessagesBulkIDB } from "../db";
-import { settings } from "../index";
-import { LoggedMessage, LoggedMessageJSON } from "../types";
-import { messageJsonToMessageClass } from "../utils";
-import { importLogs } from "../utils/settingsUtils";
 import { useMessages } from "./hooks";
 
 export interface MessagePreviewProps {

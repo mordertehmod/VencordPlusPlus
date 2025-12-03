@@ -20,13 +20,13 @@
 /// <reference path="../src/globals.d.ts" />
 
 import monacoHtmlLocal from "file://monacoWin.html?minify";
-import * as DataStore from "../src/api/DataStore";
-import { debounce, localStorage } from "../src/utils";
-import { EXTENSION_BASE_URL } from "../src/utils/web-metadata";
-import { getTheme, Theme } from "../src/utils/discord";
-import { getThemeInfo } from "../src/main/themes";
-import { Settings } from "../src/Vencord";
+import * as DataStore from "@api/DataStore";
+import type { Settings } from "@api/Settings";
+import { debounce } from "@shared/debounce";
+import { localStorage } from "@utils/localStorage";
+import { getThemeInfo } from "@main/themes";
 import { getStylusWebStoreUrl } from "@utils/web";
+import { EXTENSION_BASE_URL } from "@utils/web-metadata";
 
 // listeners for ipc.on
 const cssListeners = new Set<(css: string) => void>();
@@ -90,6 +90,8 @@ window.VencordNative = {
                 alert("Failed to open QuickCSS popup. Make sure to allow popups!");
                 return;
             }
+
+            const { getTheme, Theme } = require("@utils/discord");
 
             win.baseUrl = EXTENSION_BASE_URL;
             win.setCss = setCssDebounced;

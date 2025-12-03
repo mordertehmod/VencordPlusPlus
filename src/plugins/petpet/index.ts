@@ -88,7 +88,7 @@ async function resolveImage(options: CommandArgument[], ctx: CommandContext, noS
 
 migratePluginSettings("PetPet", "petpet");
 export default definePlugin({
-    name: "petpet",
+    name: "PetPet",
     description: "Adds a /petpet slash command to create headpet gifs from any image",
     authors: [Devs.Ven],
     commands: [

@@ -49,6 +49,4 @@ export const enum IpcEvents {
 
     OPEN_THEMES_FOLDER = "VencordOpenThemesFolder",
     OPEN_SETTINGS_FOLDER = "VencordOpenSettingsFolder",
-
-    UPDATE_MAIN_LOCALE = "VencordUpdateMainLocale",
 }

@@ -12,18 +12,18 @@ import { User } from "@vencord/discord-types";
 export default definePlugin({
     name: "AlwaysExpandProfiles",
     description: "Always expands profile popouts to the full modal",
-    authors: [Devs.LSDZaddi],
+    authors: [Devs.thororen],
     patches: [
         {
             find: '"view-profile"',
             replacement: {
-                match: /(user:(\i).*?"PRESS_VIEW_PROFILE".{0,200})return/,
-                replace: "$1return $self.openUserProfile($2);"
+                match: /(user:(\i).*?"PRESS_VIEW_PROFILE".{0,200}return)/,
+                replace: "$1 $self.openUserModal($2);"
             },
             all: true
         },
     ],
-    openUserProfile(user: User) {
+    openUserModal(user: User) {
         openUserProfile(user.id);
     }
 });

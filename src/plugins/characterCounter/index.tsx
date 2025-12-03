@@ -22,7 +22,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "CharacterCounter",
     description: "Adds a character counter to the chat input",
-    authors: [Devs.LSDZaddi],
+    authors: [Devs.thororen, Devs.LSDZaddi],
     settings,
     patches: [
         {

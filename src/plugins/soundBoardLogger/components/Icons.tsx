@@ -5,7 +5,7 @@
  */
 
 import { ChatBarButton, ChatBarButtonFactory } from "@api/ChatButtons";
-import { cl } from "../utils";
+import { cl } from "@plugins/soundBoardLogger/utils";
 import { classes } from "@utils/misc";
 import { Button, ButtonWrapperClasses, Tooltip } from "@webpack/common";
 

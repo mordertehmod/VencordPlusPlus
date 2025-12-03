@@ -5,7 +5,7 @@
  */
 
 import { BaseText } from "@components/BaseText";
-import { images } from "../../images";
+import { images } from "@plugins/loginWithQR/images";
 import { getIntlMessage } from "@utils/discord";
 import {
     ModalContent,

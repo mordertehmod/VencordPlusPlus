@@ -16,105 +16,59 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import "./index.css";
+import "./styles.css";
 
-import { openNotificationLogModal } from "@api/Notifications/notificationLog";
-import { Settings, useSettings } from "@api/Settings";
-import ErrorBoundary from "@components/ErrorBoundary";
+import { addHeaderBarButton, removeHeaderBarButton } from "@api/HeaderBar";
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
-import { Menu, Popout, useRef, useState } from "@webpack/common";
-import type { PropsWithChildren, ReactNode } from "react";
+import { Popout, useRef, useState } from "@webpack/common";
+
+import { renderPopout } from "./menu";
 
 const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 
-function VencordPopout(onClose: () => void) {
-    const { useQuickCss } = useSettings(["useQuickCss"]);
-
-    const pluginEntries = [] as ReactNode[];
-
-    for (const plugin of Object.values(Vencord.Plugins.plugins)) {
-        if (plugin.toolboxActions && Vencord.Plugins.isPluginEnabled(plugin.name)) {
-            pluginEntries.push(
-                <Menu.MenuGroup
-                    label={plugin.name}
-                    key={`vc-toolbox-${plugin.name}`}
-                >
-                    {Object.entries(plugin.toolboxActions).map(([text, action]) => {
-                        const key = `vc-toolbox-${plugin.name}-${text}`;
-
-                        return (
-                            <Menu.MenuItem
-                                id={key}
-                                key={key}
-                                label={text}
-                                action={action}
-                            />
-                        );
-                    })}
-                </Menu.MenuGroup>
-            );
-        }
+export const settings = definePluginSettings({
+    showPluginMenu: {
+        type: OptionType.BOOLEAN,
+        default: true,
+        description: "Show the plugins menu in the toolbox",
     }
+});
 
+function Icon() {
     return (
-        <Menu.Menu
-            navId="vc-toolbox"
-            onClose={onClose}
-        >
-            <Menu.MenuItem
-                id="vc-toolbox-notifications"
-                label="Open Notification Log"
-                action={openNotificationLogModal}
-            />
-            <Menu.MenuCheckboxItem
-                id="vc-toolbox-quickcss-toggle"
-                checked={useQuickCss}
-                label={"Enable QuickCSS"}
-                action={() => {
-                    Settings.useQuickCss = !useQuickCss;
-                }}
-            />
-            <Menu.MenuItem
-                id="vc-toolbox-quickcss"
-                label="Open QuickCSS"
-                action={() => VencordNative.quickCss.openEditor()}
-            />
-            {...pluginEntries}
-        </Menu.Menu>
-    );
-}
-
-function VencordPopoutIcon(isShown: boolean) {
-    return (
-        <svg viewBox="0 0 27 27" width={24} height={24} className="vc-toolbox-icon">
-            <path fill="currentColor" d={isShown ? "M9 0h1v1h1v2h1v2h3V3h1V1h1V0h1v2h1v2h1v7h-1v-1h-3V9h1V6h-1v4h-3v1h1v-1h2v1h3v1h-1v1h-3v2h1v1h1v1h1v3h-1v4h-2v-1h-1v-4h-1v4h-1v1h-2v-4H9v-3h1v-1h1v-1h1v-2H9v-1H8v-1h3V6h-1v3h1v1H8v1H7V4h1V2h1M5 19h2v1h1v1h1v3H4v-1h2v-1H4v-2h1m15-1h2v1h1v2h-2v1h2v1h-5v-3h1v-1h1m4 3h4v1h-4" : "M0 0h7v1H6v1H5v1H4v1H3v1H2v1h5v1H0V6h1V5h1V4h1V3h1V2h1V1H0m13 2h5v1h-1v1h-1v1h-1v1h3v1h-5V7h1V6h1V5h1V4h-3m8 5h1v5h1v-1h1v1h-1v1h1v-1h1v1h-1v3h-1v1h-2v1h-1v1h1v-1h2v-1h1v2h-1v1h-2v1h-1v-1h-1v1h-6v-1h-1v-1h-1v-2h1v1h2v1h3v1h1v-1h-1v-1h-3v-1h-4v-4h1v-2h1v-1h1v-1h1v2h1v1h1v-1h1v1h-1v1h2v-2h1v-2h1v-1h1M8 14h2v1H9v4h1v2h1v1h1v1h1v1h4v1h-6v-1H5v-1H4v-5h1v-1h1v-2h2m17 3h1v3h-1v1h-1v1h-1v2h-2v-2h2v-1h1v-1h1m1 0h1v3h-1v1h-2v-1h1v-1h1"} />
+        <svg viewBox="0 0 443 443" width={20} height={20} className="vc-toolbox-icon">
+            <path fill="currentColor" d="M221.5.6C99.2.6,0,99.7,0,222.1s99.2,221.5,221.5,221.5,221.5-99.2,221.5-221.5S343.8.6,221.5.6ZM221.5,363.3c-78.3,0-141.8-63.5-141.8-141.8s63.5-141.8,141.8-141.8,141.8,63.5,141.8,141.8-63.5,141.8-141.8,141.8Z" />
+            <path fill="currentColor" d="M438.3,175C421,90.1,354.7,23.1,269.9,5.1,145-21.3,33.1,57.6,6.2,169.5c-3.4,14.1,4.6,28.5,18.4,33.1l2.7.9c24.7,8.2,51.8-4.7,60.4-29.3,19.4-55.6,72.5-95.4,134.9-95,44.3.3,84.1,21.2,109.9,53.7l-63.3,29.5c-7.9-7-17.5-12.5-28.5-15.7-35.6-10.3-73.8,7.7-88.5,41.7-17.2,39.8,3.3,85.4,43.9,99.4,37.9,13,79.7-6.9,93.5-44.5,2.6-7.2,4.1-14.5,4.4-21.8l66-30.8c1.8,8.2,2.9,16.6,3.2,25.2,1.2,34-9.6,65.5-28.5,90.5-17.8,23.6-10.5,57.4,15.7,71.1l1.3.7c10.4,5.5,23.3,3.4,31.4-5.2,46.8-49.9,70.8-121.4,55.2-198Z" />
+            <path fill="currentColor" transform="translate(319.7 -16.5) rotate(65)" d="M172.8,152.7h0c17.7,0,32,14.3,32,32v148h-64v-148c0-17.7,14.3-32,32-32Z" />
         </svg>
     );
 }
 
-function VencordPopoutButton({ buttonClass }: { buttonClass: string; }) {
+function VencordPopoutButton() {
     const buttonRef = useRef(null);
     const [show, setShow] = useState(false);
 
     return (
         <Popout
             position="bottom"
-            align="right"
+            align="center"
+            spacing={0}
             animation={Popout.Animation.NONE}
             shouldShow={show}
             onRequestClose={() => setShow(false)}
             targetElementRef={buttonRef}
-            renderPopout={() => VencordPopout(() => setShow(false))}
+            renderPopout={() => renderPopout(() => setShow(false))}
         >
             {(_, { isShown }) => (
                 <HeaderBarIcon
                     ref={buttonRef}
-                    className={`vc-toolbox-btn ${buttonClass}`}
+                    className="vc-toolbox-btn"
                     onClick={() => setShow(v => !v)}
                     tooltip={isShown ? null : "Vencord Toolbox"}
-                    icon={() => VencordPopoutIcon(isShown)}
+                    icon={Icon}
                     selected={isShown}
                 />
             )}
@@ -124,27 +78,17 @@ function VencordPopoutButton({ buttonClass }: { buttonClass: string; }) {
 
 export default definePlugin({
     name: "VencordToolbox",
-    description: "Adds a button to the titlebar that houses Vencord quick actions",
+    description: "Adds a button next to the inbox button in the channel header that houses Equicord quick actions",
     authors: [Devs.Ven, Devs.AutumnVN],
+    dependencies: ["HeaderBarAPI"],
 
-    patches: [
-        {
-            find: '?"BACK_FORWARD_NAVIGATION":',
-            replacement: {
-                match: /(?<=trailing:.{0,50})\i\.Fragment,\{(?=.+?className:(\i))/,
-                replace: "$self.TrailingWrapper,{className:$1,"
-            }
-        }
-    ],
+    settings,
 
-    TrailingWrapper({ children, className }: PropsWithChildren<{ className: string; }>) {
-        return (
-            <>
-                {children}
-                <ErrorBoundary noop>
-                    <VencordPopoutButton buttonClass={className} />
-                </ErrorBoundary>
-            </>
-        );
+    start() {
+        addHeaderBarButton("VencordToolbox", VencordPopoutButton, 1000);
     },
+
+    stop() {
+        removeHeaderBarButton("VencordToolbox");
+    }
 });

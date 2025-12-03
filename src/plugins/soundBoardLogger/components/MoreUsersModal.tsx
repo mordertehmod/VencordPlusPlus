@@ -8,7 +8,7 @@ import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { HeadingPrimary } from "@components/Heading";
-import { cl, getEmojiUrl, SoundLogEntry, User } from "../utils";
+import { cl, getEmojiUrl, SoundLogEntry, User } from "@plugins/soundBoardLogger/utils";
 import { closeModal, ModalContent, ModalRoot, openModal } from "@utils/modal";
 import { Clickable } from "@webpack/common";
 

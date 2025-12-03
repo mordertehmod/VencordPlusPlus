@@ -7,9 +7,9 @@
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
-import settings from "../settings";
-import { clearLoggedSounds, getLoggedSounds } from "../store";
-import { addListener, AvatarStyles, cl, downloadAudio, getEmojiUrl, playSound, removeListener, SoundLogEntry, UserSummaryItem } from "../utils";
+import settings from "@plugins/soundBoardLogger/settings";
+import { clearLoggedSounds, getLoggedSounds } from "@plugins/soundBoardLogger/store";
+import { addListener, AvatarStyles, cl, downloadAudio, getEmojiUrl, playSound, removeListener, SoundLogEntry, UserSummaryItem } from "@plugins/soundBoardLogger/utils";
 import { copyWithToast } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";

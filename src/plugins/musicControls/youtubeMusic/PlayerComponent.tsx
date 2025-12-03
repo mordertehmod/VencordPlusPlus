@@ -19,12 +19,12 @@
 import "./ytmStyles.css";
 
 import { BaseText } from "@components/BaseText";
+import { Flex } from "@components/Flex";
 import { ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
 import { SeekBar } from "@plugins/musicControls/spotify/SeekBar";
 import { debounce } from "@shared/debounce";
 import { copyWithToast, openImageModal } from "@utils/discord";
 import { classes } from "@utils/misc";
-import { Flex } from "@components/Flex";
 import { ContextMenuApi, FluxDispatcher, Menu, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { type Repeat, type Song, YoutubeMusicStore } from "./YtmStore";

@@ -4,9 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Gif } from "@plugins/gifCollections/types";
 import { RestAPI } from "@webpack/common";
-
-import { Gif } from "../types";
 
 async function fetchMessageFromAPI(channelId: string, messageId: string): Promise<any> {
     try {

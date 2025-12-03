@@ -1,6 +1,6 @@
 dist
 node_modules
-.modules
+.VSCodeCounter
 
 *.exe
 vencord_installer
@@ -20,9 +20,12 @@ lerna-debug.log*
 .pnpm-debug.log*
 *.tsbuildinfo
 
+.modules/
 src/userplugins
 
 ExtensionCache/
 /settings
 
 TODO.txt
+# vencord companion module cache
+.modules

@@ -93,8 +93,6 @@ function makeShortcuts() {
     let fakeRenderWin: WeakRef<Window> | undefined;
     const find = newFindWrapper(f => f);
     const findByProps = newFindWrapper(filters.byProps);
-    const testFind = findAll(filters.byStoreName("UserStore"));
-
 
     return {
         ...Object.fromEntries(Object.keys(Common).map(key => [key, { getter: () => Common[key] }])),

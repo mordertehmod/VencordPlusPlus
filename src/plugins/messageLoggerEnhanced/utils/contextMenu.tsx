@@ -5,11 +5,11 @@
  */
 
 import { addContextMenuPatch, NavContextMenuPatchCallback, removeContextMenuPatch } from "@api/ContextMenu";
+import { openLogModal } from "@plugins/messageLoggerEnhanced/components/LogsModal";
+import { deleteMessageIDB } from "@plugins/messageLoggerEnhanced/db";
+import { settings } from "plugins/messageLoggerEnhanced/index";
 import { FluxDispatcher, Menu, MessageActions, React, Toasts, UserStore } from "@webpack/common";
 
-import { openLogModal } from "../components/LogsModal";
-import { deleteMessageIDB } from "../db";
-import { settings } from "../index";
 import { addToXAndRemoveFromOpposite, ListType, removeFromX } from ".";
 
 const idFunctions = {

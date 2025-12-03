@@ -5,13 +5,12 @@
  */
 
 import { showNotification } from "@api/Notifications";
+import { settings } from "@plugins/musicControls/settings";
+import { getLyrics } from "@plugins/musicControls/tidal/lyrics/api";
+import { EnhancedLyric } from "@plugins/musicControls/tidal/lyrics/types";
+import { TidalStore } from "@plugins/musicControls/tidal/TidalStore";
 import { proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
-
-import { settings } from "../../../settings";
-import { TidalStore } from "../../TidalStore";
-import { getLyrics } from "../api";
-import { EnhancedLyric } from "../types";
 
 function showNotif(title: string, body: string) {
     if (settings.store.ShowFailedToasts) {

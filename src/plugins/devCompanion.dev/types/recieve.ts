@@ -27,7 +27,9 @@ export type SearchData =
     );
 
 export type FindOrSearchData =
-    | SearchData
+    | (SearchData & {
+        usePatched: boolean | null;
+    })
     | ({
         extractType: "find";
     } & _PrefixKeys<_CapitalizeKeys<FindData>, "find">);
@@ -78,7 +80,13 @@ export type I18nLookup = {
     };
 };
 
+/**
+ * @deprecated use {@link ExtractModule} instead
+ */
 export type RawId = {
+    /**
+     * @deprecated use {@link ExtractModule} instead
+     */
     type: "rawId";
     data: {
         id: number;

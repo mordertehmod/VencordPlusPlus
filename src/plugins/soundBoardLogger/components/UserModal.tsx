@@ -8,7 +8,7 @@ import { BaseText } from "@components/BaseText";
 import { Flex } from "@components/Flex";
 import { HeadingPrimary } from "@components/Heading";
 import { CopyIcon } from "@components/Icons";
-import { AvatarStyles, cl, downloadAudio, getEmojiUrl, playSound, SoundLogEntry, User, UserSummaryItem } from "../utils";
+import { AvatarStyles, cl, downloadAudio, getEmojiUrl, playSound, SoundLogEntry, User, UserSummaryItem } from "@plugins/soundBoardLogger/utils";
 import { copyWithToast, openUserProfile } from "@utils/discord";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
