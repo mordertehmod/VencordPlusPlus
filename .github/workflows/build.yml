@@ -46,6 +46,13 @@ jobs:
               run: |
                   echo "release_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
+            - name: Create or update devbuild release
+              if: github.repository == 'mordertehmod/VencordPlusPlus'
+              run: |
+                  gh release view devbuild || gh release create devbuild --title "DevBuild" --notes "Automated development builds" --prerelease
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
             - name: Upload DevBuild as release
               if: github.repository == 'mordertehmod/VencordPlusPlus'
               run: |
