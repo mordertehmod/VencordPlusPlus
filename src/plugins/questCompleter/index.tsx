@@ -233,19 +233,12 @@ export default definePlugin({
     authors: [Devs.amia, Devs.LSDZaddi],
     patches: [
         {
-            find: "BkZhUF),",
+            find: ".platformSelectorPrimary,",
             replacement: {
                 match: /(?<=questId:(\i\.id).*?"secondary",)disabled:!0/,
-                replace: "onClick: () => $self.mobileQuestPatch($1)"
+                replace: "onClick:()=>$self.mobileQuestPatch($1)"
             },
         },
-        {
-            find: '?"BACK_FORWARD_NAVIGATION":',
-            replacement: {
-                match: /focusSectionProps:"HELP".{0,20},className:(\i(?:\.button)?)\}\),/,
-                replace: "$& $self.renderQuestButton(),"
-            }
-        }
     ],
     mobileQuestPatch(questId) {
         if (questId === questIdCheck) return;
