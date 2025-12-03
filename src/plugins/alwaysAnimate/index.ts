@@ -45,6 +45,7 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         description: "Always animate role gradients",
         options: [
+            { label: "Always animate all role gradients", value: "gradientAll"},
             { label: "Always animate role gradients in chat", value: "gradientChat" },
             { label: "Always animate role gradients in member list", value: "gradientMembersList" },
         ],
@@ -121,7 +122,7 @@ export default definePlugin({
         {
             // Role Gradients
             find: "animateGradient:",
-            predicate: () => settings.store.roleGradients,
+            predicate: () => settings.store.roleGradients === "gradientAll",
             all: true,
             noWarn: true,
             replacement: {
