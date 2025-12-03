@@ -221,3 +221,4 @@ function isPluginFile({ name }: { name: string; }) {
         writeFileSync("dist/plugins.json", data);
     }
 })();
+}
