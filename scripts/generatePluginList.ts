@@ -194,7 +194,11 @@ async function getEntryPoint(dir: string, dirent: Dirent) {
 }
 
 function isPluginFile({ name }: { name: string; }) {
-    if (name === "index.ts") return false;
+    const skipNames = ["betterMicrophone.desktop", "philsPluginLibraryVisualRefresh", "betterScreenshare.desktop"];
+
+    if (name === "index.ts" || skipNames.includes(name)) {
+        return false;
+    }
     return !name.startsWith("_") && !name.startsWith(".");
 }
 

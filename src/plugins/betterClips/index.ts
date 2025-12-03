@@ -14,14 +14,12 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
- * Testing auto-update. Disregard
 */
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
-import { SelectOption } from "@webpack/types";
+import { SelectOption } from "@vencord/discord-types";
 
 
 const settings = definePluginSettings({
@@ -44,7 +42,7 @@ const settings = definePluginSettings({
         restartNeeded: true
     },
     moreClipFramerates: {
-        description: "Change clip framerate. (UP TO 240FPS!!)",
+        description: "Change clip framerate. (Up to 240FPS!)",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
@@ -78,12 +76,12 @@ export default definePlugin({
             replacement: [
                 {
                     predicate: () => settings.store.moreClipFramerates,
-                    match: /\[\{.{0,25}\i.\i.FPS_15.{0,500}\}\]/,
+                    match: /\[\{.{0,10}\i.\i.FPS_15.{0,250}\}\]/,
                     replace: "$self.patchFPS($&))"
                 },
                 {
                     predicate: () => settings.store.moreClipDurations,
-                    match: /\[\{.{0,25}\i.\i.SECONDS_30.{0,500}\}\]/,
+                    match: /\[\{.{0,10}\i.\i.SECONDS_30.{0,250}\}\]/,
                     replace: "$self.patchDurations($&)"
                 }
             ]
