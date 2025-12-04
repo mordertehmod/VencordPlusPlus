@@ -12,9 +12,9 @@ import { makeRange, OptionType } from "@utils/types";
 import { Button, ColorPicker, ContextMenuApi, Menu, Select, Slider, TextInput, useEffect, useRef, useState } from "@webpack/common";
 import { JSX } from "react";
 
-import { activeQuestIntervals, getQuestTileClasses, getQuestTileStyle } from "./index";
-import { DynamicDropdown, DynamicDropdownSettingOption, ExcludedQuest, GuildlessServerListItem, Quest, QuestIcon, QuestRewardType, QuestStatus, QuestTile, RadioGroup, RadioOption, SelectOption, SoundIcon } from "./utils/components";
-import { decimalToRGB, fetchAndDispatchQuests, getFormattedNow, getIgnoredQuestIDs, getQuestStatus, isDarkish, isSoundAllowed, leftClick, middleClick, q, QuestifyLogger, QuestsStore, rightClick, setIgnoredQuestIDs, validCommaSeparatedList } from "./utils/misc";
+import { activeQuestIntervals, getQuestTileClasses, getQuestTileStyle } from "@plugins/questify/index";
+import { DynamicDropdown, DynamicDropdownSettingOption, ExcludedQuest, GuildlessServerListItem, Quest, QuestIcon, QuestRewardType, QuestStatus, QuestTile, RadioGroup, RadioOption, SelectOption, SoundIcon } from "@plugins/questify/utils/components";
+import { decimalToRGB, fetchAndDispatchQuests, getFormattedNow, getIgnoredQuestIDs, getQuestStatus, isDarkish, isSoundAllowed, leftClick, middleClick, q, QuestifyLogger, QuestsStore, rightClick, setIgnoredQuestIDs, validCommaSeparatedList } from "@plugins/questify/utils/misc";
 
 let autoFetchInterval: null | ReturnType<typeof setInterval> = null;
 const defaultLeftClickAction = "open-quests";
