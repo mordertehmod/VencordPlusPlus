@@ -8,7 +8,7 @@ import { Devs } from "@utils/constants";
 import { canonicalizeMatch } from "@utils/patches";
 import definePlugin from "@utils/types";
 
-// duplicate values have multiple branches with different types. Just include all to be safe
+/* duplicate values have multiple branches with different types. Just include all to be safe
 const nameMap = {
     radio: "MenuRadioItem",
     separator: "MenuSeparator",
@@ -21,6 +21,7 @@ const nameMap = {
     item: "MenuItem",
     customitem: "MenuItem",
 };
+*/
 
 export default definePlugin({
     name: "MenuItemDemanglerAPI",
@@ -34,6 +35,20 @@ export default definePlugin({
                 match: /function.{0,80}type===(\i\.\i)\).{0,50}navigable:.+?Menu API/s,
                 replace: (m, mod) => {
                     const nameAssignments = [] as string[];
+
+                    // Local name map so this function doesn't rely on outer scope at runtime
+                    const nameMap: Record<string, string> = {
+                        radio: "MenuRadioItem",
+                        separator: "MenuSeparator",
+                        checkbox: "MenuCheckboxItem",
+                        groupstart: "MenuGroup",
+
+                        control: "MenuControlItem",
+                        compositecontrol: "MenuControlItem",
+
+                        item: "MenuItem",
+                        customitem: "MenuItem",
+                    };
 
                     // if (t.type === m.MenuItem)
                     const typeCheckRe = canonicalizeMatch(/\(\i\.type===(\i\.\i)\)/g);
