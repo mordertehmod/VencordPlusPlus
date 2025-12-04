@@ -4,131 +4,148 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
+import { React, showToast, Toasts ,VoiceActions } from "@webpack/common";
 
+import { FakeDeafenIcon } from "./Icon";
+import { settings } from "./settings";
 
-export let fakeD = false;
-
+let isFakeDeafened = false;
+const listeners = new Set<() => void>();
 const Button = findComponentByCodeLazy(".NONE,disabled:", ".PANEL_BUTTON");
 
-function mute() {
-    (document.querySelector('[aria-label="Mute"]') as HTMLElement).click();
+function useFakeDeafen() {
+    const [, forceUpdate] = React.useReducer(x => x + 1, 0);
+    React.useEffect(() => fakeDeafenStore.subscribe(forceUpdate), []);
+    return fakeDeafenStore.enabled;
 }
 
-function deafen() {
-    (document.querySelector('[aria-label="Deafen"]') as HTMLElement).click();
+function getElementByXpath(path: string): HTMLElement | null {
+    const result = document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    return result.singleNodeValue as HTMLElement | null;
 }
 
-function makeDeafenIcon(useFakeState: boolean) {
-    return function DeafenIconComponent() {
-        return (
-            <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                {/* Ear Icon Paths */}
-                <path
-                    d="M5.274 5.876c0.396-0.89 0.744-1.934 1.611-2.476 4.086-2.554 8.316 1.441 7.695 5.786-0.359 2.515-3.004 3.861-4.056 5.965-0.902 1.804-4.457 3.494-4.742 0.925"
-                    stroke={useFakeState ? "var(--status-danger)" : "currentColor"}
-                    strokeOpacity={0.9}
-                    strokeWidth={0.8}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                />
-                <path
-                    d="M11.478 11.931c2.111-2.239 1.579-7.495-1.909-7.337-2.625 0.119-2.012 3.64-1.402 4.861"
-                    stroke={useFakeState ? "var(--status-danger)" : "currentColor"}
-                    strokeOpacity={0.9}
-                    strokeWidth={0.8}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                />
-                <path
-                    d="M7.636 7.755c2.796-0.194 3.747 2.749 1.933 4.563-0.472 0.472-1.386-0.214-1.933 0.06-0.547 0.274-0.957 1.136-1.497 0.507"
-                    stroke={useFakeState ? "var(--status-danger)" : "currentColor"}
-                    strokeOpacity={0.9}
-                    strokeWidth={0.8}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                />
+function toggleDeafen() {
+    try {
+        VoiceActions.toggleSelfDeaf();
+        return true;
+    } catch (error) {
+        showToast(`Failed to toggle deafen state. Error: ${error}`, Toasts.Type.FAILURE);
+    }
 
-                {/* Strike-through (only shown in fake state) */}
-                {useFakeState && (
-                    <path
-                        d="M19 1L1 19"
-                        stroke="var(--status-danger)"
-                        strokeWidth="1.7"
-                        strokeLinecap="round"
-                    />
-                )}
-            </svg>
-        );
-    };
+    // Fallback methods
+    const deafenButtonClass = document.querySelector('[aria-label="Deafen"]') as HTMLElement;
+    const xPathDeafenButton = getElementByXpath('//*[@id="app-mount"]/div[3]/div/div[1]/div/div[2]/div/div/div/div[2]/div[1]/section/div[2]/div[3]/button[2]');
+
+    try {
+        if (deafenButtonClass) {
+            deafenButtonClass.click();
+            return true;
+        }
+    } catch (error) {
+        showToast(`Failed to toggle deafen state via aria-label. Error: ${error}`, Toasts.Type.FAILURE);
+    } finally {
+        if (xPathDeafenButton) {
+            xPathDeafenButton.click();
+            return true;
+        }
+    }
+    showToast("Failed to toggle deafen state via all methods.", Toasts.Type.FAILURE);
+
+    console.error(`[FakeDeafen] toggleDeafen results:\n
+        VoiceActions: Failed\n
+        Aria-label method: ${deafenButtonClass ? "Success" : "Failed"}\n
+        XPATH method: ${xPathDeafenButton ? "Success" : "Failed"}`);
+    return false;
 }
 
+function toggleMute() {
+    try {
+        VoiceActions.toggleSelfMute();
+        return true;
+    } catch (error) {
+        showToast(`Failed to toggle mute state. Error: ${error}`, Toasts.Type.FAILURE);
+    }
+
+    // Fallback methods
+    const muteButtonClass = document.querySelector('[aria-label="Mute"]') as HTMLElement;
+    const xPathMuteButton = getElementByXpath('//*[@id="app-mount"]/div[3]/div/div[1]/div/div[2]/div/div/div/div[2]/div[1]/section/div[2]/div[3]/div/button');
+
+    try {
+        if (muteButtonClass) {
+            muteButtonClass.click();
+            return true;
+        }
+    } catch (error) {
+        showToast(`Failed to toggle mute state via aria-label. Error: ${error}`, Toasts.Type.FAILURE);
+    } finally {
+        if (xPathMuteButton) {
+            xPathMuteButton.click();
+            return true;
+        }
+    }
+    showToast("Failed to toggle mute state via all methods.", Toasts.Type.FAILURE);
+
+    console.error(`[FakeDeafen] toggleMute results:\n
+        VoiceActions: Failed\n
+        Aria-label method: ${muteButtonClass ? "Success" : "Failed"}\n
+        XPATH method: ${xPathMuteButton ? "Success" : "Failed"}`);
+    return false;
+}
+
+export const fakeDeafenStore = {
+    get enabled() { return isFakeDeafened; },
+
+    toggle() {
+        isFakeDeafened = !isFakeDeafened;
+
+        const fakeDeafenResult = toggleDeafen();
+        setTimeout(() => toggleDeafen(), 250);
+
+        if (fakeDeafenResult) showToast(isFakeDeafened ? "Fake Deafen enabled" : "Fake Deafen disabled", Toasts.Type.SUCCESS );
+
+        if (isFakeDeafened && settings.store.muteUponFakeDeafen) {
+            const mutedAfterDeafen = setTimeout(() => toggleMute(), 300);
+            if (mutedAfterDeafen) showToast("Successfully muted after Fake Deafen", Toasts.Type.SUCCESS );
+        }
+
+        listeners.forEach(l => l());
+    },
+    subscribe(listener: () => void) {
+        listeners.add(listener);
+        return () => { listeners.delete(listener); };
+    }
+}
 
 function fakeDeafenToggleButton() {
+    const isActive = useFakeDeafen();
 
     return (
         <Button
             tooltipText="Fake Deafen"
-            icon={makeDeafenIcon(fakeD)}
+            icon={() => <FakeDeafenIcon isActive={isActive} />}
             role="switch"
-            aria-checked={!fakeD}
-            onClick={() => {
-                fakeD = !fakeD;
-                deafen();
-                setTimeout(deafen, 250);
-
-                if (settings.store.muteUponFakeDeafen)
-                    setTimeout(mute, 300);
-            }
-            }
+            aria-checked={!isActive}
+            onClick={() => fakeDeafenStore.toggle()}
         />
     );
 }
 
-const settings = definePluginSettings({
-    muteUponFakeDeafen: {
-        type: OptionType.BOOLEAN,
-        description: "",
-        default: false
-    },
-    mute: {
-        type: OptionType.BOOLEAN,
-        description: "",
-        default: true
-    },
-    deafen: {
-        type: OptionType.BOOLEAN,
-        description: "",
-        default: true
-    },
-    cam: {
-        type: OptionType.BOOLEAN,
-        description: "",
-        default: false
-    }
-});
-
 export default definePlugin({
     name: "FakeDeafen",
-    description: "You're deafened but you're not",
+    description: "Appear deafened to others while still hearing audio",
     authors: [Devs.philhk, Devs.LSDZaddi],
+    settings,
 
     patches: [
         {
             find: "}voiceStateUpdate(",
             replacement: {
                 match: /self_mute:([^,]+),self_deaf:([^,]+),self_video:([^,]+)/,
-                replace: "self_mute:$self.toggle($1, 'mute'),self_deaf:$self.toggle($2, 'deaf'),self_video:$self.toggle($3, 'video')"
+                replace: "self_mute:$self.toggle($1,'mute'),self_deaf:$self.toggle($2,'deaf'),self_video:$self.toggle($3,'video')"
             }
         },
         {
@@ -140,17 +157,18 @@ export default definePlugin({
         }
     ],
 
-    settings,
-    toggle: (au: any, what: string) => {
-        if (fakeD === false)
-            return au;
-        else
-            switch (what) {
-                case "mute": return settings.store.mute;
-                case "deaf": return settings.store.deafen;
-                case "video": return settings.store.cam;
-            }
+    toggle(actual: boolean, type: string) {
+        if (!isFakeDeafened) return actual;
+        switch (type) {
+            case "mute": return settings.store.mute;
+            case "deaf": return settings.store.deafen;
+            case "video": return settings.store.cam;
+            default: return actual;
+        }
     },
+
     fakeDeafenToggleButton: ErrorBoundary.wrap(fakeDeafenToggleButton, { noop: true }),
 
+    fakeDeafenStore,
+    useFakeDeafen
 });
