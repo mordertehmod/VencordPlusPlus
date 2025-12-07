@@ -8,21 +8,6 @@ import { Devs } from "@utils/constants";
 import { canonicalizeMatch } from "@utils/patches";
 import definePlugin from "@utils/types";
 
-/* duplicate values have multiple branches with different types. Just include all to be safe
-const nameMap = {
-    radio: "MenuRadioItem",
-    separator: "MenuSeparator",
-    checkbox: "MenuCheckboxItem",
-    groupstart: "MenuGroup",
-
-    control: "MenuControlItem",
-    compositecontrol: "MenuControlItem",
-
-    item: "MenuItem",
-    customitem: "MenuItem",
-};
-*/
-
 export default definePlugin({
     name: "MenuItemDemanglerAPI",
     description: "Demangles Discord's Menu Item module",
