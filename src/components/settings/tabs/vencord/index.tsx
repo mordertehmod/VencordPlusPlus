@@ -18,7 +18,6 @@ import { Heading } from "@components/Heading";
 import { FolderIcon, GithubIcon, LogIcon, PaintbrushIcon, RestartIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import { openContributorModal, openPluginModal, SettingsTab, wrapTab } from "@components/settings";
-import { DonateButton, InviteButton } from "@components/settings/DonateButton";
 import { QuickAction, QuickActionCard } from "@components/settings/QuickAction";
 import { SpecialCard } from "@components/settings/SpecialCard";
 import { gitRemote } from "@shared/vencordUserAgent";
@@ -29,7 +28,7 @@ import { relaunch } from "@utils/native";
 import { React, Select, UserStore } from "@webpack/common";
 
 import { openNotificationSettingsModal } from "./NotificationSettings";
-import { isDonor } from "./DonateButton";
+import { isDonor, DonateButtonComponent } from "./DonateButton";
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://equicord.org/assets/favicon.png";
@@ -120,7 +119,7 @@ function VencordSettings() {
         ];
 
     return (
-        <SettingsTab title="Vencord Settings">
+        <SettingsTab>
             {(isDonor(user.id)) ? (
                 <SpecialCard
                     title="Donations"
@@ -151,9 +150,18 @@ function VencordSettings() {
                     cardImage={COZY_CONTRIB_IMAGE}
                     backgroundImage={CONTRIB_BACKGROUND_IMAGE}
                     backgroundColor="#EDCC87"
-                    buttonTitle="See what you've contributed to"
-                    buttonOnClick={() => openContributorModal(user)}
-                />
+                >
+                    <Button
+                        variant="none"
+                        size="medium"
+                        type="button"
+                        onClick={() => openContributorModal(user)}
+                        className="vc-contrib-button"
+                    >
+                        <GithubIcon aria-hidden fill={"#000000"} className={"vc-contrib-github"} />
+                        See what you've contributed to
+                    </Button>
+                </SpecialCard>
             )}
 
             <section>
@@ -322,17 +330,6 @@ function VencordSettings() {
                 </Flex>
             </section>
         </SettingsTab>
-    );
-}
-
-function DonateButtonComponent() {
-    return (
-        <Flex>
-            <DonateButton
-                style={{ marginTop: "1em" }} />
-            <InviteButton
-                style={{ marginTop: "1em" }} />
-        </Flex>
     );
 }
 

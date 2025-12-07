@@ -18,6 +18,7 @@
 
 import { Button } from "@components/Button";
 import { Heart } from "@components/Heart";
+import { OpenExternalIcon } from "@components/Icons";
 import { openInviteModal } from "@utils/discord";
 import { ButtonProps } from "@vencord/discord-types";
 import { showToast } from "@webpack/common";
@@ -55,9 +56,10 @@ export function InviteButton({
                     showToast("Invalid or expired invite"),
                 );
             }}
-            className="vc-donate-button"
+            className="vc-invite-button"
         >
             Invite
+            <OpenExternalIcon className="vc-invite-link" />
         </Button>
     );
 }

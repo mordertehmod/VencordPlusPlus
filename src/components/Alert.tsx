@@ -16,7 +16,7 @@ export interface AlertProps {
     children: ReactNode;
     className?: string;
     style?: CSSProperties;
-    icon?: ComponentType<{ className?: string; color?: string }>;
+    icon?: ComponentType<{ className?: string; color?: string; }>;
 }
 
 function Warning({ children, className, style, icon }: Readonly<AlertProps>) {

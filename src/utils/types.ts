@@ -20,7 +20,7 @@ import { AudioProcessor } from "@api/AudioPlayer";
 import type { ProfileBadge } from "@api/Badges";
 import type { ChatBarButtonData, ChatBarButtonFactory } from "@api/ChatButtons";
 import type { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { HeaderBarButtonFactory } from "@api/HeaderBar";
+import { HeaderBarButtonData } from "@api/HeaderBar";
 import { Keybind, KeybindShortcut } from "@api/Keybinds/types";
 import type { MemberListDecoratorFactory } from "@api/MemberListDecorators";
 import type { MessageAccessoryFactory } from "@api/MessageAccessories";
@@ -207,7 +207,7 @@ export interface PluginDef {
 
     // Additions //
     renderNicknameIcon?: NicknameIconFactory;
-    renderHeaderBarButton?: HeaderBarButtonFactory;
+    headerBarButton?: HeaderBarButtonData;
     audioProcessor?: AudioProcessor;
 
     // TODO: Remove eventually

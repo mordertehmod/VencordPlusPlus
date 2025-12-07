@@ -20,6 +20,7 @@ import { useSettings } from "@api/Settings";
 import { authorizeCloud, deauthorizeCloud } from "@api/SettingsSync/cloudSetup";
 import { deleteCloudSettings, eraseAllCloudData, getCloudSettings, putCloudSettings } from "@api/SettingsSync/cloudSync";
 import { Button } from "@components/Button";
+import { Card } from "@components/Card";
 import { CheckedTextInput } from "@components/CheckedTextInput";
 import { Divider } from "@components/Divider";
 import { FormSwitch } from "@components/FormSwitch";
@@ -109,18 +110,18 @@ function CloudTab() {
     }
 
     return (
-        <SettingsTab title="Vencord Cloud">
+        <SettingsTab>
             <section className={Margins.top16}>
-                <Heading>Cloud Settings</Heading>
-
-                <Paragraph size="md" className={Margins.bottom20}>
-                    Vencord comes with a cloud integration allowing settings to be synced across apps and devices.
-                    <br />
-                    It <Link href="https://vencord.dev/cloud/privacy">respects your privacy</Link>, and
-                    <br />
-                    the <Link href="https://github.com/Vencord/Backend">source code</Link> is AGPL 3.0 licensed so you
-                    can host it yourself.
-                </Paragraph>
+                <Card defaultPadding={true} className={Margins.bottom16}>
+                    <Paragraph size="md">
+                        Vencord comes with a cloud integration allowing settings to be synced across apps and devices.
+                        <br />
+                        It <Link href="https://vencord.dev/cloud/privacy">respects your privacy</Link>, and
+                        <br />
+                        the <Link href="https://github.com/Vencord/Backend">source code</Link> is AGPL 3.0 licensed so you
+                        can host it yourself.
+                    </Paragraph>
+                </Card>
                 <FormSwitch
                     key="backend"
                     title="Enable Cloud Integrations"
@@ -133,7 +134,7 @@ function CloudTab() {
                             settings.cloud.authenticated = v;
                     }}
                 />
-                <Heading>Backend URL</Heading>
+                <Heading className={Margins.top16}>Backend URL</Heading>
                 <Paragraph className={Margins.bottom8}>
                     Which backend to use when using cloud integrations.
                 </Paragraph>

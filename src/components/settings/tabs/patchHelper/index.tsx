@@ -104,7 +104,7 @@ function PatchHelper() {
     }
 
     return (
-        <SettingsTab title="Patch Helper">
+        <SettingsTab>
             <HeadingTertiary>Full Patch</HeadingTertiary>
             <FullPatchInput
                 setFind={onFindChange}

@@ -183,7 +183,7 @@ function Updater() {
     };
 
     return (
-        <SettingsTab title="Vencord Updater">
+        <SettingsTab>
             <Heading>Updater Settings</Heading>
             <FormSwitch
                 title="Automatically update"

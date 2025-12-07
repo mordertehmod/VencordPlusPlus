@@ -65,7 +65,6 @@ async function fetchCommitsBetween(
             {
                 headers: {
                     Accept: "application/vnd.github+json",
-                    // testing auto-update bypass for CORS issues
                 },
             },
         );
