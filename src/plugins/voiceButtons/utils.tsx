@@ -6,11 +6,13 @@
 
 import "./styles.css";
 
+import { isPluginEnabled } from "@api/PluginManager";
 import { Icon, User } from "@vencord/discord-types";
 import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
-import { Button, ChannelStore, GuildActions, MediaEngineStore, NavigationRouter, PermissionsBits, PermissionStore, Tooltip, UserStore, VoiceActions, VoiceStateStore } from "@webpack/common";
+import { Button, ChannelStore, GuildActions, MediaEngineStore, NavigationRouter, PermissionsBits, PermissionStore, Tooltip, useEffect, UserStore, useState, VoiceActions, VoiceStateStore } from "@webpack/common";
 import { JSX } from "react";
 
+import { ButtonVisibility } from "./settings";
 import { settings } from "./settings";
 
 const SoundboardStore = findStoreLazy("SoundboardStore");
@@ -20,10 +22,16 @@ const ChatIcon = findComponentByCodeLazy(".css,d:\"M12 22a10") as Icon;
 const MuteIconSelf = findComponentByCodeLazy("d:\"m2.7 22.7 20-20a1", "1.4ZM10.8") as Icon;
 const MuteIconOther = findComponentByCodeLazy("M21.76.83a5.02", "M12 2c.33 0") as Icon;
 
-function VoiceUserButton({ user, tooltip, icon, onClick }: { user: User; tooltip: string; icon: JSX.Element; onClick: () => void; }) {
-    const isCurrent = (user.id === UserStore.getCurrentUser().id);
-    if (isCurrent && settings.store.showButtonsSelf === "hide") return null;
-    const disabled = isCurrent && settings.store.showButtonsSelf === "disable";
+function VoiceUserButton({ user, tooltip, icon, onClick, visibility }: {
+    user: User;
+    tooltip: string;
+    icon: JSX.Element;
+    onClick: () => void;
+    visibility?: ButtonVisibility;
+}) {
+    if (visibility === "hide") return null;
+    const disabled = visibility === "disable";
+
     return (
         <div className="voice-user-button-container">
             <Tooltip text={tooltip} shouldShow={!disabled}>
@@ -84,11 +92,12 @@ function getServerMuteDeafenState(userId: string) {
     };
 }
 
-export function UserChatButton({ user }: { user: User; }) {
-    const isCurrent = (user.id === UserStore.getCurrentUser().id);
+export function UserChatButton({ user, visibility }: { user: User; visibility?: ButtonVisibility }) {
+    const isCurrent = user.id === UserStore.getCurrentUser().id;
     return (
         <VoiceUserButton
             user={user}
+            visibility={visibility}
             tooltip={isCurrent ? "Navigate to DMs" : `Open DMs with ${getUserName(user)}`}
             icon={<ChatIcon size="sm" />}
             onClick={() => {
@@ -103,7 +112,7 @@ export function UserChatButton({ user }: { user: User; }) {
     );
 }
 
-export function UserMuteButton({ user }: { user: User; }) {
+export function UserMuteButton({ user, visibility }: { user: User; visibility?: ButtonVisibility;}) {
     const isCurrent = (user.id === UserStore.getCurrentUser().id);
     const { canMute: canServerMute } = canServerMuteDeafen(user.id);
     const { isServerMuted } = getServerMuteDeafenState(user.id);
@@ -120,6 +129,7 @@ export function UserMuteButton({ user }: { user: User; }) {
     return (
         <VoiceUserButton
             user={user}
+            visibility={visibility}
             tooltip={`${tooltipAction} ${isCurrent ? "yourself" : `${getUserName(user)}`}`}
             icon={isCurrent ? <MuteIconSelf muted={isMuted} size="sm" color={color} /> : <MuteIconOther muted={isMuted} size="sm" color={color} />}
             onClick={() => {
@@ -146,7 +156,7 @@ export function UserMuteButton({ user }: { user: User; }) {
     );
 }
 
-export function UserDeafenButton({ user }: { user: User; }) {
+export function UserDeafenButton({ user, visibility }: { user: User; visibility?: ButtonVisibility; }) {
     const isCurrent = (user.id === UserStore.getCurrentUser().id);
     const { canDeafen: canServerDeafen } = canServerMuteDeafen(user.id);
     const { isServerDeafened } = getServerMuteDeafenState(user.id);
@@ -167,6 +177,7 @@ export function UserDeafenButton({ user }: { user: User; }) {
     return (
         <VoiceUserButton
             user={user}
+            visibility={visibility}
             tooltip={`${tooltipAction} ${isCurrent ? "yourself" : `${getUserName(user)}`}`}
             icon={isCurrent ? <DeafenIconSelf muted={isDeafened} size="sm" color={color} /> : <DeafenIconOther muted={isDeafened} size="sm" color={color} />}
             onClick={() => {
@@ -213,6 +224,85 @@ export function UserDeafenButton({ user }: { user: User; }) {
                     }
                 }
             }}
+        />
+    );
+}
+
+function getFakeDeafenAPI() {
+    if (!isPluginEnabled("FakeDeafen")) return null;
+    const fakeDeafen = require("@plugins/fakeDeafen");
+    try {
+        return {
+            store: fakeDeafen.fakeDeafenStore,
+            useFakeDeafen: fakeDeafen.useFakeDeafen
+        };
+    } catch (error) {
+        console.error("Failed to load FakeDeafen plugin API:", error);
+        console.log(`FakeDeafen store: ${JSON.stringify(fakeDeafen.fakeDeafenStore)}`);
+        console.log(`FakeDeafen useFakeDeafen: ${JSON.stringify(fakeDeafen.useFakeDeafen)}`);
+        return null;
+    }
+}
+
+function FakeDeafenIconSmall({ active }: { active: boolean }) {
+    const color = active ? "var(--status-danger)" : "var(--channels-default)";
+    return (
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+            <path
+                d="M5.274 5.876c0.396-0.89 0.744-1.934 1.611-2.476 4.086-2.554 8.316 1.441 7.695 5.786-0.359 2.515-3.004 3.861-4.056 5.965-0.902 1.804-4.457 3.494-4.742 0.925"
+                stroke={color}
+                strokeOpacity={0.9}
+                strokeWidth={0.8}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+            <path
+                d="M11.478 11.931c2.111-2.239 1.579-7.495-1.909-7.337-2.625 0.119-2.012 3.64-1.402 4.861"
+                stroke={color}
+                strokeOpacity={0.9}
+                strokeWidth={0.8}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+            <path
+                d="M7.636 7.755c2.796-0.194 3.747 2.749 1.933 4.563-0.472 0.472-1.386-0.214-1.933 0.06-0.547 0.274-0.957 1.136-1.497 0.507"
+                stroke={color}
+                strokeOpacity={0.9}
+                strokeWidth={0.8}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+            />
+            {active && (
+                <path
+                    d="M19 1L1 19"
+                    stroke="var(--status-danger)"
+                    strokeWidth="1.7"
+                    strokeLinecap="round"
+                />
+            )}
+        </svg>
+    );
+}
+
+
+
+export function UserFakeDeafenButton({ user, visibility }: { user: User; visibility?: ButtonVisibility; }) {
+    const isCurrent = user.id === UserStore.getCurrentUser().id;
+    if (!isCurrent) return null;
+
+    const api = getFakeDeafenAPI();
+    if (!api) return null;
+
+    const [isActive, setIsActive] = useState(api.store.enabled);
+    useEffect(() => api.store.subscribe(() => setIsActive(api.store.enabled)), []);
+
+    return (
+        <VoiceUserButton
+            user={user}
+            visibility={visibility}
+            tooltip={isActive ? "Disable Fake Deafen" : "Enable Fake Deafen"}
+            icon={<FakeDeafenIconSmall active={isActive} />}
+            onClick={() => api.store.toggle()}
         />
     );
 }
