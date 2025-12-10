@@ -54,6 +54,12 @@
             "@webpack/wreq.d": [
                 "./webpack/wreq.d"
             ],
+            "@zaddyplugins/*": [
+                "./zaddyplugins/*"
+            ],
+            "@zaddyadditions/*": [
+                "./zaddyadditions/*"
+            ]
         },
         "plugins": [
             // Transform paths in output .d.ts files (Include this line if you output declarations files)
