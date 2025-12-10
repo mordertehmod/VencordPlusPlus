@@ -65,6 +65,13 @@ async function listThemes(): Promise<UserThemeHeader[]> {
     return themeInfo;
 }
 
+function listThemesNew(): Promise<{ fileName: string; content: string; }[]> {
+    return readdir(THEMES_DIR)
+        .then(files =>
+            Promise.all(files.map(async fileName => ({ fileName, content: await getThemeData(fileName) }))))
+        .catch(() => []);
+}
+
 function getThemeData(fileName: string) {
     fileName = fileName.replace(/\?v=\d+$/, "");
     const safePath = ensureSafePath(THEMES_DIR, fileName);
@@ -92,6 +99,7 @@ ipcMain.handle(IpcEvents.SET_QUICK_CSS, (_, css) =>
     writeFileSync(QUICKCSS_PATH, css)
 );
 
+ipcMain.handle(IpcEvents.GET_THEMES_DIR, () => THEMES_DIR);
 ipcMain.handle(IpcEvents.GET_THEMES_LIST, () => listThemes());
 ipcMain.handle(IpcEvents.GET_THEME_DATA, (_, fileName) => getThemeData(fileName));
 ipcMain.handle(IpcEvents.GET_THEME_SYSTEM_VALUES, () => ({

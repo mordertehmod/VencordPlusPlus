@@ -70,7 +70,8 @@ export const CspPolicies: PolicyMap = {
     "timezone.creations.works": ConnectSrc, // Timezone API
     "api.vmohammad.dev": ConnectSrc, // Custom API
     "ttsvibes.com": ConnectSrc, // TikTok TTS API
-    "https://corsproxy.io": ConnectSrc //Better audio display
+    "https://corsproxy.io": ConnectSrc, //Better audio display
+    "https://discord-themes.com": ImageAndCssSrc // Discord Themes CDN
 };
 
 const findHeader = (headers: PolicyMap, headerName: Lowercase<string>) => {
