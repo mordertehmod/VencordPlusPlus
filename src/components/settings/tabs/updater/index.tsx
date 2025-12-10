@@ -80,7 +80,7 @@ function Updater() {
             <Paragraph className={Margins.bottom8}>
                 This is the GitHub repository where Vencord++ fetches updates from.
             </Paragraph>
-            <Paragraph color="text-muted">
+            <Paragraph color="text-subtle">
                 {repoPending
                     ? repo
                     : err

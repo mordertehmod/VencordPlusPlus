@@ -541,7 +541,7 @@ function ChangelogContent() {
             {error && (
                 <ErrorCard style={{ padding: "1em", marginTop: "1em" }}>
                     <Paragraph>{error}</Paragraph>
-                    <Paragraph color="text-muted" style={{ marginTop: "0.5em" }}>
+                    <Paragraph color="text-subtle" style={{ marginTop: "0.5em" }}>
                         Make sure you have an internet connection and try again.
                     </Paragraph>
                 </ErrorCard>
@@ -553,7 +553,7 @@ function ChangelogContent() {
             <Paragraph className={Margins.bottom8}>
                 This is the GitHub repository where Equicord fetches updates from.
             </Paragraph>
-            <Paragraph color="text-muted">
+            <Paragraph color="text-subtle">
                 {repoPending ? (
                     repo
                 ) : repoErr ? (
@@ -617,7 +617,7 @@ function ChangelogContent() {
                 <>
                     <Divider className={Margins.top20} />
                     <Heading className={Margins.top20}>Recent Changes</Heading>
-                    <Paragraph color="text-muted">
+                    <Paragraph color="text-subtle">
                         No commits available ahead of your current version. Click "Fetch from Repository" to check for new changes.
                     </Paragraph>
                 </>
