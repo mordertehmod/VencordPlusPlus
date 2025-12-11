@@ -78,7 +78,7 @@ function VencordPopoutButton() {
 
 export default definePlugin({
     name: "VencordToolbox",
-    description: "Adds a button next to the inbox button in the channel header that houses Equicord quick actions",
+    description: "Adds a button next to the inbox button in the channel header that houses VencordPlusPlus quick actions",
     authors: [Devs.Ven, Devs.AutumnVN],
     dependencies: ["HeaderBarAPI"],
 

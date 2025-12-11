@@ -221,21 +221,17 @@ const settings = definePluginSettings({
         restartNeeded: true,
         options: [
             {
-                label: "Equicord",
-                value: "equicord",
-                default: true
-            },
-            {
-                label: "Suncord",
-                value: "suncord",
-            },
-            {
-                label: "Old Vencord Icon",
+                label: "New Vencord Icon",
                 value: "newVencord",
+                default: true
             },
             {
                 label: "Old Vencord Icon",
                 value: "oldVencord",
+            },
+            {
+                label: "Suncord",
+                value: "suncord",
             },
         ],
     }

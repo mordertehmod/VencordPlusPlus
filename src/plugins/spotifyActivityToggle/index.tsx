@@ -81,7 +81,7 @@ const settings = definePluginSettings({
         description: "Where to show the spotify toggle button",
         options: [
             { label: "Next to Mute/Deafen", value: "PANEL", default: true },
-            { label: "Equicord Toolbox", value: "TOOLBOX" }
+            { label: "Vencord Toolbox", value: "TOOLBOX" }
         ],
         get hidden() {
             return !isPluginEnabled(vencordToolbox.name);

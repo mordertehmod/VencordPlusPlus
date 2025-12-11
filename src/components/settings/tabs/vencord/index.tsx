@@ -215,7 +215,7 @@ function VencordSettings() {
 
             <Heading className={Margins.top20}>Client Settings</Heading>
             <Paragraph className={Margins.bottom16}>
-                Configure how Equicord behaves and integrates with Discord. These settings affect the Discord client's appearance and behavior.
+                Configure how VencordPlusPlus behaves and integrates with Discord. These settings affect the Discord client's appearance and behavior.
             </Paragraph>
             <Alert.Info className={Margins.bottom20} style={{ width: "100%" }}>
                 You can customize where this settings section appears in Discord's settings menu by configuring the{" "}
