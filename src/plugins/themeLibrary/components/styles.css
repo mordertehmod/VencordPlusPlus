@@ -127,3 +127,15 @@
     padding: 10px 0;
     width: 100%;
 }
+
+.vce-tab-bar {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    justify-content: center;
+}
+
+.vce-tab-bar-item {
+    margin-right: 32px;
+    padding-bottom: 16px;
+    margin-bottom: -2px;
+}

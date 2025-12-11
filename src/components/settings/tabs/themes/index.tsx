@@ -18,23 +18,34 @@
 
 import "./styles.css";
 
+import { isPluginEnabled } from "@api/PluginManager";
+import { Settings } from "@api/Settings";
+import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { Link } from "@components/Link";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
+import { ThemeTab } from "@plugins/themeLibrary/components/ThemeTab";
 import { getStylusWebStoreUrl } from "@utils/web";
 import { Forms, React, TabBar, useState } from "@webpack/common";
 
 import { CspErrorCard } from "./CspErrorCard";
 import { LocalThemesTab } from "./LocalThemesTab";
 import { OnlineThemesTab } from "./OnlineThemesTab";
+import { Margins } from "@utils/margins";
+import { on } from "events";
+import { Heading, HeadingPrimary } from "@components/Heading";
+import { Paragraph } from "@components/Paragraph";
+import { Flex } from "@components/Flex";
 
-const enum ThemeTab {
+const enum ThemeTabs {
     LOCAL,
-    ONLINE
+    ONLINE,
+    THEME_LIBRARY
 }
 
 function ThemesTab() {
-    const [currentTab, setCurrentTab] = useState(ThemeTab.LOCAL);
+    const [currentTab, setCurrentTab] = useState(ThemeTabs.LOCAL);
+    const [, forceUpdate] = useState({});
 
     return (
         <SettingsTab>
@@ -47,23 +58,68 @@ function ThemesTab() {
             >
                 <TabBar.Item
                     className="vc-settings-tab-bar-item"
-                    id={ThemeTab.LOCAL}
+                    id={ThemeTabs.LOCAL}
                 >
                     Local Themes
                 </TabBar.Item>
                 <TabBar.Item
                     className="vc-settings-tab-bar-item"
-                    id={ThemeTab.ONLINE}
+                    id={ThemeTabs.ONLINE}
                 >
                     Online Themes
+                </TabBar.Item>
+                <TabBar.Item
+                    className="vc-settings-tab-bar-item"
+                    id={ThemeTabs.THEME_LIBRARY}
+                >
+                    Theme Library
                 </TabBar.Item>
             </TabBar>
 
             <CspErrorCard />
 
-            {currentTab === ThemeTab.LOCAL && <LocalThemesTab />}
-            {currentTab === ThemeTab.ONLINE && <OnlineThemesTab />}
+            {currentTab === ThemeTabs.LOCAL && <LocalThemesTab />}
+            {currentTab === ThemeTabs.ONLINE && <OnlineThemesTab />}
+            {currentTab === ThemeTabs.THEME_LIBRARY && isPluginEnabled("ThemeLibrary") && <ThemeTab />}
+            {currentTab === ThemeTabs.THEME_LIBRARY && !isPluginEnabled("ThemeLibrary") &&
+                <EnableThemeLibraryPlugin onEnabled={() => forceUpdate({})} />
+            }
         </SettingsTab>
+    );
+}
+
+function EnableThemeLibraryPlugin({ onEnabled }: { onEnabled: () => void }) {
+    return (
+        <Card variant="danger" style={{ display: "flex", flexWrap: "wrap" }}>
+            <Flex flexWrap="wrap" style={{ width: "100%", gap: "0.1em" }}>
+                <div style={{ margin: "2px", flex: 1 }}>
+                    <HeadingPrimary style={{ marginBottom: "4px" }}>Theme Library Plugin Not Enabled</HeadingPrimary>
+                    <Paragraph>It must be enabled to access this feature.</Paragraph>
+                </div>
+                <div style={{ display: "flex", alignContent: "center", alignItems: "center", margin: "2px" }}>
+                    <Button
+                        variant="positive"
+                        title="Enable Theme Library Plugin"
+                        onClick={() => {
+                            const settings = Settings.plugins["ThemeLibrary"];
+                            const result = Vencord.Plugins.startPlugin(Vencord.Plugins.plugins["ThemeLibrary"]);
+
+                            if (!result) {
+                                settings.enabled = false;
+                                const msg = `Error while starting ThemeLibrary plugin`;
+                                console.error(msg);
+                                return;
+                            }
+
+                            settings.enabled = true;
+                            onEnabled();
+                        }}
+                    >
+                        Enable ThemeLibrary
+                    </Button>
+                </div>
+            </Flex>
+        </Card>
     );
 }
 

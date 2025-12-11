@@ -56,7 +56,7 @@ const SearchTags = {
     [SearchStatus.LIGHT]: "LIGHT",
 };
 
-function ThemeTab() {
+export function ThemeTab() {
     const [themes, setThemes] = useState<Theme[]>([]);
     const [filteredThemes, setFilteredThemes] = useState<Theme[]>([]);
     const [themeLinks, setThemeLinks] = useState(Vencord.Settings.themeLinks);
@@ -293,7 +293,7 @@ function SubmitThemes() {
 }
 
 
-function ThemeLibrary() {
+export function ThemeLibrary() {
     const [currentTab, setCurrentTab] = useState(TabItem.THEMES);
 
     return (
@@ -301,27 +301,21 @@ function ThemeLibrary() {
             <TabBar
                 type="top"
                 look="brand"
-                className="vc-settings-tab-bar"
+                className="vce-tab-bar"
                 selectedItem={currentTab}
                 onItemSelect={setCurrentTab}
             >
                 <TabBar.Item
-                    className="vc-settings-tab-bar-item"
+                    className="vce-tab-bar-item"
                     id={TabItem.THEMES}
                 >
                     Themes
                 </TabBar.Item>
-                <TabBar.Item
-                    className="vc-settings-tab-bar-item"
-                    id={TabItem.SUBMIT_THEMES}
-                >
-                    Submit Theme
-                </TabBar.Item>
             </TabBar>
 
-            {currentTab === TabItem.THEMES ? <ThemeTab /> : <SubmitThemes />}
+            {currentTab === TabItem.THEMES && <ThemeTab />}
         </SettingsTab>
     );
 }
 
-export default wrapTab(ThemeLibrary, "Theme Library");
+export default wrapTab(ThemeTab, "Theme Library");

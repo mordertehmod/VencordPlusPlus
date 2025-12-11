@@ -24,7 +24,7 @@ export default definePlugin({
     },
 
     start() {
-        const { customEntries, customSections } = SettingsPlugin;
+        const { customEntries } = SettingsPlugin;
 
         customEntries.push({
             key: "vencord_theme_library",
@@ -35,10 +35,8 @@ export default definePlugin({
     },
 
     stop() {
-        const { customEntries, customSections } = SettingsPlugin;
+        const { customEntries } = SettingsPlugin;
         const entry = customEntries.findIndex(entry => entry.key === "vencord_theme_library");
-        const section = customSections.findIndex(section => section({} as any).id === "ThemeLibrary");
         if (entry !== -1) customEntries.splice(entry, 1);
-        if (section !== -1) customSections.splice(section, 1);
     },
 });
