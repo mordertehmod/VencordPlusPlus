@@ -89,12 +89,11 @@ export default definePlugin({
         },
         {
             // Gift button
-            find: "GIFT_BUTTON)",
+            find: '"sticker")',
             replacement: {
-                match: /if\(\i\)return null;/,
-                replace: "return null;",
+                match: /&&\i\.push\(\{[^&]*?,"gift"\)\}\)/,
+                replace: "",
             },
-            all: true,
             predicate: () => settings.store.gift,
         },
         {
