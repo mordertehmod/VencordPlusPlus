@@ -125,10 +125,8 @@ export async function exportDataStores({ minify }: { minify?: boolean; } = {}) {
     return JSON.stringify({ dataStore }, null, minify ? undefined : 4);
 }
 
-
 export async function downloadSettingsBackup(type: BackupType = "all", { minify }: { minify?: boolean; } = {}) {
     const backup = await exportSettings({ minify, type });
-
     const filename = `vencord-${type}-backup-${moment().format("YYYY-MM-DD")}.json`;
     const data = new TextEncoder().encode(backup);
 
