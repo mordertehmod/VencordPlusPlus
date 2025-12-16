@@ -1,15 +1,17 @@
 /* Plugin name */
 .vc-plugin-modal-header-title {
     display: flex;
-    align-items: center;
-    gap: 4px;
     flex: 1;
+    align-items: center;
     justify-content: center;
+    gap: 4px;
 }
 
 /* Hacky ass spacer to keep the close element in the
 *  flex container and maintain our title centering */
 .vc-plugin-modal-header-spacer {
+    display: flex;
+    align-items: flex-start;
     width: 32px;
 }
 
@@ -48,7 +50,6 @@
 .vc-plugin-modal-authorsAndButtons {
     display: flex;
     align-items: center;
-    color: var(--text-muted);
 }
 
 .vc-plugin-modal-authors-label {
@@ -57,6 +58,8 @@
 }
 
 .vc-plugin-modal-links {
+    display: flex;
+    gap: 4px;
     margin-left: auto;
 }
 
@@ -90,8 +93,8 @@
     content: '';
     position: absolute;
     inset: 0;
-    background-color: var(--background-modifier-hover);
-    opacity: 0;
+    background-color: var(--background-modifier-hover); /* TODO: FIX */
+    opacity: .3;
     transition: opacity 0.15s ease;
     pointer-events: none;
 }
@@ -114,11 +117,11 @@
 }
 
 .vc-plugin-modal-tab:hover {
-    color: var(--header-primary);
+    color: var(--text-strong);
 }
 
 .vc-plugin-modal-tab-active {
-    color: var(--header-primary);
+    color: var(--text-strong);
     border-bottom-color: var(--brand-experiment);
 }
 
@@ -144,4 +147,22 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.vc-plugin-modal-confirm [class*="footer"] {
+    flex-direction: row-reverse;
+    gap: var(--space-8, 8px);
+}
+
+.vc-plugin-modal-confirm [class*="footer"]>button {
+    flex: 1;
+    margin: 0;
+    width: 100%;
+}
+
+.vc-plugin-modal-warning {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-feedback-critical);
 }

@@ -152,7 +152,7 @@ function PatchHelper() {
             {module && (
                 <>
                     <Divider className={Margins.top16 + " " + Margins.bottom16} />
-                    <Span size="md" weight="medium" color="header-primary">Preview</Span>
+                    <Span size="md" weight="medium" color="text-strong">Preview</Span>
                     <PatchPreview
                         module={module}
                         match={match}
@@ -165,7 +165,7 @@ function PatchHelper() {
             {!!(find && match && replacement) && (
                 <>
                     <Divider className={Margins.top16 + " " + Margins.bottom16} />
-                    <Span size="md" weight="medium" color="header-primary">Generated Code</Span>
+                    <Span size="md" weight="medium" color="text-strong">Generated Code</Span>
                     <div style={{ width: "100%", marginTop: 8 }}>
                         <CodeBlock lang="js" content={code} />
                     </div>
@@ -183,4 +183,4 @@ function PatchHelper() {
     );
 }
 
-export default IS_DEV ? wrapTab(PatchHelper, "PatchHelper") : null;
+export default IS_DEV ? wrapTab(PatchHelper, "Patch Helper") : null;

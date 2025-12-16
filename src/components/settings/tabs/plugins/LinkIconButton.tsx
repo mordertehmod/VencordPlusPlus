@@ -4,38 +4,30 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./LinkIconButton.css";
-
+import { Button } from "@components/Button";
 import { GithubIcon, WebsiteIcon } from "@components/Icons";
-import { getTheme, Theme } from "@utils/discord";
-import { MaskedLink, Tooltip } from "@webpack/common";
-
-export function GithubLinkIcon() {
-    const theme = getTheme() === Theme.Light ? "#000000" : "#FFFFFF";
-    return <GithubIcon aria-hidden fill={theme} className={"vc-settings-modal-link-icon"} />;
-}
-
-export function WebsiteLinkIcon() {
-    const theme = getTheme() === Theme.Light ? "#000000" : "#FFFFFF";
-    return <WebsiteIcon aria-hidden fill={theme} className={"vc-settings-modal-link-icon"} />;
-}
 
 interface Props {
     text: string;
     href: string;
+    onMouseEnter?: () => void;
+    onMouseLeave?: () => void;
 }
 
-function LinkIcon({ text, href, Icon }: Props & { Icon: React.ComponentType; }) {
+export function WebsiteButton({ text, href, onMouseEnter, onMouseLeave }: Props) {
     return (
-        <Tooltip text={text}>
-            {props => (
-                <MaskedLink {...props} href={href}>
-                    <Icon />
-                </MaskedLink>
-            )}
-        </Tooltip>
+        <Button variant="secondary" size="small" style={{ gap: 4 }} onClick={() => VencordNative.native.openExternal(href)} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+            <WebsiteIcon width={16} height={16} />
+            {text}
+        </Button>
     );
 }
 
-export const WebsiteButton = (props: Props) => <LinkIcon {...props} Icon={WebsiteLinkIcon} />;
-export const GithubButton = (props: Props) => <LinkIcon {...props} Icon={GithubLinkIcon} />;
+export function GithubButton({ text, href, onMouseEnter, onMouseLeave }: Props) {
+    return (
+        <Button variant="secondary" size="small" style={{ gap: 4 }} onClick={() => VencordNative.native.openExternal(href)} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+            <GithubIcon width={16} height={16} />
+            {text}
+        </Button>
+    );
+}

@@ -19,7 +19,7 @@ export interface AlertProps {
     icon?: ComponentType<{ className?: string; color?: string; }>;
 }
 
-function Warning({ children, className, style, icon }: Readonly<AlertProps>) {
+function Warning({ children, className, style, icon }: AlertProps) {
     return (
         <HelpMessage messageType={HelpMessageTypes.WARNING} className={className} style={style} icon={icon}>
             {children}
@@ -27,7 +27,7 @@ function Warning({ children, className, style, icon }: Readonly<AlertProps>) {
     );
 }
 
-function Info({ children, className, style, icon }: Readonly<AlertProps>) {
+function Info({ children, className, style, icon }: AlertProps) {
     return (
         <HelpMessage messageType={HelpMessageTypes.INFO} className={className} style={style} icon={icon}>
             {children}
@@ -35,7 +35,7 @@ function Info({ children, className, style, icon }: Readonly<AlertProps>) {
     );
 }
 
-function Error({ children, className, style, icon }: Readonly<AlertProps>) {
+function Error({ children, className, style, icon }: AlertProps) {
     return (
         <HelpMessage messageType={HelpMessageTypes.ERROR} className={className} style={style} icon={icon}>
             {children}
@@ -43,7 +43,7 @@ function Error({ children, className, style, icon }: Readonly<AlertProps>) {
     );
 }
 
-function Positive({ children, className, style, icon }: Readonly<AlertProps>) {
+function Positive({ children, className, style, icon }: AlertProps) {
     return (
         <HelpMessage messageType={HelpMessageTypes.POSITIVE} className={className} style={style} icon={icon}>
             {children}

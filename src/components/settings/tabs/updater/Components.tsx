@@ -83,7 +83,7 @@ export function Updatable(props: CommonProps) {
                 <Button
                     size="small"
                     disabled={isUpdating || isChecking}
-                    onClick={runWithDispatch(setIsUpdating, async () => {
+                    onClick={runWithDispatch(setIsChecking, async () => {
                         const outdated = await checkForUpdates();
 
                         if (outdated) {
@@ -135,7 +135,7 @@ export function Updatable(props: CommonProps) {
             </Flex>
             {!updates && updateError ? (
                 <>
-                    <Span size="md" weight="medium" color="header-primary">Error checking for updates</Span>
+                    <Span size="md" weight="medium" color="text-strong">Error checking for updates</Span>
                     <ErrorCard className={Margins.top8} style={{ padding: "1em" }}>
                         <p>{updateError.stderr || updateError.stdout || "An unknown error occurred"}</p>
                     </ErrorCard>

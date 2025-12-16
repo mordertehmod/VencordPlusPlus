@@ -34,9 +34,7 @@ export const TextWeights = {
     extrabold: "800",
 } as const;
 
-
 export const TextColors = {
-    "header-primary": "var(--header-primary)",
     "text-default": "var(--text-default)",
     "text-muted": "var(--text-muted)",
     "text-link": "var(--text-link)",
@@ -91,7 +89,7 @@ export function BaseText<T extends TextTag = "div">(props: BaseTextProps<T>): Re
             className={classes(textCls("base", size, weight), className)}
             style={{
                 ...style,
-                ...(color && { color: TextColors[color] }),
+                ...(color && { color: TextColors[color] })
             }}
             {...restProps}
         >

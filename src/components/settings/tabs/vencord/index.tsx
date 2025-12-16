@@ -117,7 +117,7 @@ function VencordSettings() {
             !IS_WEB &&
             IS_WINDOWS && {
                 key: "winCtrlQ",
-                title: "Register Ctrl+Q as shortcut to close Discord (Alternative to Alt+F4)",
+                title: "Register Ctrl+Q as shortcut to close Discord",
                 description: "Add Ctrl+Q as a keyboard shortcut to close Discord. This provides an alternative to Alt+F4 for quickly closing the application.",
                 restartRequired: true,
                 warning: { enabled: false },
@@ -229,7 +229,7 @@ function VencordSettings() {
             </Alert.Info>
 
             {Switches.filter((s): s is Exclude<typeof s, false> => !!s).map(
-                (s, i, arr) => (
+                s => (
                     <FormSwitch
                         key={s.key}
                         value={settings[s.key]}
@@ -247,7 +247,7 @@ function VencordSettings() {
                                 s.description
                             )
                         }
-                        hideBorder={i === arr.length - 1}
+                        hideBorder
                     />
                 ),
             )}

@@ -628,7 +628,7 @@ function ChangelogContent() {
                     <Divider className={Margins.top20} />
 
                     <Heading className={Margins.top20}>
-                    Update Logs ({changelogHistory.length} {changelogHistory.length === 1 ? "log" : "logs"})
+                        Update Logs ({changelogHistory.length} {changelogHistory.length === 1 ? "log" : "logs"})
                     </Heading>
                     <Paragraph className={Margins.bottom16}>
                         A history of your previous update sessions with their commit history and plugin changes. Click on a log to expand it and see the details.

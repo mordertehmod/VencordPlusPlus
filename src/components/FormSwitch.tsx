@@ -30,16 +30,15 @@ export function FormSwitch({ onChange, title, value, description, disabled, clas
             <label className={classes("vc-form-switch", className, disabled && "vc-form-switch-disabled")}>
                 <div className="vc-form-switch-text">
                     <Flex flexDirection="column" gap="4px">
-                        <Span size="md" weight="medium" color="header-primary">{title}</Span>
+                        <Span size="md" weight="medium" color="text-strong">{title}</Span>
                         {description && <Span size="sm" color="text-subtle">{description}</Span>}
                     </Flex>
                 </div>
-
                 <div className="vc-form-switch-control">
                     <Switch checked={value} onChange={onChange} disabled={disabled} />
                 </div>
-        </label>
-    </div>
+            </label>
+        </div>
     );
 }
 

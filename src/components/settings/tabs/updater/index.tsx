@@ -58,6 +58,7 @@ function Updater() {
             <Paragraph className={Margins.bottom20}>
                 Control how Vencord++ keeps itself up to date. You can choose to update automatically in the background or be notified when new updates are available.
             </Paragraph>
+
             <FormSwitch
                 title="Automatically Update"
                 description="When enabled, Vencord++ will automatically download and install updates in the background without asking for confirmation. You'll need to restart Discord to apply the changes."
@@ -97,9 +98,8 @@ function Updater() {
             <Divider className={Margins.top20} />
 
             <Heading className={Margins.top20}>Updates</Heading>
-
             {isNewer ? <Newer {...commonProps} /> : <Updatable {...commonProps} />}
-        </SettingsTab >
+        </SettingsTab>
     );
 }
 

@@ -1,5 +1,6 @@
 .vc-form-switch-container {
     padding-bottom: 20px;
+    margin-bottom: 20px;
     border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -18,7 +19,6 @@
 
 .vc-form-switch-disabled {
     opacity: 0.5;
-    pointer-events: none;
     cursor: not-allowed;
 }
 

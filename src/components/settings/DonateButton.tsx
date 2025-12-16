@@ -24,6 +24,7 @@ import { ButtonProps } from "@vencord/discord-types";
 import { showToast } from "@webpack/common";
 
 export function DonateButton({
+    className,
     ...props
 }: Partial<ButtonProps>) {
     return (
@@ -33,7 +34,7 @@ export function DonateButton({
             size="medium"
             type="button"
             onClick={() => VencordNative.native.openExternal("https://github.com/sponsors/Vendicated")}
-            className="vc-donate-button"
+            className={className || "vc-donate-button"}
         >
             <Heart />
             Donate
@@ -42,6 +43,7 @@ export function DonateButton({
 }
 
 export function InviteButton({
+    className,
     ...props
 }: Partial<ButtonProps>) {
     return (
@@ -56,7 +58,7 @@ export function InviteButton({
                     showToast("Invalid or expired invite"),
                 );
             }}
-            className="vc-invite-button"
+            className={className || "vc-donate-button"}
         >
             Invite
             <OpenExternalIcon className="vc-invite-link" />
