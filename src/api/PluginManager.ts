@@ -43,6 +43,7 @@ export { Plugins as plugins };
 import { traceFunction } from "../debug/Tracer";
 import { addAudioProcessor, removeAudioProcessor } from "./AudioPlayer";
 import { addChannelToolbarButton, addHeaderBarButton, removeChannelToolbarButton, removeHeaderBarButton } from "./HeaderBar";
+import { addUserAreaButton, removeUserAreaButton } from "./UserArea";
 
 const logger = new Logger("PluginManager", "#a6d189");
 
@@ -102,6 +103,10 @@ function isReporterTestable(p: Plugin, part: ReporterTestable) {
         : (p.reporterTestable & part) === part;
 }
 
+export function pluginRequiresRestart(p: Plugin) {
+    return p.requiresRestart !== false && (p.requiresRestart || !!p.patches?.length);
+}
+
 export const startAllPlugins = traceFunction("startAllPlugins", function startAllPlugins(target: StartAt) {
     logger.info(`Starting plugins (stage ${target})`);
     for (const name in Plugins) {
@@ -130,7 +135,7 @@ export function startDependenciesRecursive(p: Plugin) {
             settings[d].enabled = true;
             dep.isDependency = true;
 
-            if (dep.patches) {
+            if (pluginRequiresRestart(dep)) {
                 logger.warn(`Enabling dependency ${d} requires restart.`);
                 restartNeeded = true;
                 return;
@@ -193,7 +198,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
         renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton,
         // Additions //
-        renderNicknameIcon, headerBarButton, audioProcessor
+        renderNicknameIcon, headerBarButton, audioProcessor, userAreaButton
     } = p;
 
     if (p.start) {
@@ -286,6 +291,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         }
     }
     if (audioProcessor) addAudioProcessor(name, audioProcessor);
+    if (userAreaButton) addUserAreaButton(name, userAreaButton.render, userAreaButton.priority);
 
     return true;
 }, p => `startPlugin ${p.name}`);
@@ -296,7 +302,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
         renderChatBarButton, chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, renderMessagePopoverButton, messagePopoverButton,
         // Additions //
-        renderNicknameIcon, headerBarButton, audioProcessor
+        renderNicknameIcon, headerBarButton, audioProcessor, userAreaButton
     } = p;
 
     if (p.stop) {
@@ -375,6 +381,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
         }
     }
     if (audioProcessor) removeAudioProcessor(name);
+    if (userAreaButton) removeUserAreaButton(name);
 
     return true;
 }, p => `stopPlugin ${p.name}`);
@@ -428,6 +435,7 @@ export const initPluginManager = onlyOnce(function init() {
         if (p.renderNicknameIcon) neededApiPlugins.add("NicknameIconsAPI");
         if (p.headerBarButton) neededApiPlugins.add("HeaderBarAPI");
         if (p.audioProcessor) neededApiPlugins.add("AudioPlayerAPI");
+        if (p.userAreaButton) neededApiPlugins.add("UserAreaAPI");
 
         for (const key of pluginKeysToBind) {
             p[key] &&= p[key].bind(p) as any;
