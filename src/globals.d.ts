@@ -61,6 +61,7 @@ declare global {
     export var DiscordNative: any;
     export var Vesktop: any;
     export var VesktopNative: any;
+    export var unsafeWindow: any;
 
     interface Window extends Record<PropertyKey, any> { }
 }
