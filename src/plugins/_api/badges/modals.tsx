@@ -1,7 +1,13 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { Flex } from "@components/Flex";
 import { Heart } from "@components/Heart";
 import { DonateButton, ErrorBoundary, HeadingPrimary, Paragraph } from "@components/index";
-import { Margins } from "@utils/margins"
+import { Margins } from "@utils/margins";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 
 export function VencordDonorModal() {
