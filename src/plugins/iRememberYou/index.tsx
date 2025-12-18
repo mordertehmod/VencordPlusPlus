@@ -11,7 +11,6 @@ import { EyeIcon } from "@components/Icons";
 import SettingsPlugin from "@plugins/_core/settings";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { React, } from "@webpack/common";
 
 import { Data } from "./components/data";
 import DataUI from "./components/ui";
@@ -25,7 +24,7 @@ export default definePlugin({
     patches: [],
 
     async start() {
-        const { customEntries, customSections } = SettingsPlugin;
+        const { customEntries } = SettingsPlugin;
 
         customEntries.push({
             key: "vencord_i_remember_you",
@@ -47,11 +46,9 @@ export default definePlugin({
 
     stop() {
         const dataManager = this.dataManager as Data;
-        const { customEntries, customSections } = SettingsPlugin;
+        const { customEntries } = SettingsPlugin;
         const entry = customEntries.findIndex(entry => entry.key === "vencord_i_remember_you");
-        const section = customSections.findIndex(section => section({} as any).id === "IRememberYou");
         if (entry !== -1) customEntries.splice(entry, 1);
-        if (section !== -1) customSections.splice(section, 1);
 
         removeMessagePreSendListener(dataManager._onMessagePreSend_preSend);
         clearInterval(dataManager._storageAutoSaveProtocol_interval);
