@@ -4,13 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { DataStore } from "@api/index";
 import "./style.css";
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
+import { DataStore } from "@api/index";
 import { isPluginEnabled } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { Button, ErrorBoundary, Heading, TextButton } from "@components/index";
+import mentionAvatars from "@plugins/mentionAvatars";
 import { Devs } from "@utils/constants";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/index";
 import definePlugin, { OptionType } from "@utils/types";
@@ -18,7 +19,6 @@ import { GuildMember, Message, User } from "@vencord/discord-types";
 import { findByCodeLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildStore, Menu, MessageStore, RelationshipStore, StreamerModeStore, TextInput, useEffect, UserStore, useState } from "@webpack/common";
 import { JSX } from "react";
-import mentionAvatars from "@plugins/mentionAvatars";
 
 const wrapEmojis = findByCodeLazy("lastIndex;return");
 const AccessibilityStore = findStoreLazy("AccessibilityStore");
