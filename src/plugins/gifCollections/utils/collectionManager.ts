@@ -5,7 +5,7 @@
  */
 
 import { DataStore } from "@api/index";
-import { settings } from "@plugins/gifCollections//index";
+import { settings } from "@plugins/gifCollections/index";
 import { Collection, Gif } from "@plugins/gifCollections/types";
 import { Toasts } from "@webpack/common";
 
