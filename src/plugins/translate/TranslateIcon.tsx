@@ -43,7 +43,7 @@ export const TranslateIcon: IconComponent = ({ height = 20, width = 20, classNam
 export let setShouldShowTranslateEnabledTooltip: undefined | ((show: boolean) => void);
 
 export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
-    const { autoTranslate, showChatBarButton } = settings.use(["autoTranslate", "showChatBarButton"]);
+    const { autoTranslate } = settings.use(["autoTranslate"]);
 
     const [shouldShowTranslateEnabledTooltip, setter] = useState(false);
     useEffect(() => {
@@ -51,14 +51,14 @@ export const TranslateChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
         return () => setShouldShowTranslateEnabledTooltip = undefined;
     }, []);
 
-    if (!isMainChat || !showChatBarButton) return null;
+    if (!isMainChat) return null;
 
     const toggle = () => {
         const newState = !autoTranslate;
         settings.store.autoTranslate = newState;
         if (newState && settings.store.showAutoTranslateAlert !== false)
             Alerts.show({
-                title: "Vencord Auto-Translate Enabled",
+                title: "VencordPlusPlus Auto-Translate Enabled",
                 body: <>
                     <Paragraph>
                         You just enabled Auto Translate! Any message <b>will automatically be translated</b> before being sent.
