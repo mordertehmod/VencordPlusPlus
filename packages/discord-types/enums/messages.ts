@@ -11,6 +11,7 @@ export const enum StickerFormatType {
     LOTTIE = 3,
     GIF = 4
 }
+
 export const enum MessageType {
     /**
      * A default message (see below)
@@ -593,4 +594,3 @@ export const enum MessageFlags {
      */
     SENT_BY_SOCIAL_LAYER_INTEGRATION = 1 << 16,
 }
-

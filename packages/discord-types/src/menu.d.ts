@@ -77,4 +77,3 @@ export interface ContextMenuApi {
         options?: { enableSpellCheck?: boolean; }
     ): void;
 }
-
