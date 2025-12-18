@@ -19,12 +19,7 @@ migratePluginSettings("BetterActivities", "MemberListActivities");
 export default definePlugin({
     name: "BetterActivities",
     description: "Shows activity icons in the member list and allows showing all activities",
-    authors: [
-        Devs.D3SOX,
-        Devs.Arjix,
-        Devs.AutumnVN,
-        Devs.LSDZaddi
-    ],
+    authors: [Devs.D3SOX, Devs.Arjix, Devs.AutumnVN, Devs.thororen, Devs.LSDZaddi],
     tags: ["activity"],
 
     settings,
