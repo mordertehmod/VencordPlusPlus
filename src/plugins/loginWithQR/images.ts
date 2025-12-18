@@ -3,7 +3,7 @@
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-
+// TODO: Self host these on our asset repository!
 export const images = {
     cross: "https://i.imgur.com/XxRnu3b.png",
     deviceImage: {
