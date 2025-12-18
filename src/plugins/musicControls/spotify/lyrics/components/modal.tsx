@@ -5,7 +5,7 @@
  */
 
 import { BaseText } from "@components/BaseText";
-import { SpotifyStore, Track } from "plugins/musicControls/spotify/SpotifyStore";
+import { SpotifyStore, Track } from "@plugins/musicControls/spotify/SpotifyStore";
 import { openImageModal } from "@utils/discord";
 import { ModalContent, ModalHeader, ModalProps, ModalRoot } from "@utils/modal";
 import { React } from "@webpack/common";

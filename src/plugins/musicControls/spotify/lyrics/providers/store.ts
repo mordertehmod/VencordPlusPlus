@@ -5,7 +5,7 @@
  */
 
 import { showNotification } from "@api/Notifications";
-import { settings } from "plugins/musicControls/settings";
+import { settings } from "@plugins/musicControls/settings";
 import { getLyrics, lyricFetchers, providers, updateLyrics } from "@plugins/musicControls/spotify/lyrics/api";
 import { SpotifyStore, type Track } from "@plugins/musicControls/spotify/SpotifyStore";
 import { proxyLazyWebpack } from "@webpack";

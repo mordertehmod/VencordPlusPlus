@@ -5,7 +5,7 @@
  */
 
 import { BaseText } from "@components/BaseText";
-import { settings } from "plugins/musicControls/settings";
+import { settings } from "@plugins/musicControls/settings";
 import { SpotifyLrcStore } from "@plugins/musicControls/spotify/lyrics/providers/store";
 import { SpotifyStore } from "@plugins/musicControls/spotify/SpotifyStore";
 import { openModal } from "@utils/modal";
