@@ -47,14 +47,9 @@ import {
 
 import { settings, SidebarStore } from "./store";
 
-// ??? no clue why this HeaderBarIcon doesnt work, its the same as the one below
-const { HeaderBar, /* HeaderBarIcon*/ } = mapMangledModuleLazy(".themedMobile]:", {
-    HeaderBarIcon: filters.componentByCode('size:"custom",'),
+const { HeaderBar } = mapMangledModuleLazy(".themedMobile]:", {
     HeaderBar: filters.byCode(".themedMobile]:"),
 });
-
-// from toolbox
-const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_TOP:", '.iconBadge,"top"');
 
 const { ForumView } = mapMangledModuleLazy("forum-grid-header-section-", {
     ForumView: filters.byCode("sidebarState")
