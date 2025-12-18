@@ -49,7 +49,7 @@ if (!IS_COMPANION_TEST && process.argv.includes("--companion-test"))
     console.error("--companion-test must be run with --reporter for any effect");
 
 export const IS_UPDATER_DISABLED = process.argv.includes("--disable-updater");
-export const gitHash = process.env.VENCORD_HASH || execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
+export const gitHash = process.env.VENCORD_HASH || execSync("git rev-parse HEAD", { encoding: "utf-8" }).trim();
 
 export const banner = {
     js: `
@@ -163,6 +163,7 @@ export const globPlugins = kind => ({
                     const fileName = file.name;
                     if (fileName.startsWith("_") || fileName.startsWith(".")) continue;
                     if (fileName === "index.ts") continue;
+                    if (/\.(zip|rar|7z|tar|gz|bz2)/.test(fileName)) continue;
 
                     const target = getPluginTarget(fileName);
 
@@ -181,7 +182,7 @@ export const globPlugins = kind => ({
                         }
                     }
 
-                    const folderName = `src/${dir}/${fileName}`.replace(/^src\/plugins\//, "");
+                    const folderName = `src/${dir}/${fileName}`;
 
                     const mod = `p${i}`;
                     code += `import ${mod} from "./${dir}/${fileName.replace(/\.tsx?$/, "")}";\n`;
@@ -303,7 +304,20 @@ export const fileUrlPlugin = {
     }
 };
 
+/**
+ * @type {(filter: RegExp, message: string) => import("esbuild").Plugin}
+ */
+export const banImportPlugin = (filter, message) => ({
+    name: "ban-imports",
+    setup: build => {
+        build.onResolve({ filter }, () => {
+            return { errors: [{ text: message }] };
+        });
+    }
+});
+
 const styleModule = readFileSync("./scripts/build/module/style.js", "utf-8");
+
 /**
  * @type {import("esbuild").Plugin}
  */
@@ -329,18 +343,6 @@ export const stylePlugin = {
 };
 
 /**
- * @type {(filter: RegExp, message: string) => import("esbuild").Plugin}
- */
-export const banImportPlugin = (filter, message) => ({
-    name: "ban-imports",
-    setup: build => {
-        build.onResolve({ filter }, () => {
-            return { errors: [{ text: message }] };
-        });
-    }
-});
-
-/**
  * @type {import("esbuild").BuildOptions}
  */
 export const commonOpts = {
@@ -358,13 +360,7 @@ export const commonOpts = {
     jsxFragment: "VencordFragment"
 };
 
-const escapedBuiltinModules = builtinModules
-    .map(m => m.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&"))
-    .join("|");
-const builtinModuleRegex = new RegExp(`^(node:)?(${escapedBuiltinModules})$`);
-
 export const commonRendererPlugins = [
-    banImportPlugin(builtinModuleRegex, "Cannot import node inbuilt modules in browser code. You need to use a native.ts file"),
     banImportPlugin(/^react$/, "Cannot import from react. React and hooks should be imported from @webpack/common"),
     banImportPlugin(/^electron(\/.*)?$/, "Cannot import electron in browser code. You need to use a native.ts file"),
     banImportPlugin(/^ts-pattern$/, "Cannot import from ts-pattern. match and P should be imported from @webpack/common"),
