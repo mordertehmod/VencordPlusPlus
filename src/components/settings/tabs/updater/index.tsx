@@ -70,7 +70,7 @@ function Updater() {
                 value={settings.autoUpdateNotification}
                 onChange={(v: boolean) => settings.autoUpdateNotification = v}
                 title="Get notified when an automatic update completes"
-                description="Receive a notification when Vencord++ finishes downloading an update in the background, so you know when to restart Discord."
+                description="Receive a notification when VencordPlusPlus finishes downloading an update in the background, so you know when to restart Discord."
                 disabled={!settings.autoUpdate}
                 hideBorder
             />
@@ -79,7 +79,7 @@ function Updater() {
 
             <Heading className={Margins.top20}>Repository</Heading>
             <Paragraph className={Margins.bottom8}>
-                This is the GitHub repository where Vencord++ fetches updates from.
+                This is the GitHub repository where VencordPlusPlus fetches updates from.
             </Paragraph>
             <Paragraph color="text-subtle">
                 {repoPending

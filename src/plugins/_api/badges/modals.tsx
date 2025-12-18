@@ -27,7 +27,7 @@ export function VencordDonorModal() {
                     >
                         <Flex justifyContent="center" alignItems="center" gap="0.5em">
                             <Heart />
-                            Become a Vencord Donor
+                            Vencord Donor
                         </Flex>
                     </HeadingPrimary>
                 </ModalHeader>
@@ -82,7 +82,7 @@ export function VencordPlusPlusDonorModal() {
                     >
                         <Flex justifyContent="center" alignItems="center" gap="0.5em">
                             <Heart />
-                            Become a Vencord++ Donor
+                            VencordPlusPlus Donor
                         </Flex>
                     </HeadingPrimary>
                 </ModalHeader>
@@ -103,10 +103,10 @@ export function VencordPlusPlusDonorModal() {
                     </Flex>
                     <div style={{ padding: "1em" }}>
                         <Paragraph>
-                            This Badge is a special perk for Vencord Donors
+                            This Badge is a special perk for VencordPlusPlus (Not Vencord) Donors
                         </Paragraph>
                         <Paragraph className={Margins.top20}>
-                            Please consider supporting the development of Vencord by becoming a donor. It would mean a lot!!
+                            Please consider supporting the development of VencordPlusPlus by becoming a donor. It would mean a lot! :3
                         </Paragraph>
                     </div>
                 </ModalContent>

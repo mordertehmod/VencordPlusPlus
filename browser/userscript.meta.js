@@ -2,10 +2,10 @@
 // @name            Vencord
 // @description     A Discord client mod - Web version
 // @version         %version%
-// @author          Vendicated (https://github.com/Vendicated)
-// @namespace       https://github.com/Vendicated/Vencord
-// @supportURL      https://github.com/Vendicated/Vencord
-// @icon            https://raw.githubusercontent.com/Vendicated/Vencord/refs/heads/main/browser/icon.png
+// @author          LSDZaddi (https://github.com/mordertehmod)
+// @namespace       https://github.com/mordertehmod/VencordPlusPlus
+// @supportURL      https://github.com/mordertehmod/VencordPlusPlus
+// @icon            https://raw.githubusercontent.com/mordertehmod/VencordPlusPlus/refs/heads/main/browser/icon.png
 // @license         GPL-3.0
 // @match           *://*.discord.com/*
 // @grant           GM_xmlhttpRequest
