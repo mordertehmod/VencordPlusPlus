@@ -296,7 +296,6 @@ export default definePlugin({
     name: "SilentTyping",
     authors: [Devs.Ven, Devs.Rini, Devs.ImBanana, Devs.LSDZaddi],
     description: "Hide your typing indicator from chat.",
-    dependencies: ["ChatInputButtonAPI"],
     isModified: true,
     settings,
 
