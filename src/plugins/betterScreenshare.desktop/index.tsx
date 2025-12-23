@@ -33,7 +33,7 @@ import { initScreenshareAudioStore, initScreenshareStore } from "./stores";
 import { StreamCreateEvent, StreamDeleteEvent } from "./types";
 import { parseStreamKey, stopSendingScreenSharePreview } from "./utilities";
 
-const Button = findComponentByCodeLazy( ".NONE,disabled:", ".PANEL_BUTTON" );
+const Button = findComponentByCodeLazy("tooltipPositionKey", ".greenTooltip")
 
 function screenshareSettingsButton()
 {
