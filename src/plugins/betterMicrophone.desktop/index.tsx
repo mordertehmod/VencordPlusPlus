@@ -27,7 +27,7 @@ import { openMicrophoneSettingsModal } from "./modals";
 import { MicrophonePatcher } from "./patchers";
 import { initMicrophoneStore } from "./stores";
 
-const Button = findComponentByCodeLazy(".NONE,disabled:", ".PANEL_BUTTON");
+const Button = findComponentByCodeLazy("tooltipPositionKey", ".greenTooltip")
 
 function micSettingsButton() {
     const { hideSettingsIcon } = settings.use(["hideSettingsIcon"]);
