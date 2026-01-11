@@ -79,14 +79,6 @@ export default definePlugin({
                     replace: "$& $self.renderIcon({ ...arguments[0], DeviceIcon: $1 }), false &&"
                 }
             ]
-        },
-        // Allow passing custom size to BlobMask
-        {
-            find: "!1,lowerBadgeSize:",
-            replacement: {
-                match: /\i.modules.guildbar.FOLDER_SIZE\),\i=/,
-                replace: "$& arguments[0].size != null ? arguments[0].size : "
-            }
         }
     ],
 
@@ -135,7 +127,6 @@ export default definePlugin({
             <BlobMask
                 isFolder
                 style={{ cursor: "unset" }}
-                size={48}
                 selected={false}
                 lowerBadge={
                     <div
