@@ -88,7 +88,8 @@ export default definePlugin({
     settings,
 
     start() {
-        if(settings.store.organizeMenu) enableStyle(fullHeightStyle);
+        if (settings.store.organizeMenu)
+            enableStyle(fullHeightStyle);
     },
 
     stop() {
