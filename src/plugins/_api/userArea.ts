@@ -4,13 +4,15 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { isPluginEnabled } from "@api/PluginManager";
+import betterUserArea from "@plugins/betterUserArea";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "UserAreaAPI",
     description: "API to add buttons to the user area panel.",
-    authors: [Devs.LSDZaddi],
+    authors: [Devs.Prism],
 
     patches: [
         {
@@ -31,6 +33,6 @@ export default definePlugin({
     },
 
     shouldHideTooltips() {
-        return Vencord.Plugins.isPluginEnabled("BetterUserArea") && Vencord.Plugins.plugins.BetterUserArea.settings?.store?.removeButtonTooltips;
+        return isPluginEnabled(betterUserArea.name) && betterUserArea.settings.store.removeButtonTooltips;
     }
 });
