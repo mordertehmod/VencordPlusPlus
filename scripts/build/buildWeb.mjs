@@ -47,8 +47,8 @@ const commonOptions = {
         IS_STANDALONE: true,
         IS_DEV,
         IS_REPORTER,
-        IS_ANTI_CRASH_TEST,
         IS_COMPANION_TEST,
+        IS_ANTI_CRASH_TEST,
         IS_DISCORD_DESKTOP: false,
         IS_VESKTOP: false,
         IS_UPDATER_DISABLED: true,
@@ -177,14 +177,7 @@ async function buildExtension(target, files) {
 }
 
 const appendCssRuntime = readFile("dist/Vencord.user.css", "utf-8").then(content => {
-    const cssRuntime = `
-;document.addEventListener("DOMContentLoaded", () => document.body.insertAdjacentElement("afterend",
-    Object.assign(document.createElement("style"), {
-        textContent: \`${content.replaceAll("`", "\\`")}\`,
-        id: "vencord-css-core"
-    })
-), { once: true });
-`;
+    const cssRuntime = `unsafeWindow._vcUserScriptRendererCss=\`${content.replaceAll("`", "\\`")}\``;
 
     return appendFile("dist/Vencord.user.js", cssRuntime);
 });

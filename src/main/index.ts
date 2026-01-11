@@ -26,7 +26,7 @@ import { RendererSettings } from "./settings";
 import { IS_VANILLA, THEMES_DIR } from "./utils/constants";
 import { installExt } from "./utils/extensions";
 
-if (IS_VESKTOP || !IS_VANILLA) {
+if (!IS_VANILLA && !IS_EXTENSION) {
     app.whenReady().then(() => {
         protocol.handle("vencord", ({ url: unsafeUrl }) => {
             let url = decodeURI(unsafeUrl).slice("vencord://".length).replace(/\?v=\d+$/, "");
@@ -70,7 +70,6 @@ if (IS_VESKTOP || !IS_VANILLA) {
                     .then(() => console.info("[Vencord] Installed React Developer Tools"))
                     .catch(err => console.error("[Vencord] Failed to install React Developer Tools", err));
         } catch { }
-
 
         initCsp();
     });

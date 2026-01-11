@@ -108,7 +108,7 @@ function PatchHelper() {
 
     return (
         <SettingsTab>
-        <Heading className={Margins.top16}>Patch Helper</Heading>
+            <Heading className={Margins.top16}>Patch Helper</Heading>
             <Paragraph className={Margins.bottom16}>
                 A developer tool to help you create patches for Vencord/VencordPlusPlus/Equicord plugins.
             </Paragraph>

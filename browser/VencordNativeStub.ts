@@ -19,6 +19,8 @@
 /// <reference path="../src/modules.d.ts" />
 /// <reference path="../src/globals.d.ts" />
 
+// Be very careful with imports in this file to avoid circular dependency issues.
+// Only import pure modules that don't import other parts of Vencord.
 import monacoHtmlLocal from "file://monacoWin.html?minify";
 import * as DataStore from "@api/DataStore";
 import type { Settings } from "@api/Settings";
@@ -26,7 +28,7 @@ import { debounce } from "@shared/debounce";
 import { localStorage } from "@utils/localStorage";
 import { getThemeInfo } from "@main/themes";
 import { getStylusWebStoreUrl } from "@utils/web";
-import { EXTENSION_BASE_URL } from "@utils/web-metadata";
+import { EXTENSION_BASE_URL, metaReady, RENDERER_CSS_URL } from "@utils/web-metadata";
 
 // listeners for ipc.on
 const cssListeners = new Set<(css: string) => void>();
@@ -46,6 +48,9 @@ window.VencordNative = {
         getThemesList: () => DataStore.entries(themeStore).then(entries =>
             entries.map(([name, css]) => getThemeInfo(css, name.toString()))
         ),
+        getThemesListNew: () => DataStore.entries(themeStore).then(entries =>
+            entries.map(([name, css]) => ({ fileName: name as string, content: css }))
+        ),
         getThemeData: (fileName: string) => DataStore.get(fileName, themeStore),
         getSystemValues: async () => ({}),
 
@@ -54,7 +59,18 @@ window.VencordNative = {
 
     native: {
         getVersions: () => ({}),
-        openExternal: async (url) => void open(url, "_blank")
+        openExternal: async (url) => void open(url, "_blank"),
+        getRendererCss: async () => {
+            if (IS_USERSCRIPT)
+                // need to wait for next tick for _vcUserScriptRendererCss to be set
+                return Promise.resolve().then(() => window._vcUserScriptRendererCss);
+
+            await metaReady;
+
+            return fetch(RENDERER_CSS_URL)
+                .then(res => res.text());
+        },
+        onRendererCssUpdate: NOOP,
     },
 
     updater: {
@@ -91,18 +107,20 @@ window.VencordNative = {
                 return;
             }
 
-            const { getTheme, Theme } = require("@utils/discord");
-
             win.baseUrl = EXTENSION_BASE_URL;
             win.setCss = setCssDebounced;
             win.getCurrentCss = () => VencordNative.quickCss.get();
-            win.getTheme = () =>
-                getTheme() === Theme.Light
-                    ? "vs-light"
-                    : "vs-dark";
+            win.getTheme = this.getEditorTheme;
 
             win.document.write(monacoHtmlLocal);
         },
+        getEditorTheme: () => {
+            const { getTheme, Theme } = require("@utils/discord");
+
+            return getTheme() === Theme.Light
+                ? "vs-light"
+                : "vs-dark";
+        }
     },
 
     settings: {

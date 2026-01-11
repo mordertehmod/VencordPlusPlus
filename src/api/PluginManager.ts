@@ -48,7 +48,6 @@ import { addUserAreaButton, removeUserAreaButton } from "./UserArea";
 const logger = new Logger("PluginManager", "#a6d189");
 
 export const PMLogger = logger;
-const settings = Settings.plugins;
 
 /** Whether we have subscribed to flux events of all the enabled plugins when FluxDispatcher was ready */
 let enabledPluginsSubscribedFlux = false;
@@ -232,17 +231,17 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (keybinds && Object.keys(keybinds).length) {
         logger.debug("Registering keybinds of plugin", name);
         let warned = false;
+
         for (const keybind of keybinds) {
             try {
-                if (!IS_DISCORD_DESKTOP && keybind.global) { // TODO: maybe check for IS_VESKTOP
+                if (!IS_DISCORD_DESKTOP && keybind.global) {
                     if (!warned) {
                         logger.warn(`${name}: Global keybinds are only supported on desktop`);
                         warned = true;
                     }
                     continue;
                 }
-                const keys = settings[name]?.[keybind.event] ?? [];
-                if (keybindsManager.registerKeybind(keybind, keys)) {
+                if (keybindsManager.registerKeybind(keybind, p.settings?.store[keybind.event] ?? [])) {
                     keybindsManager.enableKeybind(keybind.event, keybind.global);
                 }
             } catch (e) {
@@ -337,7 +336,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
         logger.debug("Unregistering keybinds of plugin", name);
         for (const keybind of keybinds) {
             try {
-                if (!IS_DISCORD_DESKTOP && keybind.global) { // TODO: maybe check for IS_VESKTOP
+                if (!IS_DISCORD_DESKTOP && keybind.global) {
                     continue;
                 }
                 keybindsManager.unregisterKeybind(keybind.event, keybind.global);

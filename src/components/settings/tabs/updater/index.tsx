@@ -56,7 +56,7 @@ function Updater() {
         <SettingsTab>
             <Heading className={Margins.top16}>Update Preferences</Heading>
             <Paragraph className={Margins.bottom20}>
-                Control how Vencord++ keeps itself up to date. You can choose to update automatically in the background or be notified when new updates are available.
+                Control how VencordPlusPlus keeps itself up to date. You can choose to update automatically in the background or be notified when new updates are available.
             </Paragraph>
 
             <FormSwitch

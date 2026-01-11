@@ -50,6 +50,7 @@ export interface NativeSettings {
         };
     };
     customCspRules: Record<string, string[]>;
+    isFirstInstall?: boolean;
 }
 
 const DefaultNativeSettings: NativeSettings = {

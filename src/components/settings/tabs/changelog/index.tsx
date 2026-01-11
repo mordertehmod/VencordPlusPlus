@@ -538,6 +538,7 @@ function ChangelogContent() {
                     </>
                 )}
             </div>
+
             {error && (
                 <ErrorCard style={{ padding: "1em", marginTop: "1em" }}>
                     <Paragraph>{error}</Paragraph>

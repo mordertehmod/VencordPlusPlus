@@ -18,7 +18,7 @@
 
 import { ChannelStore, GuildMemberStore } from "@webpack/common";
 
-import { DevsById } from "./constants";
+import { DevsById, VencordPlusPlusDevsById, VencordPlusPlusMaintainersById } from "./constants";
 
 /**
  * Calls .join(" ") on the arguments
@@ -83,6 +83,14 @@ export const isMobile = navigator.userAgent.includes("Mobi");
 
 export const isPluginDev = (id: string) => Object.hasOwn(DevsById, id);
 export const shouldShowContributorBadge = (id: string) => isPluginDev(id) && DevsById[id].badge !== false;
+
+export const isVencordPlusPlusPluginDev = (id: string) => Object.hasOwn(VencordPlusPlusDevsById, id);
+export const isVencordPlusPlusMaintainer = (id: string) => Object.hasOwn(VencordPlusPlusMaintainersById, id);
+export const shouldShowVencordPlusPlusMaintainerBadge = (id: string) => isVencordPlusPlusMaintainer(id) && VencordPlusPlusMaintainersById[id].badge !== false;
+export const shouldShowVencordPlusPlusContributorBadge = (id: string) => isVencordPlusPlusPluginDev(id) && VencordPlusPlusDevsById[id].badge !== false;
+
+export const isAnyPluginDev = (id: string) => Object.hasOwn(DevsById, id) || Object.hasOwn(VencordPlusPlusDevsById, id);
+
 
 export function pluralise(amount: number, singular: string, plural = singular + "s") {
     return amount === 1 ? `${amount} ${singular}` : `${amount} ${plural}`;

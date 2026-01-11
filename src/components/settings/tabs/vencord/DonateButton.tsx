@@ -15,12 +15,14 @@ export const isDonor = (userId: string) => !!(
     || GuildMemberStore?.getMember(VENCORD_GUILD_ID, userId)?.roles.includes(DONOR_ROLE_ID)
 );
 
-export function DonateButtonComponent() {
+export function DonateButtonComponent({ donated = false }) {
     return (
         <Flex>
             <DonateButton
+                className={!donated ? "vc-donate-support-button" : ""}
                 style={{ marginTop: "1em" }} />
             <InviteButton
+                className={!donated ? "vc-invite-support-button" : ""}
                 style={{ marginTop: "1em" }} />
         </Flex>
     );
