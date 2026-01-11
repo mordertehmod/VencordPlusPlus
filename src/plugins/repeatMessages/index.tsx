@@ -1,24 +1,13 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2025 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import { findGroupChildrenByChildId, NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { classNameFactory } from "@api/Styles";
+import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import { sendMessage } from "@utils/discord";
 import { useForceUpdater } from "@utils/react";
 import definePlugin from "@utils/types";
@@ -139,10 +128,11 @@ const keydownListener = (event: KeyboardEvent) => {
     if (event.key === "Shift") shift = true;
 };
 
+migratePluginSettings("RepeatMessages", "RepeatMessage");
 export default definePlugin({
-    name: "RepeatMessage",
+    name: "RepeatMessages",
     description: "Allows you to repeat messages quickly. If you hold shift while clicking the Repeat option, it will reply to the message.",
-    authors: [Devs.LSDZaddi],
+    authors: [Devs.thororen],
     contextMenus: {
         "message": messageCtxPatch
     },
