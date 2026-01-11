@@ -7,6 +7,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
+import { FormSwitch } from "@components/FormSwitch";
 import { Devs } from "@utils/constants";
 import { closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
@@ -63,12 +64,11 @@ const settings = definePluginSettings({
 function ToggleModal() {
     const value = !settings.use(["showConfirmationModal"]).showConfirmationModal;
     return (
-        <Switch
-            note="You can re-enable this setting later"
+        <FormSwitch
+            title="You can re-enable this setting later"
             value={value}
             onChange={v => { settings.store.showConfirmationModal = !v; }}>
-            Disable modal?
-        </Switch>
+        </FormSwitch>
     );
 }
 
