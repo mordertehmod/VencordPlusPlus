@@ -1,5 +1,5 @@
 /*
- * Vencord, a modification for Discord's desktop app
+ * Vencord, a Discord client mod
  * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -57,7 +57,7 @@ const settings = definePluginSettings({
     customEngineURL: {
         description: "The URL of the Engine you wish to use",
         type: OptionType.STRING,
-        placeholder: "https://search.vmohammad.dev/?q="
+        placeholder: ""
     }
 });
 
