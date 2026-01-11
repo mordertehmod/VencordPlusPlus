@@ -44,13 +44,15 @@ interface IMessageCreate {
 const ChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
     [enabled, setEnabled] = useState(false);
     const [buttonDisabled, setButtonDisabled] = useState(false);
+    const currentChannel = getCurrentChannel()?.id;
 
     useEffect(() => {
         const listener: MessageSendListener = async (_, message) => {
             if (enabled) {
                 const groupChannel = await DataStore.get("encryptcordChannelId");
-                if (getCurrentChannel().id !== groupChannel) {
-                    sendBotMessage(getCurrentChannel().id, { content: `You must be in <#${groupChannel}> to send an encrypted message!\n> If you wish to send an unencrypted message, please click the button in the chatbar.` });
+                if (currentChannel !== undefined && currentChannel !== groupChannel)
+                {
+                    sendBotMessage(currentChannel, { content: `You must be in <#${groupChannel}> to send an encrypted message!\n> If you wish to send an unencrypted message, please click the button in the chatbar.` });
                     message.content = "";
                     return;
                 }
@@ -75,24 +77,23 @@ const ChatBarIcon: ChatBarButtonFactory = ({ isMainChat }) => {
     }, [enabled]);
 
     if (!isMainChat) return null;
-
     return (
         <ChatBarButton
             tooltip={enabled ? "Send Unencrypted Messages" : "Send Encrypted Messages"}
             onClick={async () => {
-                if (await DataStore.get("encryptcordGroup") === false || (await DataStore.get("encryptcordChannelId") !== getCurrentChannel().id)) {
+                if (await DataStore.get("encryptcordGroup") === false || (await DataStore.get("encryptcordChannelId") !== currentChannel)) {
                     setButtonDisabled(true);
-                    await sendTempMessage(getCurrentChannel().id, "", `join\`\`\`\n${await DataStore.get("encryptcordPublicKey")}\`\`\``, false);
-                    sendBotMessage(getCurrentChannel().id, { content: `*Checking for any groups in this channel...*\n> If none is found, a new one will be created <t:${Math.floor(Date.now() / 1000) + 5}:R>\n> [Tip] You can do \`/encryptcord leave\` to leave a group` });
+                    await sendTempMessage(currentChannel ?? "", "", `join\`\`\`\n${await DataStore.get("encryptcordPublicKey")}\`\`\``, false);
+                    sendBotMessage(currentChannel ?? "", { content: `*Checking for any groups in this channel...*\n> If none is found, a new one will be created <t:${Math.floor(Date.now() / 1000) + 5}:R>\n> [Tip] You can do \`/encryptcord leave\` to leave a group` });
                     await sleep(5000);
-                    if (await DataStore.get("encryptcordGroup") === true && (await DataStore.get("encryptcordChannelId") !== getCurrentChannel().id)) {
-                        sendBotMessage(getCurrentChannel().id, { content: "*Leaving current group...*" });
+                    if (await DataStore.get("encryptcordGroup") === true && (await DataStore.get("encryptcordChannelId") !== currentChannel)) {
+                        sendBotMessage(currentChannel ?? "", { content: "*Leaving current group...*" });
                         await leave("", { channel: { id: await DataStore.get("encryptcordChannelId") } });
                     } else if (await DataStore.get("encryptcordGroup") === true) {
                         setButtonDisabled(false);
                         return;
                     }
-                    await startGroup("", { channel: { id: getCurrentChannel().id } });
+                    await startGroup("", { channel: { id: currentChannel } });
                 }
                 setEnabled(!enabled);
                 setButtonDisabled(false);
