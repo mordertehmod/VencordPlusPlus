@@ -76,7 +76,7 @@ export default definePlugin({
     name: "HideChatButtons",
     description: "able to hide the chat buttons",
     settings: settings,
-    authors: [Devs.LSDZaddi],
+    authors: [Devs.iamme, Devs.LSDZaddi],
     patches: [
         {
             find: '"sticker")',
