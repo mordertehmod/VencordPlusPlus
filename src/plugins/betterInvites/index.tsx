@@ -11,6 +11,7 @@ import { Devs } from "@utils/constants";
 import { openUserProfile } from "@utils/discord";
 import { classes } from "@utils/misc";
 import definePlugin, { StartAt } from "@utils/types";
+import { Guild } from "@vencord/discord-types";
 import { findByPropsLazy } from "@webpack";
 import { Parser, Tooltip, UserStore } from "@webpack/common";
 
@@ -33,7 +34,7 @@ function lurk(id: string) {
 export default definePlugin({
     name: "BetterInvites",
     description: "See invites expiration date, view inviter profile and preview discoverable servers before joining by clicking their name",
-    authors: [Devs.thororen, Devs.LSDZaddi],
+    authors: [Devs.iamme, Devs.thororen, Devs.LSDZaddi],
     isModified: true,
     patches: [
         {
@@ -49,20 +50,14 @@ export default definePlugin({
             find: ".guildNameContainer,onClick:",
             replacement: [
                 {
-                    match: /children:\i\.name\}\).{0,100}\.guildNameContainer/,
-                    replace: "onClick:$self.Lurkable(arguments[0].invite?.guild?.id,arguments[0].invite?.guild?.features),$&"
+                    // make the button clickable
+                    match: /children:(\i)\.name\}\).{0,100}\.guildNameContainer/,
+                    replace: "onClick:$self.Lurkable($1),$&"
                 },
                 {
-                    match: /\.nameContainer.{0,100}disableGuildNameClick:\i/,
-                    replace: "$&,invite:arguments[0].invite"
-                },
-                {
-                    match: /disableGuildNameClick:\i.{0,50}\}\),\i/,
-                    replace: "$&,$self.RenderTip(arguments[0].invite?.expires_at)"
-                },
-                {
-                    match: /\.nameContainer.{0,200}\]\}\)/,
-                    replace: "$&,$self.Header(arguments[0].invite?.inviter,arguments[0].profile.name)"
+                    // tip gets inserted in the name container, header gets inserted beside it
+                    match: /(:(\i),disableGuildNameClick:.{0,20}\}\),\i)(\]\}\))/,
+                    replace: "$1,$self.RenderTip(arguments[0].invite?.expires_at)$3,$self.Header(arguments[0].invite?.inviter,$2.name)"
                 }
             ]
         },
@@ -104,15 +99,14 @@ export default definePlugin({
                         : "/assets/1f0bfc0865d324c2587920a7d80c609b.png?size=128"}
                 />
                 <div className="vc-bi-header-text">
-                    {inviter.username} invited you to {guildName}
+                    {inviter.global_name || inviter.username} invited you to {guildName}
                 </div>
             </div>
         );
     },
-    Lurkable: (id: string, features: Iterable<string> | undefined) => {
-        if (!id || !features) return null;
-        return new Set(features).has("DISCOVERABLE") ? () => lurk(id) : null;
+    Lurkable: (guild?: Guild) => {
+        if (!guild) return null;
+        return new Set(guild.features).has("DISCOVERABLE") ? () => lurk(guild.id) : null;
     },
     startAt: StartAt.WebpackReady
 });
-
