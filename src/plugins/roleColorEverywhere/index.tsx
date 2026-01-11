@@ -16,15 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { definePluginSettings, Settings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
-import { findByCodeLazy } from "@webpack";
+import { findByCodeLazy, findByPropsLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildRoleStore, GuildStore, UserStore } from "@webpack/common";
 
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
+const usernameFont = findByPropsLazy("usernameFont");
+const usernameGradient = findByPropsLazy("usernameGradient");
+const fonts = findByPropsLazy("dnsFont"); // Default font
 
 const settings = definePluginSettings({
     chatMentions: {
@@ -105,8 +108,8 @@ export default definePlugin({
             find: 'tutorialId:"whos-online',
             replacement: [
                 {
-                    match: /null,\i," — ",\i\]/,
-                    replace: "null,$self.RoleGroupColor(arguments[0])]"
+                    match: /(?<=\.roleIcon.{0,15}:null,).{0,150}— ",\i\]\}\)\]/,
+                    replace: "$self.RoleGroupColor(arguments[0])]"
                 },
             ],
             predicate: () => settings.store.memberList
@@ -127,7 +130,7 @@ export default definePlugin({
             replacement: [
                 {
                     match: /\.usernameSpeaking\]:.+?,(?=children)(?<=guildId:(\i),.+?user:(\i).+?)/,
-                    replace: "$&style:$self.getColorStyle($2.id,$1),"
+                    replace: "$&style:$self.getColorStyle($2.id,$1),className:$self.getColorClass($2.id,$1),"
                 }
             ],
             predicate: () => settings.store.voiceUsers
@@ -146,7 +149,7 @@ export default definePlugin({
             find: ",reactionVoteCounts",
             replacement: {
                 match: /\.name,(?="aria-label)/,
-                replace: "$&style:$self.getColorStyle(arguments[0]?.user?.id,arguments[0]?.channel?.id),"
+                replace: "$&style:$self.getColorStyle(arguments[0]?.user?.id,arguments[0]?.channel?.id),className:$self.getPollResultColorClass(arguments[0]?.user?.id,arguments[0]?.channel?.id),"
             },
             predicate: () => settings.store.pollResults
         },
@@ -164,18 +167,18 @@ export default definePlugin({
     getDisplayNameFont(userId: string) {
         try {
             const user = UserStore.getUser(userId);
-            const fontId = user?.displayNameStyles?.fontId;
+            const fontId = user?.displayNameStyles?.font_id;
 
-            if (!fontId || Number(fontId) === 1) return "";
+            if (!fontId || Number(fontId) === 1) return fonts.dnsFont;
 
             const fontClasses: Record<number, string> = {
-                2: "zillaSlab__89a31",
-                3: "cherryBomb__89a31",
-                4: "chicle__89a31",
-                5: "museoModerno__89a31",
-                6: "neoCastel__89a31",
-                7: "pixelify__89a31",
-                8: "sinistre__89a31"
+                2: fonts.zillaSlab,
+                3: fonts.cherryBomb,
+                4: fonts.chicle,
+                5: fonts.museoModerno,
+                6: fonts.neoCastel,
+                7: fonts.pixelify,
+                8: fonts.sinistre
             };
 
             return fontClasses[Number(fontId)] || "";
@@ -217,15 +220,15 @@ export default definePlugin({
     getColorClass(userId: string, channelOrGuildId: string) {
         const fontClass = this.getDisplayNameFont(userId);
         const baseClass = this.getColorString(userId, channelOrGuildId)?.secondaryColor
-            ? "usernameFont__07f91 username__07f91 twoColorGradient_e5de78 usernameGradient_e5de78 "
-            : "usernameFont__07f91 username__07f91 ";
+            ? `${usernameFont.usernameFont} ${usernameFont.username} ${usernameGradient.twoColorGradient} ${usernameGradient.usernameGradient} `
+            : `${usernameFont.usernameFont} ${usernameFont.username} `;
         return fontClass ? `${baseClass}${fontClass}` : baseClass;
     },
 
     getPollResultColorClass(userId: string, channelOrGuildId: string) {
         const fontClass = this.getDisplayNameFont(userId);
         const baseClass = this.getColorString(userId, channelOrGuildId)?.secondaryColor
-            ? "twoColorGradient_e5de78 usernameGradient_e5de78 "
+            ? `${usernameGradient.twoColorGradient} ${usernameGradient.usernameGradient} `
             : "";
         return fontClass ? `${baseClass} ${fontClass}`.trim() : baseClass;
     },
@@ -235,12 +238,15 @@ export default definePlugin({
             const { messageSaturation } = settings.use(["messageSaturation"]);
             const author = useMessageAuthor(message);
 
+            // Do not apply role color if the send fails, otherwise it becomes indistinguishable if the message is sent
+            if (message.state !== "SENT") return;
+
             if (author.colorString != null && messageSaturation !== 0) {
                 const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
 
                 return {
                     color: value.replace("{DEFAULT}", "--text-default"),
-                    "--text-strong": value.replace("{DEFAULT}", "--header-primary"),
+                    "--text-strong": value.replace("{DEFAULT}", "--text-strong"),
                     "--text-muted": value.replace("{DEFAULT}", "--text-muted")
                 };
             }
@@ -262,7 +268,7 @@ export default definePlugin({
         let className = "";
 
         if (cs) {
-            if (cs.secondaryColor) className = "twoColorGradient_e5de78 usernameGradient_e5de78";
+            if (cs.secondaryColor) className = `${usernameGradient.twoColorGradient} ${usernameGradient.usernameGradient}`;
             style["--custom-gradient-color-1" as any] = cs.primaryColor;
             style["--custom-gradient-color-2" as any] = cs.secondaryColor;
             style["--custom-gradient-color-3" as any] = cs.tertiaryColor ?? cs.primaryColor;
