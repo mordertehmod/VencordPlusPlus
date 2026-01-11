@@ -96,7 +96,6 @@ export default definePlugin({
                 }
             ]
         },
-        // Messages
         ...[
             '"Message Username"', // Messages
             ".nameplatePreview,{", // Nameplate preview

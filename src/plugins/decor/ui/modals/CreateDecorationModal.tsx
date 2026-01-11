@@ -76,7 +76,7 @@ function CreateDecorationModal(props: ModalProps) {
                 Create Decoration
             </BaseText>
             <ModalCloseButton onClick={props.onClose} />
-        </ModalHeader>
+        </ModalHeader >
         <ModalContent
             className={cl("create-decoration-modal-content")}
             scrollbarType="none"
@@ -167,7 +167,7 @@ function CreateDecorationModal(props: ModalProps) {
                 </Button>
             </div>
         </ModalFooter>
-    </ModalRoot>;
+    </ModalRoot >;
 }
 
 export const openCreateDecorationModal = () =>
