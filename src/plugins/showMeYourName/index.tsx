@@ -894,8 +894,8 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "ShowMeYourName",
     description: "Display any permutation of custom nicknames, friend nicknames, server nicknames, display names, and usernames in chat.",
-    authors: [Devs.Rini, Devs.TheKodeToad, Devs.sadan, Devs.LSDZaddi],
-    tags: ["SMYN", "Nicknames", "Custom Nicknames"],
+    authors: [Devs.Rini, Devs.TheKodeToad, Devs.sadan, Devs.Prism, Devs.LSDZaddi],
+    tags: ["SMYN", "Nicknames", "Custom Nicknames",],
     isModified: true,
     settings,
 
@@ -969,7 +969,7 @@ export default definePlugin({
             // Tags *should* contain the guild ID nested in its structure, but on the first time
             // loading a guild member's preview profile, it will be undefined. This patch bypasses
             // that by passing the guild ID as its own prop.
-            find: ".hasAvatarForGuild(null==",
+            find: "\"UserProfilePopoutBody\"}",
             replacement: {
                 match: /(pronouns,tags:)/,
                 replace: "pronouns,guildId:arguments[0]?.guild?.id??null,tags:"
@@ -977,7 +977,7 @@ export default definePlugin({
         },
         {
             // Same as above, but for bot members.
-            find: "BotUserProfilePopoutBody\"}",
+            find: "popularApplicationCommandIds)!=null&&null",
             replacement: {
                 match: /(pronouns,tags:)/,
                 replace: "pronouns,guildId:arguments[0]?.guild?.id??null,tags:"
