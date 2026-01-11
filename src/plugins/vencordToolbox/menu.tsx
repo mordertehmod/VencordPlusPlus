@@ -315,4 +315,3 @@ export function renderPopout(onClose: () => void) {
         </Menu.Menu >
     );
 }
-

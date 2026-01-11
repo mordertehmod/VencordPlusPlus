@@ -20,7 +20,6 @@ import "./styles.css";
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
-import { classNameFactory } from "@api/Styles";
 import { Card } from "@components/Card";
 import { Heading } from "@components/Heading";
 import { Microphone } from "@components/Icons";
@@ -28,6 +27,7 @@ import { Link } from "@components/Link";
 import { Paragraph } from "@components/Paragraph";
 import { lastState as silentMessageEnabled } from "@plugins/silentMessageToggle";
 import { Devs } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
@@ -283,7 +283,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "VoiceMessages",
     description: "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message.",
-    authors: [Devs.Ven, Devs.Vap, Devs.Nickyux, Devs.LSDZaddi],
+    authors: [Devs.Ven, Devs.Vap, Devs.Nickyux, Devs.Prism, Devs.LSDZaddi],
     settings,
 
     contextMenus: {

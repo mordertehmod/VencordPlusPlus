@@ -124,7 +124,6 @@ const RenderStatusMenuItem = ({ status, update, disabled }: { status: DiscordSta
     </div >;
 };
 
-
 const StatusSubMenuComponent = () => {
     const premiumType = OverridePremiumTypeStore.getState().premiumTypeActual ?? 0;
     const update = useForceUpdater();
@@ -143,11 +142,10 @@ const StatusSubMenuComponent = () => {
     </Menu.Menu>;
 };
 
-
 export default definePlugin({
     name: "StatusPresets",
     description: "Allows you to remember your statuses and set them later",
-    authors: [Devs.LSDZaddi],
+    authors: [Devs.iamme, Devs.LSDZaddi],
     settings: settings,
     dependencies: ["UserSettingsAPI"],
     managedStyle,
