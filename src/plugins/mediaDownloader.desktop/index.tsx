@@ -16,9 +16,12 @@ import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import { openModal } from "@utils/modal";
 import definePlugin, { OptionType, PluginNative, ReporterTestable } from "@utils/types";
-import { Button, DraftType, FluxDispatcher, Forms, UploadHandler, UploadManager, UserStore } from "@webpack/common";
+import { DraftType, FluxDispatcher, UploadHandler, UploadManager, UserStore } from "@webpack/common";
 
 import { DependencyModal } from "./DependencyModal";
+import { Button } from "@components/Button";
+import { Paragraph } from "@components/Paragraph";
+import { Divider } from "@components/Divider";
 
 type ButtonComponent = {
     customId?: string;
@@ -67,10 +70,11 @@ function mimetype(extension: "mp4" | "webm" | "gif" | "mp3" | string) {
 
 const CancelButton = [{
     components: [{
-        customId: "media-downloader-stop-download", // ! for some reason customId is always undefined, so I'm just saving the id in the emoji animated field :3
+        custom_id: "media-downloader-stop-download", // ! for some reason customId is always undefined, so I'm just saving the id in the emoji animated field :3
         emoji: {
+            id: "media-downloader-stop-download",
             name: "⚪",
-            animated: "media-downloader-stop-download"
+            animated: true
         },
         label: "Cancel download",
         id: "0,0",
@@ -146,14 +150,14 @@ const settings = definePluginSettings({
         default: "none",
         component: () => (
             <>
-                <Forms.FormText>
+                <Paragraph>
                     <Link href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" className="media-downloader-link">
                         <Button role="link" style={{ width: "100%" }}>
                             Click to see supported websites.
                         </Button>
                     </Link>
-                </Forms.FormText>
-                <Forms.FormDivider />
+                </Paragraph>
+                <Divider />
             </>
         )
     },
