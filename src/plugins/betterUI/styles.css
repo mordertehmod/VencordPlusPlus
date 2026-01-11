@@ -1,0 +1,93 @@
+.vc-betterui-tabbar {
+    margin-bottom: 16px;
+    flex-wrap: wrap !important;
+    gap: 8px 16px;
+}
+
+.vc-betterui-tabbar > div {
+    flex-wrap: wrap !important;
+    gap: 8px 16px;
+}
+
+.vc-betterui-tab {
+    padding: 8px 12px;
+    margin: 0 !important;
+}
+
+.vc-betterui-tab .top {
+    font-size: 5px !important;
+}
+
+.vc-betterui-content {
+    padding-top: 16px;
+}
+
+.vc-betterui-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vc-betterui-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.vc-betterui-grid-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.vc-betterui-switch-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--background-secondary);
+    border-radius: 4px;
+}
+
+.vc-betterui-demo-button {
+    padding: 8px 16px;
+    background: var(--background-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    color: var(--text-normal);
+    cursor: pointer;
+}
+
+.vc-betterui-demo-button:hover {
+    background: var(--background-secondary-alt);
+}
+
+.vc-betterui-modal-header {
+    display: flex;
+    align-items: flex-start;
+    position: relative;
+}
+
+.vc-betterui-modal-header-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.vc-betterui-modal-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.vc-betterui-modal-content {
+    padding-bottom: var(--space-16);
+}
+
+.vc-betterui-modal-footer {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 8px;
+}
