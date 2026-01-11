@@ -21,7 +21,6 @@ import { SetColorModal } from "./SetColorModal";
 export const DATASTORE_KEY = "vencord-customcolors";
 export let colors: Record<string, string> = {};
 
-
 (async () => {
     colors = await get<Record<string, string>>(DATASTORE_KEY) || {};
 })();
