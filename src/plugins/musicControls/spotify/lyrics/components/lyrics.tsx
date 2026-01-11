@@ -5,11 +5,12 @@
  */
 
 import { BaseText } from "@components/BaseText";
+import { TooltipContainer } from "@components/TooltipContainer";
 import { settings } from "@plugins/musicControls/settings";
 import { SpotifyLrcStore } from "@plugins/musicControls/spotify/lyrics/providers/store";
 import { SpotifyStore } from "@plugins/musicControls/spotify/SpotifyStore";
 import { openModal } from "@utils/modal";
-import { ContextMenuApi, React, TooltipContainer, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenuApi, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { LyricsContextMenu } from "./ctxMenu";
 import { LyricsModal } from "./modal";

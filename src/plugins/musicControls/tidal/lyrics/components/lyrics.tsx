@@ -5,11 +5,12 @@
  */
 
 import { BaseText } from "@components/BaseText";
+import { TooltipContainer } from "@components/TooltipContainer";
 import { settings } from "@plugins/musicControls/settings";
 import { TidalLrcStore } from "@plugins/musicControls/tidal/lyrics/providers/store";
 import { TidalStore } from "@plugins/musicControls/tidal/TidalStore";
 import { openModal } from "@utils/modal";
-import { ContextMenuApi, TooltipContainer, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenuApi, useEffect, useState, useStateFromStores } from "@webpack/common";
 
 import { LyricsContextMenu } from "./ctxMenu";
 import { LyricsModal } from "./modal";
