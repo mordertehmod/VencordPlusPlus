@@ -1,49 +1,97 @@
 {
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Vencord Reporter",
+            "label": "Build",
             "type": "shell",
-            "command": "pnpm build --dev --reporter --companion-test",
+            "command": "pnpm build",
             "group": {
                 "kind": "build",
-                "isDefault": false
-            },
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": false
-            },
-            "isBackground": false,
-            "problemMatcher": [],
-            "runOptions": {
-                "runOn": "default"
+                "isDefault": true
             }
         },
         {
-            "label": "Vencord Build",
+            "label": "Build Dev",
             "type": "shell",
             "command": "pnpm build --dev",
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            },
+            "group": "build"
+        },
+        {
+            // for use with the vencord companion extension
+            "label": "Build Companion Reporter",
+            "type": "shell",
+            "command": "pnpm build --dev --reporter --companion-test",
             "presentation": {
                 "echo": true,
-                "reveal": "always",
-                "focus": false,
+                "reveal": "silent",
                 "panel": "shared",
                 "showReuseMessage": true,
-                "clear": false
-            },
-            "isBackground": false,
-            "problemMatcher": [],
-            "runOptions": {
-                "runOn": "default"
+                "clear": true
             }
+        },
+        {
+            "label": "Watch",
+            "type": "shell",
+            "command": "pnpm watch",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build"
+            }
+        },
+        {
+            "label": "Watch Dev",
+            "type": "shell",
+            "command": "pnpm watch --dev",
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": {
+                    "regexp": "^$"
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".",
+                    "endsPattern": "watching for file changes"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "Launch Discord with Debugging",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-Command",
+                "& (Get-ChildItem \"$env:LOCALAPPDATA\\Discord\\app-*\\Discord.exe\" | Sort-Object Name -Descending | Select-Object -First 1).FullName --remote-debugging-port=9223 --inspect"
+            ],
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": {
+                    "regexp": "^$"
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": ".",
+                    "endsPattern": "."
+                }
+            },
+            "presentation": {
+                "reveal": "never"
+            }
+        },
+        {
+            "label": "Build and Launch Discord",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "Start Vencord Watch",
+                "Launch Discord with Debugging"
+            ],
+            "problemMatcher": []
         }
     ]
 }

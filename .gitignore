@@ -29,3 +29,5 @@ ExtensionCache/
 TODO.txt
 # vencord companion module cache
 .modules
+.recovery-backup/**
+**/.txt
