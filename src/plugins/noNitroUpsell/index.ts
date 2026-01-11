@@ -1,6 +1,6 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2023 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2024 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -11,11 +11,11 @@ import { OverridePremiumTypeStore } from "@webpack/common";
 export default definePlugin({
     name: "NoNitroUpsell",
     description: "Removes ALL of Discord's nitro upsells by tricking the client into thinking you have nitro.",
-    authors: [Devs.LSDZaddi],
+    authors: [Devs.thororen],
     flux: {
         CONNECTION_OPEN() {
             const state = OverridePremiumTypeStore.getState();
-            if (state.premiumTypeActual !== 2 || state.premiumTypeOveride === 2) return;
+            if (state.premiumTypeActual !== 2 || state.premiumTypeOverride === 2) return;
             state.premiumTypeOverride = 2;
         }
     },
