@@ -21,10 +21,11 @@ import "./style.css";
 import { HeaderBarButton } from "@api/HeaderBar";
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
-import { Alert } from "@components/Alert";
+import { Notice } from "@components/Notice";
 import { Devs } from "@utils/constants";
 import { getTheme, Theme } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
+import { GuildChannels } from "@vencord/discord-types";
 import { findByPropsLazy, findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { ChannelStore, FluxDispatcher, GuildChannelStore, NavigationRouter, RestAPI, UserStore } from "@webpack/common";
 
@@ -176,7 +177,7 @@ async function openCompleteQuestUI() {
             };
             FluxDispatcher.subscribe("QUESTS_SEND_HEARTBEAT_SUCCESS", fn);
         } else if (taskName === "PLAY_ACTIVITY") {
-            const channelId = ChannelStore.getSortedPrivateChannels()[0]?.id ?? Object.values(GuildChannelStore.getAllGuilds() as any[]).find(x => x != null && x.VOCAL.length > 0).VOCAL[0].channel.id;
+            const channelId = ChannelStore.getSortedPrivateChannels()[0]?.id ?? Object.values(GuildChannelStore.getAllGuilds() as unknown as any[]).find(x => x != null && x.VOCAL.length > 0).VOCAL[0].channel.id;
             const streamKey = `call:${channelId}:1`;
 
             const fn = async () => {
@@ -220,9 +221,9 @@ export default definePlugin({
     authors: [Devs.amia, Devs.LSDZaddi],
     settings,
     settingsAboutComponent: () => (
-        <Alert.Info>
+        <Notice.Info>
             You must manually accept the quest first before clicking the button.
-        </Alert.Info>
+        </Notice.Info>
     ),
     headerBarButton: {
         icon: QuestIcon,
