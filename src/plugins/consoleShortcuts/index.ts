@@ -255,7 +255,6 @@ export default definePlugin({
         }
     ],
 
-
     start() {
         const shortcuts = makeShortcuts();
         window.shortcutList = {};
