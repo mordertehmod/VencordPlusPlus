@@ -1,10 +1,3 @@
-/*
- * Vencord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
- * SPDX-License-Identifier: GPL-3.0-or-later
- */
-
-import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { findComponentByCodeLazy } from "@webpack";
@@ -13,9 +6,11 @@ import { React, showToast, Toasts ,VoiceActions } from "@webpack/common";
 import { FakeDeafenIcon } from "./Icon";
 import { settings } from "./settings";
 
+// TODO: Fix this shit fully later
+
 let isFakeDeafened = false;
 const listeners = new Set<() => void>();
-const Button = findComponentByCodeLazy("tooltipPositionKey", "positionKeyStemOverride");
+const Button = findComponentByCodeLazy("tooltipPositionKey", "positionKeyStemOverride")
 
 function useFakeDeafen() {
     const [, forceUpdate] = React.useReducer(x => x + 1, 0);
@@ -147,15 +142,13 @@ export default definePlugin({
                 match: /self_mute:([^,]+),self_deaf:([^,]+),self_video:([^,]+)/,
                 replace: "self_mute:$self.toggle($1,'mute'),self_deaf:$self.toggle($2,'deaf'),self_video:$self.toggle($3,'video')"
             }
-        },
-        {
-            find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
-            replacement: {
-                match: /className:\i\.buttons,.{0,50}children:\[/,
-                replace: "$&$self.fakeDeafenToggleButton(),"
-            }
         }
     ],
+
+    userAreaButton: {
+        icon: () => <FakeDeafenIcon isActive={useFakeDeafen()} />,
+        render: fakeDeafenToggleButton
+    },
 
     toggle(actual: boolean, type: string) {
         if (!isFakeDeafened) return actual;
@@ -167,8 +160,5 @@ export default definePlugin({
         }
     },
 
-    fakeDeafenToggleButton: ErrorBoundary.wrap(fakeDeafenToggleButton, { noop: true }),
-
     fakeDeafenStore,
-    useFakeDeafen
 });
