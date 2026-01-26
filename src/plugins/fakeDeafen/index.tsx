@@ -15,7 +15,7 @@ import { settings } from "./settings";
 
 let isFakeDeafened = false;
 const listeners = new Set<() => void>();
-const Button = findComponentByCodeLazy("tooltipPositionKey", ".greenTooltip")
+const Button = findComponentByCodeLazy("tooltipPositionKey", "positionKeyStemOverride");
 
 function useFakeDeafen() {
     const [, forceUpdate] = React.useReducer(x => x + 1, 0);
