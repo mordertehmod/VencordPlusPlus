@@ -22,8 +22,6 @@ import { ThemeStore } from "@vencord/discord-types";
 import { PopoutWindowStore } from "@webpack/common";
 
 import { userStyleRootNode, vencordRootNode } from "./Styles";
-// import { waitForStore } from "@webpack/common/internal";
-// import { Logger } from "@utils/Logger";
 
 let style: HTMLStyleElement;
 let themesStyle: HTMLStyleElement;
@@ -95,15 +93,6 @@ function applyToPopout(popoutWindow: Window | undefined, key: string) {
     doc.documentElement.appendChild(vencordRootNode.cloneNode(true));
 }
 
-/*
-function checkStoreReady(): boolean {
-    waitForStore("PopoutWindowStore", () => {
-        console.log("idfk wtf this doin");
-    });
-    return true;
-}
-*/
-
 function updatePopoutWindows() {
     if (!PopoutWindowStore) return;
 
@@ -111,38 +100,6 @@ function updatePopoutWindows() {
         applyToPopout(PopoutWindowStore.getWindow(key), key);
     }
 }
-
-/*
-function updatePopoutWindowsTest() {
-    const themeAPI = new Logger("[ThemesAPI]", "#ff00ddff");
-    if(checkStoreReady()) {
-        try {
-            const windowKeys = PopoutWindowStore.getWindowKeys();
-            if (!windowKeys?.length) throw new Error(`Store was ready, but for some reason it's value is bad. windowKeys: ${windowKeys}`);
-
-            themeAPI.info("windowKeys returned: ", windowKeys);
-            console.log("windowKeys returned: ", windowKeys);
-
-            for (const key of windowKeys) {
-                const popoutWindow = PopoutWindowStore.getWindow(key);
-                themeAPI.info("popoutWindow returned: ", popoutWindow);
-                console.info("popoutWindow returned: ", popoutWindow);
-                applyToPopout(popoutWindow);
-                themeAPI.info("applyToPopout called");
-                console.info("applyToPopout called");
-            }
-        } catch (error){
-            themeAPI.error(`updatePopoutWindows - windowKeys returned invalid data: ${PopoutWindowStore.getWindowKeys()}`);
-            themeAPI.error(`updatePopoutWindows - Exception captured: ${error}`);
-
-            console.error(`[ThemesAPI]updatePopoutWindows - windowKeys returned invalid data: ${PopoutWindowStore.getWindowKeys()}`);
-            console.error(`[ThemesAPI]updatePopoutWindows - Exception captured: ${error}`);
-        }
-    } else {
-        throw new Error("Store wasn't ready :( trying again");
-    }
-}
-*/
 
 document.addEventListener("DOMContentLoaded", () => {
     if (IS_USERSCRIPT) return;

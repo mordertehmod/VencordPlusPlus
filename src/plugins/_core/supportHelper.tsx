@@ -66,6 +66,16 @@ const ShowEmbeds = getUserSettingLazy<boolean>("textAndImages", "renderEmbeds")!
 
 const isSupportAllowedChannel = (channel: Channel) => channel.parent_id === SUPPORT_CATEGORY_ID || AdditionalAllowedChannelIds.includes(channel.id);
 
+interface clientData {
+    name: string;
+    version?: string | null | undefined;
+    info?: string | boolean | null | undefined;
+    spoofed?: string | null | undefined;
+    shortHash?: string | null | undefined;
+    hash?: string | null | undefined;
+    dev?: boolean | null | undefined;
+}
+
 async function forceUpdate() {
     const outdated = await checkForUpdates();
     if (outdated) {
