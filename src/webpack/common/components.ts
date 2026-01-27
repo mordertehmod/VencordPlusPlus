@@ -50,8 +50,6 @@ export const Button = ButtonCompat;
 /** @deprecated Use FormSwitch from Vencord */
 export const Switch = FormSwitchCompat as never;
 
-/** @deprecated Use Card from Vencord */
-export const Card = waitForComponent<never>("Card", filters.componentByCode(".editable),", ".outline:"));
 export const Checkbox = waitForComponent<t.Checkbox>("Checkbox", filters.componentByCode('"data-toggleable-component":"checkbox'));
 export const Keybind = waitForComponent<t.GlobalKeybind>("Keybind", filters.componentByCode("=this.handleComboKeys"));
 
