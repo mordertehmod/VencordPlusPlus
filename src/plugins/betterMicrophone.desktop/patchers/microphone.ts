@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Emitter, MediaEngineStore, Patcher, types } from "../../philsPluginLibraryVisualRefresh";
-import { patchConnectionAudioTransportOptions } from "../../philsPluginLibraryVisualRefresh/patches/audio";
-import { PluginInfo } from "../constants";
-import { logger } from "../logger";
-import { microphoneStore } from "../stores";
+import { Emitter, MediaEngineStore, Patcher, types } from "@plugins/philsPluginLibraryVisualRefresh";
+import { patchConnectionAudioTransportOptions } from "@plugins/philsPluginLibraryVisualRefresh/patches/audio";
+import { PluginInfo } from "@plugins/betterMicrophone.desktop/constants";
+import { logger } from "@plugins/betterMicrophone.desktop/logger";
+import { microphoneStore } from "@plugins/betterMicrophone.desktop/stores";
 
 export class MicrophonePatcher extends Patcher {
     private mediaEngineStore: types.MediaEngineStore;
