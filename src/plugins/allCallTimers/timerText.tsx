@@ -6,10 +6,10 @@
 
 export function TimerText({ text, className, style }: Readonly<{ text: string; className: string; style?: React.CSSProperties; }>) {
     return <div className={`timeCounter ${className}`} style={{
-        marginTop: -6, // this margin value doesn't change the default size of the user container
         fontWeight: "bold",
         fontFamily: "monospace",
-        fontSize: 11, // good size that doesn't touch username
+        fontSize: 11,
+        lineHeight: "7px",
         position: "relative",
         ...style
     }}>{text}</div>;
