@@ -16,7 +16,7 @@ import { ChannelStore, DraftType, FluxDispatcher, Menu, SelectedChannelStore, Up
 import RemixModal from "./RemixModal";
 import css from "./styles.css?managed";
 
-const requireCreateStickerModal = extractAndLoadChunksLazy(["stickerInspected]:"]);
+const requireCreateStickerModal = extractAndLoadChunksLazy([".CREATE_STICKER_MODAL,", "isDisplayingIndividualStickers"]);
 const requireSettingsMenu = extractAndLoadChunksLazy(['name:"UserSettings"'], /createPromise:.{0,20}(\i\.\i\("?.+?"?\).*?).then\(\i\.bind\(\i,"?(.+?)"?\)\).{0,50}"UserSettings"/);
 
 const PendingReplyStore = findStoreLazy("PendingReplyStore");
@@ -71,13 +71,12 @@ export function sendRemix(blob: Blob) {
 
 export default definePlugin({
     name: "RemixRevived",
-    description: "Revives Remix and brings it to Desktop",
+    description: "Revives Remix and breings it to Desktop",
     authors: [Devs.LSDZaddi],
     contextMenus: {
         "channel-attach": UploadContextMenuPatch,
         "message": MessageContextMenuPatch,
     },
-
     async start() {
 
         await requireCreateStickerModal();
