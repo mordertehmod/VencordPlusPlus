@@ -6,18 +6,15 @@
 
 import { CopyIcon, DeleteIcon, IDIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
 import { makeDummyUser } from "@components/settings/tabs/plugins/PluginModal";
-import { MessageType } from "@plugins/holyNotes";
+import { ChannelMessage, messageClasses, MessageType } from "@plugins/holyNotes";
 import { noteHandler } from "@plugins/holyNotes/NoteHandler";
 import { HolyNotes } from "@plugins/holyNotes/types";
 import { copyToClipboard } from "@utils/clipboard";
 import { classes } from "@utils/misc";
 import { ModalProps } from "@utils/modal";
-import { findByCodeLazy, findByPropsLazy, findComponentByCodeLazy } from "@webpack";
 import { ContextMenuApi, FluxDispatcher, Menu, NavigationRouter, React } from "@webpack/common";
 
-const messageClasses = findByPropsLazy("message", "groupStart", "cozyMessage");
-const Channel = findByCodeLazy("computeLurkerPermissionsAllowList(){");
-const ChannelMessage = findComponentByCodeLazy("Message must not be a thread");
+import { Channel } from "../..";
 
 export const RenderMessage = ({
     note,
