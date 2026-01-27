@@ -21,13 +21,13 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
-import { findByCodeLazy, findByPropsLazy } from "@webpack";
+import { findByCodeLazy, findCssClassesLazy } from "@webpack";
 import { ChannelStore, GuildMemberStore, GuildRoleStore, GuildStore, UserStore } from "@webpack/common";
 
 const useMessageAuthor = findByCodeLazy('"Result cannot be null because the message is not null"');
-const usernameFont = findByPropsLazy("usernameFont");
-const usernameGradient = findByPropsLazy("usernameGradient");
-const fonts = findByPropsLazy("dnsFont"); // Default font
+const usernameFont = findCssClassesLazy("usernameFont", "username");
+const usernameGradient = findCssClassesLazy("usernameGradient", "twoColorGradient");
+const fonts = findCssClassesLazy("dnsFont", "zillaSlab", "cherryBomb", "chicle", "museoModerno", "neoCastel", "pixelify", "sinistre", "safari");
 
 const settings = definePluginSettings({
     chatMentions: {
@@ -94,7 +94,8 @@ export default definePlugin({
         },
         // Slate
         {
-            find: ".userTooltip,children",
+            // Same find as FullUserInChatbox
+            find: ':"text":',
             replacement: [
                 {
                     match: /let\{id:(\i),guildId:\i,channelId:(\i)[^}]*\}.*?\.\i,{(?=children)/,
@@ -108,8 +109,8 @@ export default definePlugin({
             find: 'tutorialId:"whos-online',
             replacement: [
                 {
-                    match: /(?<=\.roleIcon.{0,15}:null,).{0,150}— ",\i\]\}\)\]/,
-                    replace: "$self.RoleGroupColor(arguments[0])]"
+                    match: /(#{intl::CHANNEL_MEMBERS_A11Y_LABEL}.+}\):null,).{0,100}?— ",\i\]\}\)\]/,
+                    replace: (_, rest) => `${rest}$self.RoleGroupColor(arguments[0])]`
                 },
             ],
             predicate: () => settings.store.memberList
@@ -126,20 +127,21 @@ export default definePlugin({
         },
         // Voice Users
         {
-            find: ".usernameSpeaking]:",
+            find: "#{intl::GUEST_NAME_SUFFIX})]",
             replacement: [
                 {
-                    match: /\.usernameSpeaking\]:.+?,(?=children)(?<=guildId:(\i),.+?user:(\i).+?)/,
-                    replace: "$&style:$self.getColorStyle($2.id,$1),className:$self.getColorClass($2.id,$1),"
+                    match: /#{intl::GUEST_NAME_SUFFIX}.{0,50}?"".{0,100}\](?=\}\))(?<=guildId:(\i),.+?user:(\i).+?)/,
+                    replace: "$&,style:$self.getColorStyle($2.id,$1),className:$self.getColorClass($2.id,$1),"
                 }
             ],
             predicate: () => settings.store.voiceUsers
         },
         // Reaction List
         {
-            find: ".reactionDefault",
+            find: "MessageReactions.render:",
             replacement: {
-                match: /tag:"strong"(?=.{0,50}\i\.name)(?<=onContextMenu:.{0,15}\((\i),(\i),\i\).+?)/,
+                // FIXME: (?:medium|normal) is for stable compat
+                match: /tag:"strong",variant:"text-md\/(?:medium|normal)"(?<=onContextMenu:.{0,15}\((\i),(\i),\i\).+?)/,
                 replace: "$&,style:$self.getColorStyle($2?.id,$1?.channel?.id)"
             },
             predicate: () => settings.store.reactorsList,
@@ -148,8 +150,8 @@ export default definePlugin({
         {
             find: ",reactionVoteCounts",
             replacement: {
-                match: /\.name,(?="aria-label)/,
-                replace: "$&style:$self.getColorStyle(arguments[0]?.user?.id,arguments[0]?.channel?.id),className:$self.getPollResultColorClass(arguments[0]?.user?.id,arguments[0]?.channel?.id),"
+                match: /\.SIZE_32.+?variant:"text-md\/normal",className:\i\.\i,(?="aria-label":)/,
+                replace: "$&style:$self.getColorStyle(arguments[0]?.user?.id,arguments[0]?.channel?.id),"
             },
             predicate: () => settings.store.pollResults
         },
@@ -157,7 +159,7 @@ export default definePlugin({
         {
             find: ".SEND_FAILED,",
             replacement: {
-                match: /(?<=isUnsupported\]:(\i)\.isUnsupported\}\),)(?=children:\[)/,
+                match: /(?<=\]:(\i)\.isUnsupported.{0,50}?,)(?=children:\[)/,
                 replace: "style:$self.useMessageColorsStyle($1),"
             },
             predicate: () => settings.store.colorChatMessages
@@ -189,13 +191,27 @@ export default definePlugin({
         return "";
     },
 
-    getColorString(userId: string, channelOrGuildId: string) {
+    getColorString(userId: string, channelOrGuildId: string | null | undefined) {
         try {
+            if (!channelOrGuildId) {
+                new Logger("RoleColorEverywhere").warn("channelOrGuildId is null/undefined for user:", userId);
+                return null;
+            }
+
             const guildId = ChannelStore.getChannel(channelOrGuildId)?.guild_id ?? GuildStore.getGuild(channelOrGuildId)?.id;
-            if (guildId == null) return null;
+            if (guildId == null) {
+                new Logger("RoleColorEverywhere").warn("guildId is null for channelOrGuildId:", channelOrGuildId, "user:", userId);
+                return null;
+            }
 
             const member = GuildMemberStore.getMember(guildId, userId);
-            return member?.colorStrings ?? (member?.colorString ? { primaryColor: member.colorString, secondaryColor: null, tertiaryColor: null } : null);
+            const result = member?.colorStrings ?? (member?.colorString ? { primaryColor: member.colorString, secondaryColor: null, tertiaryColor: null } : null);
+
+            if (!result && member) {
+                new Logger("RoleColorEverywhere").warn("No color found for user:", userId, "in guild:", guildId, "member:", member);
+            }
+
+            return result;
         } catch (e) {
             new Logger("RoleColorEverywhere").error("Failed to get color string", e);
         }
@@ -203,12 +219,14 @@ export default definePlugin({
         return null;
     },
 
-    getColorInt(userId: string, channelOrGuildId: string) {
+    getColorInt(userId: string, channelOrGuildId: string | null | undefined) {
+        if (!channelOrGuildId) return undefined;
         const colorString = this.getColorString(userId, channelOrGuildId);
         return colorString && colorString.primaryColor && parseInt(colorString.primaryColor.slice(1), 16);
     },
 
-    getColorStyle(userId: string, channelOrGuildId: string) {
+    getColorStyle(userId: string, channelOrGuildId: string | null | undefined) {
+        if (!channelOrGuildId) return {};
         const c = this.getColorString(userId, channelOrGuildId);
         if (!c) return {};
         if (c.secondaryColor) {
@@ -217,7 +235,8 @@ export default definePlugin({
         return { color: c.primaryColor };
     },
 
-    getColorClass(userId: string, channelOrGuildId: string) {
+    getColorClass(userId: string, channelOrGuildId: string | null | undefined) {
+        if (!channelOrGuildId) return `${usernameFont.usernameFont} ${usernameFont.username}`;
         const fontClass = this.getDisplayNameFont(userId);
         const baseClass = this.getColorString(userId, channelOrGuildId)?.secondaryColor
             ? `${usernameFont.usernameFont} ${usernameFont.username} ${usernameGradient.twoColorGradient} ${usernameGradient.usernameGradient} `
@@ -225,7 +244,8 @@ export default definePlugin({
         return fontClass ? `${baseClass}${fontClass}` : baseClass;
     },
 
-    getPollResultColorClass(userId: string, channelOrGuildId: string) {
+    getPollResultColorClass(userId: string, channelOrGuildId: string | null | undefined) {
+        if (!channelOrGuildId) return "";
         const fontClass = this.getDisplayNameFont(userId);
         const baseClass = this.getColorString(userId, channelOrGuildId)?.secondaryColor
             ? `${usernameGradient.twoColorGradient} ${usernameGradient.usernameGradient} `
@@ -238,8 +258,8 @@ export default definePlugin({
             const { messageSaturation } = settings.use(["messageSaturation"]);
             const author = useMessageAuthor(message);
 
-            // Do not apply role color if the send fails, otherwise it becomes indistinguishable if the message is sent
-            if (message.state !== "SENT") return;
+            // Do not apply role color if the send fails, otherwise it becomes indistinguishable
+            if (message.state === "SEND_FAILED") return;
 
             if (author.colorString != null && messageSaturation !== 0) {
                 const value = `color-mix(in oklab, ${author.colorString} ${messageSaturation}%, var({DEFAULT}))`;
