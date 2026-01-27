@@ -133,25 +133,20 @@ export default definePlugin({
     isModified: true,
     patches: [
         {
-            find: ".usernameSpeaking]",
-            predicate: () => !settings.store.showWithoutHover,
+            find: "VOICE_PANEL}}",
             replacement: [
                 {
-                    match: /(?<=user:(\i).*?)iconGroup,.{0,200}children:\[/,
-                    replace: "$&$self.renderTimer($1.id),"
+                    match: /user:(\i).*?\.EMBEDDED.{0,25};(?=return 0!==(\i)\.length)/,
+                    replace: "$&$2.push($self.renderTimer($1.id));",
+                    predicate: () => !settings.store.showWithoutHover,
                 },
-            ]
-        },
-        {
-            find: ".usernameSpeaking]",
-            predicate: () => settings.store.showWithoutHover,
-            replacement: [
                 {
-                    match: /function \i\(\)\{.+:""(?=.*?userId:(\i))/,
-                    replace: "$&,$self.renderTimer($1.id),"
+                    match: /#{intl::GUEST_NAME_SUFFIX}\)\]\}\):""(?=.*?userId:(\i\.\i))/,
+                    replace: "$&,$self.renderTimer($1)",
+                    predicate: () => settings.store.showWithoutHover,
                 }
             ]
-        }
+        },
     ],
 
     flux: {
@@ -240,7 +235,6 @@ export default definePlugin({
 
         if (userId === UserStore.getCurrentUser().id && !settings.store.trackSelf) return;
 
-        // role coloring logic - uses roleColorEverywhere's getColorStyle() + getColorClass()
         const colorStyle = settings.store.showRoleColor ? roleColorEverywhere.getColorStyle(userId, joinTime.guildId) : {};
         const colorClass = settings.store.showRoleColor ? roleColorEverywhere.getColorClass(userId, joinTime.guildId) : "";
 
