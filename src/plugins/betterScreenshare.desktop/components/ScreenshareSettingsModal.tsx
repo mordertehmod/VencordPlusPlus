@@ -16,10 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Button } from "@components/Button";
+import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
 import { Switch } from "@components/Switch";
 import { ModalSize, openModalLazy } from "@utils/modal";
-import { Button, Card, Forms, React, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
+import { Forms, React, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
 import { SelectOption } from "@vencord/discord-types";
 
 import { MicrophoneSettingsModal } from "../../betterMicrophone.desktop/components";
@@ -344,8 +346,8 @@ export const ScreenshareSettingsModal = (props: ScreenshareSettingsModalProps) =
     const settingsCardItemAudio =
         <SettingsModalCardItem >
             <Button
-                color={Button.Colors.PRIMARY}
-                size={Button.Sizes.SMALL}
+                variant="primary"
+                size="small"
                 onClick={() => {
                     if (screenshareAudioStore)
                         openModalLazy(async () => {

@@ -35,7 +35,7 @@ const ReplacedStreamSettings = () => {
 
     return (
         <div style={{ margin: "1em", display: "flex", flexDirection: "column", gap: "1em" }}>
-            <SettingsModalCard cardProps={cardProps} title="Stream Settings">
+            <SettingsModalCard title="Stream Settings">
                 <SettingsModalCardItem>
                     <Flex flexDirection="column">
                         <OpenScreenshareSettingsButton title="Advanced Settings" />
@@ -43,7 +43,6 @@ const ReplacedStreamSettings = () => {
                 </SettingsModalCardItem>
             </SettingsModalCard>
             <SettingsModalCard
-                cardProps={cardProps}
                 switchEnabled
                 switchProps={{
                     checked: audioSourceEnabled ?? false,

@@ -1,9 +1,13 @@
+import { BaseText } from "@components/BaseText";
+import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
-import { Button, Forms, React, Text, useCallback, useEffect, useMemo, useState } from "@webpack/common";
+import { Paragraph } from "@components/Paragraph";
+import { Forms, React, useCallback, useEffect, useMemo, useState } from "@webpack/common";
 
 import { CustomStreamPreviewState } from "../state";
 import { imageFileToStreamPreview, sendCustomPreview, stopSendingScreenSharePreview } from "../utilities";
+import { Divider } from "@components/Divider";
 
 export function ScreenSharePreviewImageModal({ modalProps, close }: { modalProps: ModalProps; close: () => void; }) {
     const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -54,27 +58,27 @@ export function ScreenSharePreviewImageModal({ modalProps, close }: { modalProps
     return (
         <ModalRoot {...modalProps} size={ModalSize.SMALL}>
             <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Screen Share Preview</Text>
+                <BaseText style={{ flexGrow: 1 }}>Screen Share Preview</BaseText>
                 <ModalCloseButton onClick={close}/>
             </ModalHeader>
 
             <ModalContent>
-                <Forms.FormText>
+                <Paragraph>
                     Select an image to use it as your screen share preview.
-                </Forms.FormText>
+                </Paragraph>
 
                 <br/>
 
-                <Forms.FormText>
+                <Paragraph>
                     NOTE: Important to enable "Hide stream preview" in the stream settings.
                     Otherwise, the custom stream preview will not be shown.
-                </Forms.FormText>
+                </Paragraph>
 
                 <br/>
 
-                <Forms.FormText>
+                <Paragraph>
                     NOTE: Stream preview images can be updated only once every 60 seconds. This is a Discord limitation.
-                </Forms.FormText>
+                </Paragraph>
 
                 <Button
                     style={{ marginTop: "1rem", marginBottom: "1rem" }}
@@ -92,7 +96,7 @@ export function ScreenSharePreviewImageModal({ modalProps, close }: { modalProps
 
                 {previewImage && (
                     <>
-                        <Forms.FormDivider style={{ marginTop: "1rem", marginBottom: "1rem" }}/>
+                        <Divider style={{ marginTop: "1rem", marginBottom: "1rem" }}/>
 
                         <img
                             src={previewImage}
@@ -108,7 +112,7 @@ export function ScreenSharePreviewImageModal({ modalProps, close }: { modalProps
                     {isStreamPreviewSending && (
                         <Button
                             disabled={!isStreamPreviewSending}
-                            color={Button.Colors.RED}
+                            color={"danger"}
                             onClick={stopReUploadPreviewButtonOnClick}
                         >
                             Stop Re-Uploading Preview
