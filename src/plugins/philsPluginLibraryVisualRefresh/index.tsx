@@ -16,15 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { replacedUserPanelComponent } from "@plugins/philsPluginLibraryVisualRefresh/patches";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-
 
 const plugin = definePlugin({
     name: "PhilsPluginLibraryVisualRefresh",
     description: "A library for phil's plugins",
     authors: [Devs.philhk, Devs.LSDZaddi],
     patches: [
+        {
+            find: '"--custom-app-panels-height",',
+            replacement: {
+                match: /{}\)}\),/,
+                replace: "{})}),$self.replacedUserPanelComponent(),"
+            }
+        },
         {
             find: "Unknown frame rate",
             replacement: [
@@ -38,7 +45,8 @@ const plugin = definePlugin({
                 }
             ]
         }
-    ]
+    ],
+    replacedUserPanelComponent
 });
 
 
