@@ -7,7 +7,7 @@ import { CustomStreamPreviewState } from "../state";
 import { ScreenSharePreviewImageModal } from "./ScreenSharePreviewImageModal";
 import { StreamPreviewChangeIcon } from "./StreamPreviewChangeIcon";
 
-const PanelButton = findComponentByCodeLazy(".NONE,disabled:", ".PANEL_BUTTON");
+const PanelButton = findComponentByCodeLazy("tooltipPositionKey", ".greenTooltip")
 
 export function SendCustomScreenSharePreviewImageButton() {
     const [isStreaming, setIsStreaming] = useState(() => {
