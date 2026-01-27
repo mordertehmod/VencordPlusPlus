@@ -43,7 +43,7 @@ export default definePlugin({
     authors: [Devs.LSDZaddi],
     patches: [
         {
-            find: '"SearchQueryStore");',
+            find: '"SearchQueryStore";',
             replacement: {
                 match: /\i\.searchResultsQuery=(\i)/,
                 replace: "$&,$self.main($1)"
