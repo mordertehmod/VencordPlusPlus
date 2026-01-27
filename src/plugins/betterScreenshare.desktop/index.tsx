@@ -16,13 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Button } from "@components/Button";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { findComponentByCodeLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
 
-import { Emitter, ScreenshareSettingsIcon } from "../philsPluginLibraryVisualRefresh";
+import { addSettingsPanelButton, Emitter, removeSettingsPanelButton, ScreenshareSettingsIcon } from "../philsPluginLibraryVisualRefresh";
 import { SendCustomScreenSharePreviewImageButton } from "./components";
 import { PluginInfo } from "./constants";
 import { openScreenshareModal } from "./modals";
@@ -33,21 +35,60 @@ import { initScreenshareAudioStore, initScreenshareStore } from "./stores";
 import { StreamCreateEvent, StreamDeleteEvent } from "./types";
 import { parseStreamKey, stopSendingScreenSharePreview } from "./utilities";
 
-const Button = findComponentByCodeLazy("tooltipPositionKey", "positionKeyStemOverride");
+const PanelButton = findComponentByCodeLazy(".GREEN,positionKeyStemOverride:");
+const PanelButtonNew = findComponentByCodeLazy("tooltipPositionKey", "positionKeyStemOverride");
 
-function screenshareSettingsButton()
-{
+function screenshareSettingsButton(props: { nameplate?: any; }) {
+    const { buttonLocation } = settings.use(["buttonLocation"]);
+    if (buttonLocation !== "voicePanel" && buttonLocation !== "both") return null;
 
     return (
-        <Button
-            tooltipText="Change screenshare settings"
-            icon={ ScreenshareSettingsIcon }
+        <PanelButton
+            tooltipText="Screenshare Settings"
+            icon={ScreenshareSettingsIcon}
             role="button"
-            onClick={ openScreenshareModal }
+            plated={props?.nameplate != null}
+            onClick={openScreenshareModal}
         />
     );
 }
 
+const settings = definePluginSettings({
+    buttonLocation: {
+        type: OptionType.SELECT,
+        description: "Where to show the Screenshare Settings button",
+        options: [
+            { label: "Above your avatar", value: "settingsPanel", default: true },
+            { label: "Beside your avatar", value: "voicePanel", default: false },
+            { label: "Both", value: "both", default: false },
+            { label: "None", value: "none", default: false }
+        ],
+        onChange: (value: string) => {
+            if (value === "settingsPanel" || value === "both") {
+                addSettingsPanelButton({
+                    name: PluginInfo.PLUGIN_NAME,
+                    icon: ScreenshareSettingsIcon,
+                    tooltipText: "Screenshare Settings",
+                    onClick: openScreenshareModal
+                });
+            } else {
+                removeSettingsPanelButton(PluginInfo.PLUGIN_NAME);
+            }
+        }
+    },
+    openSettings: {
+        type: OptionType.COMPONENT,
+        component: () => (
+            <Button
+                onClick={() => openScreenshareModal()}
+            >
+                Open Screenshare Settings
+            </Button>
+        )
+    }
+});
+
+/*
 function renderYABDButton()
 {
     return (
@@ -76,6 +117,7 @@ function sendCustomScreenSharePreviewImageButton()
 {
     return <SendCustomScreenSharePreviewImageButton />;
 }
+*/
 
 export default definePlugin( {
     name: "BetterScreenshare",
@@ -112,6 +154,7 @@ export default definePlugin( {
         },
     },
     patches: [
+        /*
         {
                         // OlD V1
             find: "GoLiveModal: user cannot be undefined", // Module: 60594; canaryRelease: 364525; L431
@@ -128,15 +171,15 @@ export default definePlugin( {
                 replace: "($self.GoLivePanelWrapper$1"
             }
         },
+        */
         {
-                        // Working
             find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
             replacement: {
-                match: /className:\i\.buttons,.{0,50}children:\[/,
-                replace: "$&$self.screenshareSettingsButton(),$self.sendCustomScreenSharePreviewImageButton(),"
+                match: /speaking:.{0,100}style:.,children:\[/,
+                replace: "$&$self.screenshareSettingsButton(arguments[0]),"
             }
-        },
-                        // NEW PATCHES
+        }
+        /*
         {
             find: "GoLiveModalV2",
             replacement: [
@@ -159,27 +202,30 @@ export default definePlugin( {
                 }
             ],
         }
+        */
     ],
-    settings: definePluginSettings( {
-        hideDefaultSettings: {
-            type: OptionType.BOOLEAN,
-            description: "Hide Discord screen sharing settings",
-            default: true,
-        }
-    } ),
-    start(): void
-    {
+    settings,
+    start(): void {
         initScreenshareStore();
         initScreenshareAudioStore();
         this.screensharePatcher = new ScreensharePatcher().patch();
         this.screenshareAudioPatcher = new ScreenshareAudioPatcher().patch();
 
+        const loc = settings.store.buttonLocation;
+        if (loc === "settingsPanel" || loc === "both") {
+            addSettingsPanelButton({
+                name: PluginInfo.PLUGIN_NAME,
+                icon: ScreenshareSettingsIcon,
+                tooltipText: "Screenshare Settings",
+                onClick: openScreenshareModal
+            });
+        }
     },
-    stop(): void
-    {
+    stop(): void {
         this.screensharePatcher?.unpatch();
         this.screenshareAudioPatcher?.unpatch();
-        Emitter.removeAllListeners( PluginInfo.PLUGIN_NAME );
+        Emitter.removeAllListeners(PluginInfo.PLUGIN_NAME);
+        removeSettingsPanelButton(PluginInfo.PLUGIN_NAME);
         CustomStreamPreviewState.reset();
     },
     toolboxActions: {
@@ -187,7 +233,7 @@ export default definePlugin( {
     },
     replacedSubmitFunction,
     GoLivePanelWrapper,
-    screenshareSettingsButton,
-    renderYABDButton,
-    sendCustomScreenSharePreviewImageButton
-} );
+    screenshareSettingsButton: ErrorBoundary.wrap(screenshareSettingsButton, { noop: true }),
+    //renderYABDButton,
+    //sendCustomScreenSharePreviewImageButton
+});
