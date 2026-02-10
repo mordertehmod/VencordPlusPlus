@@ -362,9 +362,9 @@ export default function PluginSettings() {
 
         const totalStockPlugins = totalPlugins.filter(p => !PluginMeta[p].userPlugin && !Plugins[p].hidden).length;
         const totalUserPlugins = totalPlugins.filter(p => PluginMeta[p].userPlugin).length;
+        const totalCustomPlugins = totalPlugins.filter(p => PluginMeta[p].folderName.startsWith("src/zaddyplugins/")).length;
         const enabledStockPlugins = enabledPlugins.filter(p => !PluginMeta[p].userPlugin).length;
         const enabledUserPlugins = enabledPlugins.filter(p => PluginMeta[p].userPlugin).length;
-        const totalCustomPlugins = totalPlugins.filter(p => PluginMeta[p].folderName.startsWith("src/zaddyplugins/")).length;
         const enabledCustomPlugins = enabledPlugins.filter(p => PluginMeta[p].folderName.startsWith("src/zaddyplugins/")).length;
         return { totalStockPlugins, totalUserPlugins, enabledStockPlugins, enabledUserPlugins, totalCustomPlugins, enabledCustomPlugins, enabledPlugins };
     }, [settings.plugins]);

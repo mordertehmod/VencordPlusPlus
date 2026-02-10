@@ -28,8 +28,8 @@ import { identity, isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { React, Select, UserStore } from "@webpack/common";
 
-import { openNotificationSettingsModal } from "./NotificationSettings";
 import { isDonor, DonateButtonComponent } from "./DonateButton";
+import { openNotificationSettingsModal } from "./NotificationSettings";
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://equicord.org/assets/favicon.png";
@@ -141,7 +141,7 @@ function VencordSettings() {
             ) : (
                 <SpecialCard
                     title="Support the Project"
-                    description="Please consider supporting the development of Vencord by donating!"
+                    description="Please consider supporting the development of VencordPlusPlus by donating!"
                     cardImage={donateImage}
                     backgroundImage={DONOR_BACKGROUND_IMAGE}
                     backgroundColor="#c3a3ce"
@@ -153,7 +153,7 @@ function VencordSettings() {
                 <SpecialCard
                     title="Contributions"
                     subtitle="Thank you for contributing!"
-                    description="Since you've contributed to Vencord you now have a cool new badge!"
+                    description="Since you've contributed to VencordPlusPlus you now have a cool new badge!"
                     cardImage={COZY_CONTRIB_IMAGE}
                     backgroundImage={CONTRIB_BACKGROUND_IMAGE}
                     backgroundColor="#EDCC87"
@@ -330,7 +330,7 @@ function VencordSettings() {
 
             <Heading className={Margins.top20}>Notifications</Heading>
             <Paragraph className={Margins.bottom16}>
-                Configure how Vencord++ handles notifications. You can customize when and how you receive alerts, or view a history of past notifications.
+                Configure how VencordPlusPlus handles notifications. You can customize when and how you receive alerts, or view a history of past notifications.
             </Paragraph>
 
             <Flex gap="16px">

@@ -53,7 +53,10 @@ function ContributorModal({ user }: { user: User; }) {
         const allPlugins = Object.values(Plugins);
         const pluginsByAuthor = DevsById[user.id]
             ? allPlugins.filter(p => p.authors.includes(DevsById[user.id]))
-            : allPlugins.filter(p => p.authors.some(a => a.name === user.username));
+            : allPlugins.filter(p =>
+                PluginMeta[p.name]?.userPlugin && p.authors.some(a => a.id.toString() === user.id)
+                || p.authors.some(a => a.name === user.username)
+            );
 
         return pluginsByAuthor
             .filter(p => !p.name.endsWith("API"))

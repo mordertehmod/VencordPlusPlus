@@ -21,7 +21,7 @@
 
 import { readFileSync } from "fs";
 import { appendFile, mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
-import { join } from "path";
+import path, { join } from "path";
 import Zip from "zip-local";
 
 import { BUILD_TIMESTAMP, commonOpts, globPlugins, IS_DEV, IS_REPORTER, IS_COMPANION_TEST, VERSION, commonRendererPlugins, buildOrWatchAll, stringifyValues, IS_ANTI_CRASH_TEST } from "./common.mjs";
@@ -139,7 +139,14 @@ async function globDir(dir) {
  */
 async function loadDir(dir, basePath = "") {
     const files = await globDir(dir);
-    return Object.fromEntries(await Promise.all(files.map(async f => [f.slice(basePath.length), await readFile(f)])));
+    return Object.fromEntries(
+        await Promise.all(
+            files.map(
+                async f =>
+                    [f.slice(basePath.length), await readFile(f)]
+            )
+        )
+    );
 }
 
 /**

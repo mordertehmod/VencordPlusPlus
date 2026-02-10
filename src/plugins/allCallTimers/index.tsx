@@ -15,13 +15,14 @@ import { FluxDispatcher, GuildStore, UserStore } from "@webpack/common";
 import { Timer } from "./Timer";
 
 const fixCss = `
-    .voiceUser__07f91 .container__394db .chipletParent__394db {
-        top: -5px;
-    }
+.voiceUser__07f91 .container__394db {
+    display: inline-flex;
+    align-items: baseline;
+}
 
-    .voiceUser__07f91 .content__07f91 {
-        padding: 0px var(--space-xs);
-    }
+.container__394db .usernameContainer__394db {
+    flex: none;
+}
 `;
 
 export const settings = definePluginSettings({

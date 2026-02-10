@@ -35,7 +35,6 @@ export default definePlugin({
     name: "BetterInvites",
     description: "See invites expiration date, view inviter profile and preview discoverable servers before joining by clicking their name",
     authors: [Devs.iamme, Devs.thororen, Devs.LSDZaddi],
-    isModified: true,
     patches: [
         {
             find: "#{intl::xdCLeM::raw}",

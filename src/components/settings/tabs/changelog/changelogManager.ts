@@ -61,10 +61,11 @@ async function fetchCommitsBetween(
     if (!repoSlug || typeof fetch !== "function") return [];
     try {
         const res = await fetch(
-            `${GITHUB_COMPARE_ENDPOINT}/${repoSlug}/compare/${fromHash}...${toHash}?_=${Date.now()}`,
+            `${GITHUB_COMPARE_ENDPOINT}/${repoSlug}/compare/${fromHash}...${toHash}`,
             {
                 headers: {
                     Accept: "application/vnd.github+json",
+                    "Cache-Control": "no-cache",
                 },
             },
         );

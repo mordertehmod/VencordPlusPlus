@@ -54,7 +54,7 @@ export default definePlugin({
     settings,
 
     toolboxActions: {
-        "Reconnect"() {
+        Reconnect() {
             socket?.close(1000, "Reconnecting");
             initWs(true);
         }
@@ -64,6 +64,10 @@ export default definePlugin({
         // if we're running the reporter, we need to initws in the reporter file to avoid a race condition
         if (!IS_DEV) throw new Error("This plugin requires dev mode to run, please build with pnpm build --dev");
         initWs();
+        window.reconnectDevtools = () => {
+            socket?.close(1000, "Reconnecting");
+            initWs(true);
+        };
     },
 
     stop: stopWs,

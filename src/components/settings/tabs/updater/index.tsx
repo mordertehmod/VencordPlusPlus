@@ -61,7 +61,7 @@ function Updater() {
 
             <FormSwitch
                 title="Automatically Update"
-                description="When enabled, Vencord++ will automatically download and install updates in the background without asking for confirmation. You'll need to restart Discord to apply the changes."
+                description="When enabled, VencordPlusPlus will automatically download and install updates in the background without asking for confirmation. You'll need to restart Discord to apply the changes."
                 value={settings.autoUpdate}
                 onChange={(v: boolean) => settings.autoUpdate = v}
                 hideBorder

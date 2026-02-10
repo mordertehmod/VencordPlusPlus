@@ -77,10 +77,6 @@ export function identity<T>(value: T): T {
     return value;
 }
 
-// https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent#mobile_tablet_or_desktop
-// "In summary, we recommend looking for the string Mobi anywhere in the User Agent to detect a mobile device."
-export const isMobile = navigator.userAgent.includes("Mobi");
-
 export const isPluginDev = (id: string) => Object.hasOwn(DevsById, id);
 export const shouldShowContributorBadge = (id: string) => isPluginDev(id) && DevsById[id].badge !== false;
 
@@ -90,7 +86,6 @@ export const shouldShowVencordPlusPlusMaintainerBadge = (id: string) => isVencor
 export const shouldShowVencordPlusPlusContributorBadge = (id: string) => isVencordPlusPlusPluginDev(id) && VencordPlusPlusDevsById[id].badge !== false;
 
 export const isAnyPluginDev = (id: string) => Object.hasOwn(DevsById, id) || Object.hasOwn(VencordPlusPlusDevsById, id);
-
 
 export function pluralise(amount: number, singular: string, plural = singular + "s") {
     return amount === 1 ? `${amount} ${singular}` : `${amount} ${plural}`;

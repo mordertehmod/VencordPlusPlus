@@ -30,14 +30,13 @@ import { join, relative, resolve } from "path";
 import { promisify } from "util";
 
 import { getPluginTarget } from "../utils.mjs";
-import { builtinModules } from "module";
 
 /** @type {import("../../package.json")} */
 const PackageJSON = JSON.parse(readFileSync("package.json", "utf-8"));
 
 export const VERSION = PackageJSON.version;
 // https://reproducible-builds.org/docs/source-date-epoch/
-export const BUILD_TIMESTAMP = Number(process.env.SOURCE_DATE_EPOCH) || Date.now();
+export const BUILD_TIMESTAMP = Number(process.env.SOURCE_DATE_EPOCH) * 1000 || Date.now();
 
 export const watch = process.argv.includes("--watch");
 export const IS_DEV = watch || process.argv.includes("--dev");
@@ -260,7 +259,7 @@ export const fileUrlPlugin = {
         build.onLoad({ filter, namespace: "file-uri" }, async ({ pluginData: { path, uri } }) => {
             const { searchParams } = new URL(uri);
             const base64 = searchParams.has("base64");
-            const minify = IS_STANDALONE === true && searchParams.has("minify");
+            const minify = searchParams.has("minify");
             const noTrim = searchParams.get("trim") === "false";
 
             const encoding = base64 ? "base64" : "utf-8";
@@ -293,7 +292,7 @@ export const fileUrlPlugin = {
                     throw new Error(`Don't know how to minify file type: ${path}`);
                 }
 
-                if (base64)
+                if (base64 && !content.startsWith("data:"))
                     content = Buffer.from(content).toString("base64");
             }
 

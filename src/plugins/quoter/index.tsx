@@ -57,7 +57,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "Quoter",
-    description: "Adds the ability to create an inspirational quote image from a message",
+    description: "Adds the ability to create an inspirational quote image from a message.",
     authors: [Devs.Samwich, Devs.thororen],
     settings,
 

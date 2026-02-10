@@ -1,0 +1,13 @@
+/* stylelint-disable selector-class-pattern */
+.voiceUser__07f91 .container__394db {
+    align-items: baseline;
+}
+
+.voiceUser__07f91 .chipletParent__394db {
+    margin-top: 0;
+}
+
+[class*="panels"] [class*="inner"],
+[class*="rtcConnectionStatus"] {
+    height: fit-content !important;
+}

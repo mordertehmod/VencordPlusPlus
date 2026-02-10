@@ -16,14 +16,14 @@ export default definePlugin({
         {
             find: '?"BACK_FORWARD_NAVIGATION":',
             replacement: {
-                match: /(?<=\i\.Fragment,\{children:\[.{1,500}className:\i\}\))(?=\])/,
+                match: /(?<="HELP".{0,150}className:\i\}\))(?=\])/,
                 replace: ",...Vencord.Api.HeaderBar._addHeaderBarButtons()"
             }
         },
         {
             find: "Missing channel in Channel.renderHeaderToolbar",
             replacement: {
-                match: /(?<=renderHeaderToolbar",\(\)=>\{.{1,200}let (\i)=\[\];)/,
+                match: /(?<=renderHeaderToolbar"\);let (\i)=\[\];)/,
                 replace: "Vencord.Api.HeaderBar._addChannelToolbarButtons($1);"
             }
         }
