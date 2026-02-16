@@ -325,7 +325,7 @@ const RenderPopout = ErrorBoundary.wrap(({ channel, name }: { channel: Channel; 
         <PopoutWindow
             withTitleBar
             windowKey={`DISCORD_VC_SC-${channel.id}`}
-            title={name || "Vencord"}
+            title={name || "VencordPlusPlus"}
             channelId={channel.id}
             contentClassName={cl("popout")}
         >

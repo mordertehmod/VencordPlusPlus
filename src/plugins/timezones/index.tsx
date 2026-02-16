@@ -255,7 +255,7 @@ const userContextMenuPatch: NavContextMenuPatchCallback = (children, { user }: {
 
 export default definePlugin({
     name: "Timezones",
-    authors: [Devs.Aria, Devs.LSDZaddi],
+    authors: [Devs.Aria],
     description: "Shows the local time of users in profiles and message headers",
     contextMenus: {
         "user-context": userContextMenuPatch

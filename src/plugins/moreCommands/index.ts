@@ -28,7 +28,7 @@ import { fromMorse, getCuteAnimeBoys, getCuteNeko, getCutePats, isMorse, makeFre
 export default definePlugin({
     name: "MoreCommands",
     description: "Adds various fun and useful commands",
-    authors: [Devs.Arjix, Devs.amy, Devs.Samu, Devs.thororen, Devs.Korbo, Devs.nyx, Devs.amy, Devs.LSDZaddi],
+    authors: [Devs.Arjix, Devs.amy, Devs.Samu, Devs.thororen, Devs.Korbo, Devs.nyx, Devs.amy],
     settings,
     commands: [
         {
@@ -441,8 +441,8 @@ export default definePlugin({
             find: ".isPureReactComponent=!0;",
             predicate: () => settings.store.uwuEverything,
             replacement: {
-                match: /(?<=.defaultProps\)void 0.{0,60})(\i)\)/,
-                replace: "$self.uwuifyProps($1))"
+                match: /(\.defaultProps\).{0,80}return \i\(\i,\i,void 0,void 0,null,)(\i)\)/,
+                replace: "$1$self.uwuifyProps($2))"
             }
         }
     ],

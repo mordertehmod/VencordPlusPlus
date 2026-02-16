@@ -189,26 +189,13 @@ export default definePlugin({
         clearInterval(intervalId);
     },
 
-    useBadges(profile: { userId: string; guildId: string; }) {
+    getBadges(profile: { userId: string; guildId: string; }) {
         if (!profile) return [];
 
         try {
             return _getBadges(profile);
         } catch (e) {
-            new Logger("BadgeAPI#useBadges").error(e);
-            return [];
-        }
-    },
-
-    getBadges(props: { userId: string; user?: User; guildId: string; }) {
-        if (!props) return [];
-
-        try {
-            props.userId ??= props.user?.id!;
-
-            return _getBadges(props);
-        } catch (e) {
-            new Logger("BadgeAPI#hasBadges").error(e);
+            new Logger("BadgeAPI#getBadges").error(e);
             return [];
         }
     },

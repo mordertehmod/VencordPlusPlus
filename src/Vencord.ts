@@ -66,7 +66,7 @@ async function syncSettings() {
                 title: "Cloud Settings",
                 body: "Cloud sync was disabled because this account isn't connected to the Vencord Cloud App. You can enable it again by connecting this account in Cloud Settings. (note: it will store your preferences separately)",
                 color: "var(--yellow-360)",
-                onClick: () => SettingsRouter.openUserSettingsPanel("vencord_cloud")
+                onClick: () => SettingsRouter.openUserSettings("vencord_cloud")
             });
             // Disable cloud sync globally
             Settings.cloud.authenticated = false;
@@ -85,7 +85,7 @@ async function syncSettings() {
             body: "We've noticed you have cloud integrations enabled in another client! Due to limitations, you will " +
                 "need to re-authenticate to continue using them. Click here to go to the settings page to do so!",
             color: "var(--yellow-360)",
-            onClick: () => SettingsRouter.openUserSettingsPanel("vencord_cloud")
+            onClick: () => SettingsRouter.openUserSettings("vencord_cloud")
         });
         return;
     }

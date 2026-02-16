@@ -104,7 +104,7 @@ let original: typeof ChannelActions.selectVoiceChannel;
 export default definePlugin({
     name: "ExitSounds",
     description: "Play soundboard sounds when you disconnect from voice.",
-    authors: [Devs.Prism, Devs.LSDZaddi],
+    authors: [Devs.Prism],
     dependencies: ["AudioPlayerAPI"],
     settings,
 

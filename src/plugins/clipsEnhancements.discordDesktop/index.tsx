@@ -4,13 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
 import definePlugin, { OptionType } from "@utils/types";
 import { Activity } from "@vencord/discord-types";
-import { openUserSettingsPanel, PresenceStore, UserStore } from "@webpack/common";
+import { PresenceStore, SettingsRouter, UserStore } from "@webpack/common";
 
 const extraTimeslots = [3, 4, 5, 6, 7, 10, 15, 20, 25, 30];
 const extraFramerates = [45, 90, 120, 144, 165, 240];
@@ -54,18 +54,21 @@ const settings = definePluginSettings({
         description: "",
         component: () => {
             return (
-                <Button
+                <>
+                    <Button
                         onClick={() => {
-                            openUserSettingsPanel("clips");
+                            SettingsRouter.openUserSettings("clips_panel");
                         }}
                     >
                         Change FPS and duration options in Clips settings!
-                </Button >
+                    </Button >
+                </>
             );
         }
     },
 });
 
+migratePluginSettings("ClipsEnhancements", "TimelessClips");
 export default definePlugin({
     name: "ClipsEnhancements",
     description: "Add more Clip FPS and duration options, custom clip length, RPC tagging and more",

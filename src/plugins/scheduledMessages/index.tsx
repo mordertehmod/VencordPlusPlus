@@ -86,7 +86,7 @@ function handleReactionEvent(event: FluxReactionEvent): void {
 export default definePlugin({
     name: "ScheduledMessages",
     description: "Schedule messages to be sent at a specific time or after a delay.",
-    authors: [Devs.LSDZaddi],
+    authors: [Devs.Prism],
     settings,
 
     flux: {

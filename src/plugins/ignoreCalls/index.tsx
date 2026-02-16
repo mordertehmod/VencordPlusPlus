@@ -9,7 +9,7 @@ import "./styles.css";
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { definePluginSettings } from "@api/Settings";
 import { Button } from "@components/Button";
-import { ErrorBoundary } from "@components/index";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import definePlugin, { OptionType } from "@utils/types";
@@ -83,7 +83,7 @@ const args = {
 export default definePlugin({
     name: "IgnoreCalls",
     description: "Allows you to ignore calls from specific users or dm groups.",
-    authors: [Devs.thororen, Devs.LSDZaddi],
+    authors: [Devs.thororen],
     settings,
     patches: [
         {
@@ -142,7 +142,7 @@ export default definePlugin({
                         </Button>
                     )}
                 </Tooltip>
-            </ErrorBoundary >
+            </ErrorBoundary>
         );
     }
 });

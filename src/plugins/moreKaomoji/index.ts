@@ -23,7 +23,7 @@ import definePlugin from "@utils/types";
 export default definePlugin({
     name: "MoreKaomoji",
     description: "Adds more Kaomoji to discord. ヽ(´▽`)/",
-    authors: [Devs.JacobTm, Devs.LSDZaddi],
+    authors: [Devs.JacobTm],
     commands: [
         {
             name: "dissatisfaction",

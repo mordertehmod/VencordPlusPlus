@@ -144,7 +144,7 @@ const StatusSubMenuComponent = () => {
 export default definePlugin({
     name: "StatusPresets",
     description: "Allows you to remember your statuses and set them later",
-    authors: [Devs.iamme, Devs.LSDZaddi],
+    authors: [Devs.iamme],
     settings: settings,
     dependencies: ["UserSettingsAPI"],
     managedStyle,

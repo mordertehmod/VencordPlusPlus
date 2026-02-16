@@ -305,7 +305,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "GifCollections",
     description: "Allows you to create collections of gifs",
-    authors: [Devs.Aria, Devs.LSDZaddi],
+    authors: [Devs.Aria],
     patches: [
         {
             find: "renderCategoryExtras",

@@ -18,7 +18,7 @@ import { getListeners } from "./utils";
 
 export default definePlugin({
     name: "SoundBoardLogger",
-    authors: [Devs.Moxxie, Devs.amy, Devs.thororen, Devs.LSDZaddi],
+    authors: [Devs.Moxxie, Devs.amy, Devs.thororen],
     description: "Logs all soundboards that are played in a voice chat and allows you to download them",
     dependencies: ["AudioPlayerAPI"],
     settings,

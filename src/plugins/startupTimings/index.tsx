@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ClockIcon } from "@plugins/themeLibrary/utils/Icons";
+import { ClockIcon } from "@components/Icons";
 import SettingsPlugin from "@plugins/_core/settings";
 import { Devs } from "@utils/constants";
+import { removeFromArray } from "@utils/misc";
 import definePlugin from "@utils/types";
 
 import StartupTimingPage from "./StartupTimingPage";
@@ -28,9 +29,7 @@ export default definePlugin({
     description: "Adds Startup Timings to the Settings menu",
     authors: [Devs.Megu],
     start() {
-        const { customEntries } = SettingsPlugin;
-
-        customEntries.push({
+        SettingsPlugin.customEntries.push({
             key: "vencord_startup_timings",
             title: "Startup Timings",
             Component: StartupTimingPage,
@@ -38,8 +37,6 @@ export default definePlugin({
         });
     },
     stop() {
-        const { customEntries } = SettingsPlugin;
-        const entryIdx = customEntries.findIndex(e => e.key === "vencord_startup_timings");
-        if (entryIdx !== -1) customEntries.splice(entryIdx, 1);
+        removeFromArray(SettingsPlugin.customEntries, e => e.key === "vencord_startup_timings");
     },
 });

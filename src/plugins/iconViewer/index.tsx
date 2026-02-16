@@ -9,8 +9,9 @@ import "./styles.css";
 import { MagnifyingGlassIcon } from "@components/Icons";
 import SettingsPlugin from "@plugins/_core/settings";
 import { Devs } from "@utils/constants";
+import { removeFromArray } from "@utils/misc";
 import definePlugin, { StartAt } from "@utils/types";
-import { openUserSettingsPanel } from "@webpack/common";
+import { SettingsRouter } from "@webpack/common";
 
 import IconsTab from "./components/IconsTab";
 import { SettingsAbout } from "./components/Modals";
@@ -18,19 +19,17 @@ import { SettingsAbout } from "./components/Modals";
 export default definePlugin({
     name: "IconViewer",
     description: "Adds a new tab to settings to preview all icons.",
-    authors: [Devs.iamme, Devs.LSDZaddi],
+    authors: [Devs.iamme],
     dependencies: ["Settings"],
     startAt: StartAt.WebpackReady,
     toolboxActions: {
         "Open Icons Tab"() {
-            openUserSettingsPanel("vencord_icon_viewer");
+            SettingsRouter.openUserSettings("vencord_icon_viewer");
         },
     },
     settingsAboutComponent: SettingsAbout,
     start() {
-        const { customEntries } = SettingsPlugin;
-
-        customEntries.push({
+        SettingsPlugin.customEntries.push({
             key: "vencord_icon_viewer",
             title: "Icon Finder",
             Component: IconsTab,
@@ -38,8 +37,6 @@ export default definePlugin({
         });
     },
     stop() {
-        const { customEntries } = SettingsPlugin;
-        const entryIdx = customEntries.findIndex(e => e.key === "vencord_icon_viewer");
-        if (entryIdx !== -1) customEntries.splice(entryIdx, 1);
+        removeFromArray(SettingsPlugin.customEntries, e => e.key === "vencord_icon_viewer");
     },
 });

@@ -37,7 +37,7 @@ const presendObject: MessageSendListener = (_, msg) => {
 export default definePlugin({
     name: "WriteUpperCase",
     description: "Changes the first Letter of each Sentence in Message Inputs to Uppercase",
-    authors: [Devs.Samwich, Devs.LSDZaddi],
+    authors: [Devs.Samwich],
     settings,
 
     start() {

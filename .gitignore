@@ -31,3 +31,5 @@ TODO.txt
 .modules
 .recovery-backup/**
 **/.txt
+.sonarlint
+.vscode/settings.json

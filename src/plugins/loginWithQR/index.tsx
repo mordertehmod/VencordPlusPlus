@@ -4,12 +4,13 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import SettingsPlugin from "@plugins/_core/settings";
 import { plugins } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
 import { Paragraph } from "@components/Paragraph";
+import SettingsPlugin from "@plugins/_core/settings";
 import { Devs } from "@utils/constants";
 import { getIntlMessage } from "@utils/discord";
+import { removeFromArray } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { Button } from "@webpack/common";
 
@@ -59,10 +60,7 @@ export default definePlugin({
     qrModalOpen: false,
 
     start() {
-        const { customEntries } = SettingsPlugin;
-
-
-        customEntries.push({
+        SettingsPlugin.customEntries.push({
             key: "vencord_login_with_qr",
             title: getIntlMessage("USER_SETTINGS_SCAN_QR_CODE"),
             Component: openQrModal,
@@ -73,9 +71,7 @@ export default definePlugin({
     },
 
     stop() {
-        const { customEntries } = SettingsPlugin;
-        const entryIdx = customEntries.findIndex( e => e.key === "vencord_login_with_qr" );
-        if ( entryIdx !== -1 ) customEntries.splice( entryIdx, 1 );
+        removeFromArray(SettingsPlugin.customEntries, e => e.key === "vencord_login_with_qr");
         unload();
     },
 });

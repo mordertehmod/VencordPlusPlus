@@ -54,7 +54,7 @@ const settings = definePluginSettings({
 migratePluginSettings("SortFriends", "SortFriendRequests");
 export default definePlugin({
     name: "SortFriends",
-    authors: [Devs.Megu, Devs.LSDZaddi],
+    authors: [Devs.Megu],
     description: "Sorts friend requests by date of receipt",
     isModified: true,
     settings,

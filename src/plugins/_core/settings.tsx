@@ -18,7 +18,6 @@ import {
 } from "@components/settings";
 import { gitHashShort } from "@shared/vencordUserAgent";
 import { Devs } from "@utils/constants";
-import { getIntlMessage } from "@utils/discord";
 import { isTruthy } from "@utils/guards";
 import definePlugin, { IconProps, OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
@@ -139,21 +138,6 @@ export default definePlugin({
                     replace: "$& + $self.getInfoString()"
                 }
             ]
-        },
-        {
-            find: ".SEARCH_NO_RESULTS&&0===",
-            replacement: [
-                {
-                    match: /(?<=section:(.{0,50})\.DIVIDER\}\))([,;])(?=.{0,200}(\i)\.push.{0,100}label:(\i)\.header)/,
-                    replace: (_, sectionTypes, commaOrSemi, elements, element) =>
-                        `${commaOrSemi} $self.addSettings(${elements}, ${element}, ${sectionTypes}) ${commaOrSemi}`,
-                },
-                {
-                    match: /({(?=.+?function (\i).{0,160}(\i)=\i\.useMemo.{0,140}return \i\.useMemo\(\(\)=>\i\(\3).+?\(\)=>)\2/,
-                    replace: (_, rest, settingsHook) =>
-                        `${rest}$self.wrapSettingsHook(${settingsHook})`,
-                },
-            ],
         },
         {
             find: "#{intl::USER_SETTINGS_ACTIONS_MENU_LABEL}",
@@ -315,126 +299,6 @@ export default definePlugin({
 
     customSections: [] as ((SectionTypes: Record<string, string>) => { section: string; element: ComponentType; label: string; id?: string; })[],
     customEntries: [] as EntryOptions[],
-
-    makeSettingsCategories(SectionTypes: Record<string, string>) {
-        return [
-            {
-                section: SectionTypes.HEADER,
-                label: "Vencord",
-                className: "vc-settings-header",
-            },
-            {
-                section: "VencordSettings",
-                label: "Vencord",
-                element: VencordTab,
-                className: "vc-settings",
-            },
-            {
-                section: "VencordPlugins",
-                label: "Plugins",
-                searchableTitles: ["Plugins"],
-                element: PluginsTab,
-                className: "vc-plugins",
-            },
-            {
-                section: "VencordThemes",
-                label: "Themes",
-                searchableTitles: ["Themes"],
-                element: ThemesTab,
-                className: "vc-themes",
-            },
-            !IS_UPDATER_DISABLED && {
-                section: "VencordUpdater",
-                label: "Updater",
-                searchableTitles: ["Updater"],
-                element: UpdaterTab,
-                className: "vc-updater",
-            },
-            {
-                section: "VencordChangelog",
-                label: "Changelog",
-                searchableTitles: ["Changelog"],
-                element: ChangelogTab,
-                className: "vc-changelog",
-            },
-            {
-                section: "VencordCloud",
-                label: "Cloud",
-                searchableTitles: ["Cloud"],
-                element: CloudTab,
-                className: "vc-cloud",
-            },
-            {
-                section: "VencordBackupAndRestore",
-                label: "Backup & Restore",
-                searchableTitles: ["Backup & Restore"],
-                element: BackupAndRestoreTab,
-                className: "vc-backup-restore",
-            },
-            IS_DEV && {
-                section: "VencordPatchHelper",
-                label: "Patch Helper",
-                searchableTitles: ["Patch Helper"],
-                element: PatchHelperTab,
-                className: "vc-patch-helper",
-            },
-            ...this.customSections.map(func => func(SectionTypes)),
-            {
-                section: SectionTypes.DIVIDER,
-            },
-        ].filter(Boolean);
-    },
-
-    isRightSpot({ header, settings: s }: { header?: string; settings?: string[]; }) {
-        const firstChild = s?.[0];
-        if (firstChild === "LOGOUT" || firstChild === "SOCIAL_LINKS") return true;
-
-        const { settingsLocation } = settings.store;
-
-        if (settingsLocation === "bottom") return firstChild === "LOGOUT";
-        if (settingsLocation === "belowActivity") return firstChild === "CHANGELOG";
-
-        if (!header) return;
-
-        try {
-            const names: Record<Exclude<SettingsLocation, "bottom" | "belowActivity">, string> = {
-                top: getIntlMessage("USER_SETTINGS"),
-                aboveNitro: getIntlMessage("BILLING_SETTINGS"),
-                belowNitro: getIntlMessage("APP_SETTINGS"),
-                aboveActivity: getIntlMessage("ACTIVITY_SETTINGS"),
-            };
-
-            if (!names[settingsLocation] || names[settingsLocation].endsWith("_SETTINGS"))
-                return firstChild === "PREMIUM";
-
-            return header === names[settingsLocation];
-        } catch {
-            return firstChild === "PREMIUM";
-        }
-    },
-
-    patchedSettings: new WeakSet(),
-
-    addSettings(
-        elements: any[],
-        element: { header?: string; settings: string[]; },
-        SectionTypes: Record<string, string>,
-    ) {
-        if (this.patchedSettings.has(elements) || !this.isRightSpot(element)) return;
-
-        this.patchedSettings.add(elements);
-        elements.push(...this.makeSettingsCategories(SectionTypes));
-    },
-
-    wrapSettingsHook(originalHook: (...args: any[]) => Record<string, unknown>[]) {
-        return (...args: any[]) => {
-            const elements = originalHook(...args);
-            if (!this.patchedSettings.has(elements))
-                elements.unshift(...this.makeSettingsCategories({ HEADER: SectionType.HEADER, DIVIDER: SectionType.DIVIDER, CUSTOM: SectionType.CUSTOM }) as Record<string, unknown>[]);
-
-            return elements;
-        };
-    },
 
     get electronVersion() {
         return VencordNative.native.getVersions().electron ?? window.legcord?.electron ?? null;

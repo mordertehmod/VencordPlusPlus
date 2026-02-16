@@ -114,7 +114,7 @@ function ChatBadges({ author }: { author: User; }) {
 
 export default definePlugin({
     name: "ShowBadgesInChat",
-    authors: [Devs.Inbestigator, Devs.LSDZaddi],
+    authors: [Devs.Inbestigator],
     description: "Shows the message author's badges beside their name in chat.",
     settings,
     renderMessageDecoration(props) {

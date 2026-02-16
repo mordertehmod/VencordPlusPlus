@@ -7,7 +7,7 @@
 import SettingsPlugin from "@plugins/_core/settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { StartAt } from "@utils/types";
-import { openUserSettingsPanel } from "@webpack/common";
+import { SettingsRouter } from "@webpack/common";
 
 import { initSettings } from "./settings";
 
@@ -47,7 +47,7 @@ export default definePlugin( {
     toolboxActions: {
         "Open Better UI"()
         {
-            openUserSettingsPanel( "vencord_better_ui" );
+            SettingsRouter.openUserSettings( "vencord_better_ui" );
         },
     },
     start()

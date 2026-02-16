@@ -209,7 +209,7 @@ const addMention = (id: string, type: string, guildId?: string): ReactNode => {
 export default definePlugin({
     name: "ToastNotifications",
     description: "Show a toast notification whenever you receive a direct message.",
-    authors: [Devs.Ethan, Devs.LSDZaddi],
+    authors: [Devs.Ethan],
     settings,
     flux: {
         async MESSAGE_CREATE({ message }: { message: Message; }) {

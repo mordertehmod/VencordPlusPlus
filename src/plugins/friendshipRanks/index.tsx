@@ -143,7 +143,7 @@ function getBadgesToApply() {
 export default definePlugin({
     name: "FriendshipRanks",
     description: "Adds badges showcasing how long you have been friends with a user for",
-    authors: [Devs.Samwich, Devs.LSDZaddi],
+    authors: [Devs.Samwich],
     start() {
         getBadgesToApply().forEach(b => Badges.addProfileBadge(b));
 

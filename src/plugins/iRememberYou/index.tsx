@@ -10,6 +10,7 @@ import { addMessagePreSendListener, removeMessagePreSendListener } from "@api/Me
 import { EyeIcon } from "@components/Icons";
 import SettingsPlugin from "@plugins/_core/settings";
 import { Devs } from "@utils/constants";
+import { removeFromArray } from "@utils/misc";
 import definePlugin from "@utils/types";
 
 import { Data } from "./components/data";
@@ -24,9 +25,7 @@ export default definePlugin({
     patches: [],
 
     async start() {
-        const { customEntries } = SettingsPlugin;
-
-        customEntries.push({
+        SettingsPlugin.customEntries.push({
             key: "vencord_i_remember_you",
             title: "I Remember You",
             Component: () => <DataUI usersCollection={data.usersCollection} />,
@@ -45,11 +44,9 @@ export default definePlugin({
     },
 
     stop() {
-        const dataManager = this.dataManager as Data;
-        const { customEntries } = SettingsPlugin;
-        const entry = customEntries.findIndex(entry => entry.key === "vencord_i_remember_you");
-        if (entry !== -1) customEntries.splice(entry, 1);
+        removeFromArray(SettingsPlugin.customEntries, e => e.key === "vencord_i_remember_you");
 
+        const dataManager = this.dataManager as Data;
         removeMessagePreSendListener(dataManager._onMessagePreSend_preSend);
         clearInterval(dataManager._storageAutoSaveProtocol_interval);
     },

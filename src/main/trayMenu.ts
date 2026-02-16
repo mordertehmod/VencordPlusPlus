@@ -106,7 +106,7 @@ function createVencordPlusPlusMenuItems(): MenuItemConstructorOptions[] {
                 },
                 {
                     label: "Repair VencordPlusPlus",
-                    click: () => sendToRenderer(IpcEvents.TRAY_REPAIR_VENCORDPLUSPLUS)
+                    click: () => sendToRenderer(IpcEvents.TRAY_REPAIR)
                 },
                 { type: "separator" },
                 {

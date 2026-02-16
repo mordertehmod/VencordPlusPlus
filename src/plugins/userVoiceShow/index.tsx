@@ -48,7 +48,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "UserVoiceShow",
     description: "Shows an indicator when a user is in a Voice Channel",
-    authors: [Devs.Nuckyz, Devs.LordElias, Devs.LSDZaddi],
+    authors: [Devs.Nuckyz, Devs.LordElias],
     settings,
     renderNicknameIcon({ userId }) {
         if (!settings.store.showInUserProfileModal) return null;

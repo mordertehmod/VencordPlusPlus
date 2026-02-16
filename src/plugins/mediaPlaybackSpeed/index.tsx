@@ -48,7 +48,7 @@ type MediaRef = RefObject<HTMLMediaElement> | undefined;
 export default definePlugin({
     name: "MediaPlaybackSpeed",
     description: "Allows changing the (default) playback speed of media embeds",
-    authors: [Devs.D3SOX, Devs.LSDZaddi],
+    authors: [Devs.D3SOX],
     settings,
     patches: [
         // replace voice message embed speed control because ours provides more speeds

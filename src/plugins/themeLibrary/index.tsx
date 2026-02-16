@@ -7,8 +7,9 @@
 import { ColorPaletteIcon } from "@components/Icons";
 import SettingsPlugin from "@plugins/_core/settings";
 import { Devs } from "@utils/constants";
+import { removeFromArray } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { openUserSettingsPanel } from "@webpack/common";
+import { SettingsRouter } from "@webpack/common";
 
 import { settings } from "./utils/settings";
 
@@ -19,14 +20,12 @@ export default definePlugin({
     settings,
     toolboxActions: {
         "Open Theme Library": () => {
-            openUserSettingsPanel("vencord_theme_library");
+            SettingsRouter.openUserSettings("vencord_theme_library");
         },
     },
 
     start() {
-        const { customEntries } = SettingsPlugin;
-
-        customEntries.push({
+        SettingsPlugin.customEntries.push({
             key: "vencord_theme_library",
             title: "Theme Library",
             Component: require("./components/ThemeTab").default,
@@ -35,8 +34,6 @@ export default definePlugin({
     },
 
     stop() {
-        const { customEntries } = SettingsPlugin;
-        const entry = customEntries.findIndex(entry => entry.key === "vencord_theme_library");
-        if (entry !== -1) customEntries.splice(entry, 1);
+        removeFromArray(SettingsPlugin.customEntries, e => e.key === "vencord_theme_library");
     },
 });
