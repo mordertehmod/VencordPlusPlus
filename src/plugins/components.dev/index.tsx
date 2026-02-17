@@ -41,26 +41,23 @@ function ComponentsIcon(props: React.SVGProps<SVGSVGElement>) {
 export default definePlugin({
     name: "Components",
     description: "Adds a new tab to settings to browse Discord components.",
-    authors: [Devs.prism],
+    authors: [Devs.Prism],
     dependencies: ["Settings"],
     startAt: StartAt.WebpackReady,
     toolboxActions: {
         "Open Components Tab"() {
-            SettingsRouter.openUserSettings("equicord_components_panel");
+            SettingsRouter.openUserSettings("vencord_components");
         },
     },
     start() {
         SettingsPlugin.customEntries.push({
-            key: "equicord_components",
+            key: "vencord_components",
             title: "Components",
             Component: ComponentsTab,
             Icon: ComponentsIcon
         });
-
-        SettingsPlugin.settingsSectionMap.push(["EquicordDiscordComponents", "equicord_components"]);
     },
     stop() {
-        removeFromArray(SettingsPlugin.customEntries, e => e.key === "equicord_components");
-        removeFromArray(SettingsPlugin.settingsSectionMap, entry => entry[1] === "equicord_components");
+        removeFromArray(SettingsPlugin.customEntries, e => e.key === "vencord_components");
     },
 });
