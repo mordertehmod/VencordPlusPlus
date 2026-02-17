@@ -10,20 +10,13 @@ import roleColorEverywhere from "@plugins/roleColorEverywhere";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { PassiveUpdateState, VoiceState } from "@vencord/discord-types";
-import { FluxDispatcher, GuildStore, UserStore } from "@webpack/common";
+import { findCssClassesLazy } from "@webpack";
+import { FluxDispatcher, GuildStore, Tooltip, UserStore } from "@webpack/common";
 
 import { Timer } from "./Timer";
 
-const fixCss = `
-.voiceUser__07f91 .container__394db {
-    display: inline-flex;
-    align-items: baseline;
-}
-
-.container__394db .usernameContainer__394db {
-    flex: none;
-}
-`;
+const containerClasses = findCssClassesLazy("container", "chipletParent");
+const voiceUserClasses = findCssClassesLazy("voiceUser", "content");
 
 export const settings = definePluginSettings({
     showWithoutHover: {
@@ -34,25 +27,25 @@ export const settings = definePluginSettings({
     },
     showRoleColor: {
         type: OptionType.BOOLEAN,
-        description: "Show the user's role color (if this plugin in enabled)",
+        description: "Display the user's role color (RoleColorEverywhere must be enabled)",
         restartNeeded: false,
         default: true
     },
     trackSelf: {
         type: OptionType.BOOLEAN,
-        description: "Also track yourself",
+        description: "Display your own timer",
         restartNeeded: false,
         default: true
     },
     showSeconds: {
         type: OptionType.BOOLEAN,
-        description: "Show seconds in the timer",
+        description: "Display seconds in the timer",
         restartNeeded: false,
         default: true
     },
     format: {
         type: OptionType.SELECT,
-        description: "Compact or human readable format:",
+        description: "Compact or human-readable format",
         options: [
             {
                 label: "30:23:00:42",
@@ -73,7 +66,7 @@ export const settings = definePluginSettings({
     },
     fixUI: {
         type: OptionType.BOOLEAN,
-        description: "Fix UI issues",
+        description: "In some cases the timer may break the user interface. Enable this option to fix it.",
         restartNeeded: true,
         default: true
     }
@@ -115,7 +108,14 @@ function injectCSS() {
     if (document.getElementById("allCallTimers-css")) return;
     const style = document.createElement("style");
     style.id = "allCallTimers-css";
-    style.textContent = fixCss;
+    style.textContent = `
+        .${voiceUserClasses.voiceUser} .${containerClasses.container} .${containerClasses.chipletParent} {
+            top: -5px;
+        }
+        .${voiceUserClasses.voiceUser} .${voiceUserClasses.content} {
+            padding: 0px var(--space-xs);
+        }
+    `;
     document.head.appendChild(style);
 }
 
@@ -241,7 +241,7 @@ export default definePlugin({
 
         return (
             <ErrorBoundary>
-                <Timer time={joinTime.time} defaultColorClassName={colorClass} defaultStyle={colorStyle} />
+                <Timer time={joinTime.time} defaultColorClassName={colorClass} defaultStyle={colorStyle ?? undefined} />
             </ErrorBoundary>
         );
     },
