@@ -18,8 +18,10 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
+import { getIntlMessage } from "@utils/index";
 import definePlugin, { OptionType } from "@utils/types";
-import { SelectOption } from "@vencord/discord-types";
+import { Activity } from "@vencord/discord-types";
+import { PresenceStore, UserStore } from "@webpack/common";
 
 
 const settings = definePluginSettings({
@@ -35,15 +37,42 @@ const settings = definePluginSettings({
         default: true,
         restartNeeded: true
     },
-    moreClipDurations: {
-        description: "Adds more clip durations.",
+    moreClipSettings: {
+        description: "Adds more FPS and duration options in settings.",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
     },
-    moreClipFramerates: {
-        description: "Change clip framerate. (Up to 240FPS!)",
+    ignorePlatformRestriction: {
         type: OptionType.BOOLEAN,
+        description: "Allow Platform Restricted Clipping (may cause save errors)",
+        default: true,
+        restartNeeded: true
+    },
+    enableAdvancedSignals: {
+        type: OptionType.BOOLEAN,
+        description: "Enable advanced clip signals (auto-clip triggers)",
+        default: true,
+        restartNeeded: true
+    },
+    richPresenceTagging: {
+        type: OptionType.SELECT,
+        description: "When should clips be tagged with the current Rich Presence?",
+        options: [
+            { label: "Always", value: "always" },
+            { label: "Only when beginning or end of activity name matches", value: "whenMatched", default: true },
+            { label: "Never", value: "never" },
+        ]
+    },
+    enableScreenshotKeybind: {
+        type: OptionType.BOOLEAN,
+        description: "Enable the screenshot keybind feature",
+        default: true,
+        restartNeeded: true
+    },
+    enableVoiceOnlyClips: {
+        type: OptionType.BOOLEAN,
+        description: "Enable voice-only clips (audio without video)",
         default: true,
         restartNeeded: true
     }
@@ -51,7 +80,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "BetterClips",
-    authors: [Devs.LSDZaddi],
+    authors: [Devs.Joona, Devs.LSDZaddi, Devs.niko],
     description: "Enables extra clipping options for streams.",
     settings,
     patches: [
@@ -72,19 +101,33 @@ export default definePlugin({
             }
         },
         {
-            find: "clips_recording_settings",
-            replacement: [
-                {
-                    predicate: () => settings.store.moreClipFramerates,
-                    match: /\[\{.{0,10}\i.\i.FPS_15.{0,250}\}\]/,
-                    replace: "$self.patchFPS($&))"
-                },
-                {
-                    predicate: () => settings.store.moreClipDurations,
-                    match: /\[\{.{0,10}\i.\i.SECONDS_30.{0,250}\}\]/,
-                    replace: "$self.patchDurations($&)"
-                }
-            ]
+            find: ".CLIPS_FRAME_RATE,{",
+            replacement: {
+                match: /\[\{.{0,25}\i.\i.FPS_15.{0,500}\}\]/,
+                replace: "$self.patchFramerates($&)"
+            }
+        },
+        {
+            find: ".CLIPS_LENGTH,{",
+            replacement: {
+                match: /\[\{.{0,25}\i.\i.SECONDS_30.{0,500}\}\]/,
+                replace: "$self.patchDurations($&)"
+            }
+        },
+        // enables clips
+        {
+            find: "2022-11_clips_experiment",
+            replacement: {
+                match: /defaultConfig:\{enableClips:!\d,ignorePlatformRestriction:!\d,showClipsHeaderEntrypoint:!\d,enableScreenshotKeybind:!\d,enableVoiceOnlyClips:!\d,enableAdvancedSignals:!\d\}/,
+                replace: "defaultConfig:{enableClips:!0,ignorePlatformRestriction:$self.settings.store.ignorePlatformRestriction,showClipsHeaderEntrypoint:!0,enableScreenshotKeybind:$self.settings.store.enableScreenshotKeybind,enableVoiceOnlyClips:$self.settings.store.enableVoiceOnlyClips,enableAdvancedSignals:$self.settings.store.enableAdvancedSignals}"
+            }
+        },
+        {
+            find: "2023-10_viewer_clipping",
+            replacement: {
+                match: /defaultConfig:\{enableViewerClipping:!\d,ignoreSenderPreference:!\d\}/,
+                replace: "defaultConfig:{enableViewerClipping:!0,ignoreSenderPreference:!0}"
+            }
         },
         {
             find: "#{intl::CLIPS_UNKNOWN_SOURCE}",
@@ -94,20 +137,52 @@ export default definePlugin({
             }
         }
     ],
-    patchDurations(timeslots: SelectOption[]) {
-        const newTimeslots = [...timeslots];
-        const extraTimeslots = [3, 5, 7, 10];
 
-        extraTimeslots.forEach(timeslot => newTimeslots.push({ value: timeslot * 60000, label: `${timeslot} Minutes` }));
+    patchDurations(durations: { id: string; value: number; label: string; }[]) {
+        const newDurations = [...durations];
+        const extraDurations = [3, 4, 5, 6, 7, 10, 15, 20, 25, 30];
 
-        return newTimeslots;
+        extraDurations.forEach(duration => newDurations.push({
+            id: `${duration}min`,
+            value: duration * 60000,
+            label: getIntlMessage("CLIPS_LENGTH_MINUTES", {
+                count: duration
+            })
+        }));
+
+        return newDurations.sort((a, b) => a.value - b.value);;
     },
-    patchFPS(framerates: SelectOption[]) {
-        const extraFramerates = [...framerates];
-        const moFRAMES = [45, 90, 120, 144, 165, 240];
 
-        moFRAMES.forEach(framerate => extraFramerates.push({ value: framerate, label: `${framerate}FPS` }));
+    patchFramerates(framerates: { id: string; value: number; label: string; }[]) {
+        const newFramerates = [...framerates];
+        const extraFramerates = [45, 90, 120, 144, 165, 240];
 
-        return extraFramerates.toSorted();
-    }
+        extraFramerates.forEach(framerate => newFramerates.push({
+            id: `${framerate}fps`,
+            value: framerate,
+            label: getIntlMessage("SCREENSHARE_FPS_ABBREVIATED", {
+                fps: framerate
+            })
+        }));
+
+        return newFramerates.sort((a, b) => a.value - b.value);
+    },
+
+    getApplicationId(activityName: string) {
+        if (settings.store.richPresenceTagging === "never") return null;
+
+        const activities: Activity[] = PresenceStore.getActivities(UserStore.getCurrentUser().id);
+        const validActivities = activities.filter(activity => activity.type === 0 && activity.application_id !== null);
+        const splitName = activityName.split(" ");
+
+        const matchedActivities = validActivities.filter(activity => activity.name.endsWith(splitName.at(-1)!) || activity.name.startsWith(splitName.at(0)!));
+
+        if (matchedActivities.length > 0)
+            return matchedActivities[0].application_id;
+
+        if (settings.store.richPresenceTagging !== "whenMatched")
+            return validActivities[0]?.application_id ?? null;
+
+        return null;
+    },
 });
