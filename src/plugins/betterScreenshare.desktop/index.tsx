@@ -24,10 +24,10 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { findComponentByCodeLazy } from "@webpack";
 import { UserStore } from "@webpack/common";
 
-import { addSettingsPanelButton, Emitter, removeSettingsPanelButton, ScreenshareSettingsIcon } from "../philsPluginLibraryVisualRefresh";
-import { SendCustomScreenSharePreviewImageButton } from "./components";
+import { addSettingsPanelButton, Emitter, removeSettingsPanelButton, removeVoicePanelButton, ScreenshareSettingsIcon } from "../philsPluginLibraryVisualRefresh";
+import { StreamPreviewChangeIcon } from "./components";
 import { PluginInfo } from "./constants";
-import { openScreenshareModal } from "./modals";
+import { openScreenshareModal, openScreensharePreviewModal } from "./modals";
 import { ScreenshareAudioPatcher, ScreensharePatcher } from "./patchers";
 import { GoLivePanelWrapper, replacedSubmitFunction } from "./patches";
 import { CustomStreamPreviewState } from "./state";
@@ -36,7 +36,6 @@ import { StreamCreateEvent, StreamDeleteEvent } from "./types";
 import { parseStreamKey, stopSendingScreenSharePreview } from "./utilities";
 
 const PanelButton = findComponentByCodeLazy(".GREEN,positionKeyStemOverride:");
-const PanelButtonNew = findComponentByCodeLazy("tooltipPositionKey", "positionKeyStemOverride");
 
 function screenshareSettingsButton(props: { nameplate?: any; }) {
     const { buttonLocation } = settings.use(["buttonLocation"]);
@@ -53,6 +52,21 @@ function screenshareSettingsButton(props: { nameplate?: any; }) {
     );
 }
 
+function screensharePreviewButton(props: { nameplate?: any; }) {
+    const { fakePreviewButtonLocation } = settings.use(["fakePreviewButtonLocation"]);
+    if (fakePreviewButtonLocation !== "voicePanel" && fakePreviewButtonLocation !== "both") return null;
+
+    return (
+        <PanelButton
+            tooltipText="Custom Stream Preview Image"
+            icon={StreamPreviewChangeIcon}
+            role="button"
+            plated={props?.nameplate != null}
+            onClick={openScreensharePreviewModal}
+        />
+    );
+}
+
 const settings = definePluginSettings({
     buttonLocation: {
         type: OptionType.SELECT,
@@ -61,7 +75,6 @@ const settings = definePluginSettings({
             { label: "Above your avatar", value: "settingsPanel", default: true },
             { label: "Beside your avatar", value: "voicePanel", default: false },
             { label: "Both", value: "both", default: false },
-            { label: "None", value: "none", default: false }
         ],
         onChange: (value: string) => {
             if (value === "settingsPanel" || value === "both") {
@@ -85,125 +98,76 @@ const settings = definePluginSettings({
                 Open Screenshare Settings
             </Button>
         )
-    }
+    },
+    enableFakePreview: {
+        type: OptionType.BOOLEAN,
+        description: "Enable fake screenshare preview (shows a static image instead of your actual screen)",
+        default: false
+    },
+    fakePreviewButtonLocation: {
+        type: OptionType.SELECT,
+        description: "Where to show the stream preview image button",
+        options: [
+            { label: "Above your avatar", value: "settingsPanel", default: false },
+            { label: "Beside your avatar", value: "voicePanel", default: true },
+            { label: "Both", value: "both", default: false },
+        ],
+        onChange: (value: string) => {
+            removeSettingsPanelButton("CustomScreenSharePreview");
+            removeVoicePanelButton("CustomScreenSharePreview");
+            if (value === "settingsPanel" || value === "both") {
+                addSettingsPanelButton({
+                    name: "CustomScreenSharePreview",
+                    icon: StreamPreviewChangeIcon,
+                    tooltipText: "Stream Preview Image",
+                    onClick: openScreensharePreviewModal
+                });
+            }
+        }
+    },
 });
-
-/*
-function renderYABDButton()
-{
-    return (
-        <Button
-            tooltipText="Change screenshare settings (pos1)"
-            icon={ ScreenshareSettingsIcon }
-            button="button"
-            onClick={ openScreenshareModal }
-        />
-    );
-}
-
-function renderYABDButtonAlt()
-{
-    return (
-        <Button
-            className="Change screenshare settings (pos1)"
-            icon={ ScreenshareSettingsIcon }
-            button="button"
-            onClick={ openScreenshareModal }
-        />
-    );
-}
-
-function sendCustomScreenSharePreviewImageButton()
-{
-    return <SendCustomScreenSharePreviewImageButton />;
-}
-*/
 
 export default definePlugin( {
     name: "BetterScreenshare",
     description: "This plugin allows you to further customize your screen sharing.",
-    authors: [ Devs.philhk, Devs.LSDZaddi ],
-    dependencies: [ "PhilsPluginLibraryVisualRefresh" ],
+    authors: [Devs.philhk, Devs.LSDZaddi],
+    dependencies: ["PhilsPluginLibraryVisualRefresh"],
     flux: {
-        async STREAM_CREATE( { streamKey }: StreamCreateEvent ): Promise<void>
-        {
-            const { userId } = parseStreamKey( streamKey );
+        async STREAM_CREATE({ streamKey }: StreamCreateEvent): Promise<void> {
+            const { userId } = parseStreamKey(streamKey);
 
-            if ( userId !== UserStore.getCurrentUser().id )
-            {
+            if (userId !== UserStore.getCurrentUser().id)
                 return;
-            }
 
-            CustomStreamPreviewState.setState( {
+            CustomStreamPreviewState.setState({
                 isStreaming: true,
-            } );
+            });
         },
-        async STREAM_DELETE( { streamKey }: StreamDeleteEvent ): Promise<void>
+        async STREAM_DELETE({ streamKey }: StreamDeleteEvent): Promise<void>
         {
-            const { userId } = parseStreamKey( streamKey );
+            const { userId } = parseStreamKey(streamKey);
 
-            if ( userId !== UserStore.getCurrentUser().id )
-            {
+            if (userId !== UserStore.getCurrentUser().id)
                 return;
-            }
 
-            CustomStreamPreviewState.setState( {
+            CustomStreamPreviewState.setState({
                 isStreaming: false,
-            } );
+            });
+
             stopSendingScreenSharePreview();
         },
     },
+
     patches: [
-        /*
         {
-                        // OlD V1
-            find: "GoLiveModal: user cannot be undefined", // Module: 60594; canaryRelease: 364525; L431
-            replacement: {
-                match: /onSubmit:(\w+)/,
-                replace: "onSubmit:$self.replacedSubmitFunction($1)"
-            }
-        },
-        {
-                        // OlD V1
-            find: "StreamSettings: user cannot be undefined", // Module: 641115; canaryRelease: 364525; L254
-            replacement: {
-                match: /\(.{0,10}(,{.{0,100}modalContent)/,
-                replace: "($self.GoLivePanelWrapper$1"
-            }
-        },
-        */
-        {
-            find: "#{intl::ACCOUNT_SPEAKING_WHILE_MUTED}",
+            find: ".WIDGETS_RTC_UPSELL_COACHMARK),",
             replacement: {
                 match: /speaking:.{0,100}style:.,children:\[/,
-                replace: "$&$self.screenshareSettingsButton(arguments[0]),"
+                replace: "$&$self.screenshareSettingsButton(arguments[0]),$self.screensharePreviewButton(arguments[0]),"
             }
         }
-        /*
-        {
-            find: "GoLiveModalV2",
-            replacement: [
-                {
-                    match: /(className:(\w+)\.rightButtonGroup,children:\[)/,
-                    replace: "$1$self.renderYABDButton(),"
-                },
-            ]
-        },
-        {
-            find: "canStreamWithSettings",
-            replacement: [
-                {
-                    match: /return!1/,
-                    replace: "return true"
-                },
-                {
-                    match: /return!0/,
-                    replace: "return true"
-                }
-            ],
-        }
-        */
     ],
+
     settings,
     start(): void {
         initScreenshareStore();
@@ -220,6 +184,15 @@ export default definePlugin( {
                 onClick: openScreenshareModal
             });
         }
+        const previewLoc = settings.store.fakePreviewButtonLocation;
+        if (settings.store.enableFakePreview && (previewLoc === "settingsPanel" || previewLoc === "both")) {
+            addSettingsPanelButton({
+                name: "CustomScreenSharePreview",
+                icon: StreamPreviewChangeIcon,
+                tooltipText: "Stream Preview Image",
+                onClick: openScreensharePreviewModal
+            });
+        }
     },
     stop(): void {
         this.screensharePatcher?.unpatch();
@@ -234,6 +207,5 @@ export default definePlugin( {
     replacedSubmitFunction,
     GoLivePanelWrapper,
     screenshareSettingsButton: ErrorBoundary.wrap(screenshareSettingsButton, { noop: true }),
-    //renderYABDButton,
-    //sendCustomScreenSharePreviewImageButton
+    screensharePreviewButton: ErrorBoundary.wrap(screensharePreviewButton, { noop: true }),
 });

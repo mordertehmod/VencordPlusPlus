@@ -3,7 +3,7 @@ import { Button } from "@components/Button";
 import { Flex } from "@components/Flex";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize } from "@utils/modal";
 import { Paragraph } from "@components/Paragraph";
-import { Forms, React, useCallback, useEffect, useMemo, useState } from "@webpack/common";
+import { React, useCallback, useEffect, useMemo, useState } from "@webpack/common";
 
 import { CustomStreamPreviewState } from "../state";
 import { imageFileToStreamPreview, sendCustomPreview, stopSendingScreenSharePreview } from "../utilities";

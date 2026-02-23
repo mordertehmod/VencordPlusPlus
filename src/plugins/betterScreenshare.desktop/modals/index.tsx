@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { openModalLazy } from "@utils/modal";
+import { closeModal, openModalLazy } from "@utils/modal";
 
 import Plugin from "..";
-import { ScreenshareSettingsModal } from "../components";
+import { ScreenSharePreviewImageModal, ScreenshareSettingsModal } from "../components";
 import { PluginInfo } from "../constants";
 import { screenshareAudioStore, screenshareStore } from "../stores";
 
@@ -52,4 +52,13 @@ export const openScreenshareModal =
                 author={PluginInfo.AUTHOR}
                 contributors={Object.values(PluginInfo.CONTRIBUTORS)}
                 {...props} />;
+    });
+
+export const openScreensharePreviewModal =
+    () => openModalLazy(async () => {
+        return props =>
+            <ScreenSharePreviewImageModal
+                modalProps={props}
+                close={props.onClose}
+                />;
     });
