@@ -1,7 +1,19 @@
 import { definePluginSettings } from "@api/Settings";
 import { OptionType } from "@utils/types";
 
+import { fakeDeafenButton, type ButtonLocation } from ".";
+
 export const settings = definePluginSettings({
+    buttonLocation: {
+        type: OptionType.SELECT,
+        description: "Where to show the Fake Deafen button",
+        options: [
+            { label: "Above your avatar", value: "settingsPanel", default: true },
+            { label: "Beside your avatar", value: "voicePanel", default: false },
+            { label: "Both", value: "both", default: false },
+        ],
+        onChange: (value: ButtonLocation) => fakeDeafenButton(value)
+    },
     muteUponFakeDeafen: {
         type: OptionType.BOOLEAN,
         description: "Also mute when enabling fake deafen",

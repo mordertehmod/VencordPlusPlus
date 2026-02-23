@@ -1,26 +1,20 @@
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
-import { findComponentByCodeLazy } from "@webpack";
 import { React, showToast, Toasts ,VoiceActions } from "@webpack/common";
 
 import { FakeDeafenIcon } from "./Icon";
 import { settings } from "./settings";
-
-// TODO: Fix this shit fully later
+import { addSettingsPanelButton, addVoicePanelButton, removeVoicePanelButton, removeSettingsPanelButton } from "@plugins/philsPluginLibraryVisualRefresh";
 
 let isFakeDeafened = false;
 const listeners = new Set<() => void>();
-const Button = findComponentByCodeLazy("tooltipPositionKey", "positionKeyStemOverride")
 
-function useFakeDeafen() {
+export type ButtonLocation = "settingsPanel" | "voicePanel" | "both";
+
+export function useFakeDeafen() {
     const [, forceUpdate] = React.useReducer(x => x + 1, 0);
     React.useEffect(() => fakeDeafenStore.subscribe(forceUpdate), []);
     return fakeDeafenStore.enabled;
-}
-
-function getElementByXpath(path: string): HTMLElement | null {
-    const result = document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
-    return result.singleNodeValue as HTMLElement | null;
 }
 
 function toggleDeafen() {
@@ -29,32 +23,8 @@ function toggleDeafen() {
         return true;
     } catch (error) {
         showToast(`Failed to toggle deafen state. Error: ${error}`, Toasts.Type.FAILURE);
+        return false;
     }
-
-    // Fallback methods
-    const deafenButtonClass = document.querySelector('[aria-label="Deafen"]') as HTMLElement;
-    const xPathDeafenButton = getElementByXpath('//*[@id="app-mount"]/div[3]/div/div[1]/div/div[2]/div/div/div/div[2]/div[1]/section/div[2]/div[3]/button[2]');
-
-    try {
-        if (deafenButtonClass) {
-            deafenButtonClass.click();
-            return true;
-        }
-    } catch (error) {
-        showToast(`Failed to toggle deafen state via aria-label. Error: ${error}`, Toasts.Type.FAILURE);
-    } finally {
-        if (xPathDeafenButton) {
-            xPathDeafenButton.click();
-            return true;
-        }
-    }
-    showToast("Failed to toggle deafen state via all methods.", Toasts.Type.FAILURE);
-
-    console.error(`[FakeDeafen] toggleDeafen results:\n
-        VoiceActions: Failed\n
-        Aria-label method: ${deafenButtonClass ? "Success" : "Failed"}\n
-        XPATH method: ${xPathDeafenButton ? "Success" : "Failed"}`);
-    return false;
 }
 
 function toggleMute() {
@@ -63,32 +33,8 @@ function toggleMute() {
         return true;
     } catch (error) {
         showToast(`Failed to toggle mute state. Error: ${error}`, Toasts.Type.FAILURE);
+        return false;
     }
-
-    // Fallback methods
-    const muteButtonClass = document.querySelector('[aria-label="Mute"]') as HTMLElement;
-    const xPathMuteButton = getElementByXpath('//*[@id="app-mount"]/div[3]/div/div[1]/div/div[2]/div/div/div/div[2]/div[1]/section/div[2]/div[3]/div/button');
-
-    try {
-        if (muteButtonClass) {
-            muteButtonClass.click();
-            return true;
-        }
-    } catch (error) {
-        showToast(`Failed to toggle mute state via aria-label. Error: ${error}`, Toasts.Type.FAILURE);
-    } finally {
-        if (xPathMuteButton) {
-            xPathMuteButton.click();
-            return true;
-        }
-    }
-    showToast("Failed to toggle mute state via all methods.", Toasts.Type.FAILURE);
-
-    console.error(`[FakeDeafen] toggleMute results:\n
-        VoiceActions: Failed\n
-        Aria-label method: ${muteButtonClass ? "Success" : "Failed"}\n
-        XPATH method: ${xPathMuteButton ? "Success" : "Failed"}`);
-    return false;
 }
 
 export const fakeDeafenStore = {
@@ -100,33 +46,52 @@ export const fakeDeafenStore = {
         const fakeDeafenResult = toggleDeafen();
         setTimeout(() => toggleDeafen(), 250);
 
-        if (fakeDeafenResult) showToast(isFakeDeafened ? "Fake Deafen enabled" : "Fake Deafen disabled", Toasts.Type.SUCCESS );
+        if (fakeDeafenResult)
+            showToast(isFakeDeafened ? "Fake Deafen enabled" : "Fake Deafen disabled", Toasts.Type.SUCCESS );
 
         if (isFakeDeafened && settings.store.muteUponFakeDeafen) {
-            const mutedAfterDeafen = setTimeout(() => toggleMute(), 300);
-            if (mutedAfterDeafen) showToast("Successfully muted after Fake Deafen", Toasts.Type.SUCCESS );
+            setTimeout(() => {
+                if (toggleMute())
+                    showToast("Successfully muted after Fake Deafen", Toasts.Type.SUCCESS );
+            }, 300);
         }
 
         listeners.forEach(l => l());
     },
+
     subscribe(listener: () => void) {
         listeners.add(listener);
         return () => { listeners.delete(listener); };
     }
 }
 
-function fakeDeafenToggleButton() {
-    const isActive = useFakeDeafen();
+const panelButton = () => ({
+    name: "FakeDeafen",
+    icon: () => <FakeDeafenIcon isActive={useFakeDeafen()} />,
+    tooltipText: "Fake Deafen",
+    onClick: () => fakeDeafenStore.toggle()
+});
 
-    return (
-        <Button
-            tooltipText="Fake Deafen"
-            icon={() => <FakeDeafenIcon isActive={isActive} />}
-            role="switch"
-            aria-checked={!isActive}
-            onClick={() => fakeDeafenStore.toggle()}
-        />
-    );
+export function fakeDeafenButton(location?: ButtonLocation) {
+    // I'll update this to be more efficient later, for now this is fine since it's only on settings change which isn't often
+    removeSettingsPanelButton("FakeDeafen");
+    removeVoicePanelButton("FakeDeafen");
+
+    switch (location) {
+        case "settingsPanel":
+            addSettingsPanelButton(panelButton());
+            break;
+        case "voicePanel":
+            addVoicePanelButton(panelButton());
+            break;
+        case "both":
+            addSettingsPanelButton(panelButton());
+            addVoicePanelButton(panelButton());
+            break;
+        default:
+            showToast("Uh... You shouldn't get this message, report it!", Toasts.Type.SUCCESS);
+            break;
+    }
 }
 
 export default definePlugin({
@@ -145,11 +110,6 @@ export default definePlugin({
         }
     ],
 
-    userAreaButton: {
-        icon: () => <FakeDeafenIcon isActive={useFakeDeafen()} />,
-        render: fakeDeafenToggleButton
-    },
-
     toggle(actual: boolean, type: string) {
         if (!isFakeDeafened) return actual;
         switch (type) {
@@ -158,6 +118,14 @@ export default definePlugin({
             case "video": return settings.store.cam;
             default: return actual;
         }
+    },
+
+    start() {
+        fakeDeafenButton(settings.store.buttonLocation as ButtonLocation);
+    },
+    stop() {
+        removeSettingsPanelButton(this.name);
+        removeVoicePanelButton(this.name);
     },
 
     fakeDeafenStore,
