@@ -127,7 +127,7 @@ export default definePlugin({
             predicate: () => settings.store.disableFade
         },
         { // Load menu TOC eagerly
-            find: "#{intl::USER_SETTINGS_WITH_BUILD_OVERRIDE}",
+            find: "handleOpenSettingsContextMenu=",
             replacement: {
                 match: /(?=handleOpenSettingsContextMenu=.{0,100}?null!=\i&&.{0,100}?(await [^};]*?\)\)))/,
                 replace: "_vencordBetterSettingsEagerLoad=(async ()=>$1)();"
@@ -145,7 +145,7 @@ export default definePlugin({
                 },
                 {
                     match: /case \i\.\i\.DEVELOPER_OPTIONS:return \i;/,
-                    replace: "$&case 'EquicordPlugins':return $self.buildPluginMenuEntries(true);$&case 'EquicordThemes':return $self.buildThemeMenuEntries();"
+                    replace: "$&case 'VencordPlugins':return $self.buildPluginMenuEntries(true);$&case 'VencordThemes':return $self.buildThemeMenuEntries();"
                 }
             ]
         },
