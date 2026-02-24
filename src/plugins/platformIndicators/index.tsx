@@ -128,7 +128,7 @@ interface PlatformIndicatorProps {
 }
 
 const PlatformIndicator = ({ user, isProfile, isMessage, isMemberList }: PlatformIndicatorProps) => {
-    if (user == null || (user.bot && !Settings.plugins.PlatformIndicators.showBots)) return null;
+    if (user == null || (user.bot && !settings.store.showBots)) return null;
     useEnsureOwnStatus(user);
 
     const status = useStateFromStores([PresenceStore], () => PresenceStore.getClientStatus(user.id));
