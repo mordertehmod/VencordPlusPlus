@@ -214,6 +214,7 @@ export default definePlugin({
     name: "FakeDeafen",
     description: "Appear deafened to others while still hearing audio",
     authors: [Devs.philhk, Devs.LSDZaddi],
+    dependencies: ["PhilsPluginLibraryVisualRefresh"],
     settings,
 
     patches: [
