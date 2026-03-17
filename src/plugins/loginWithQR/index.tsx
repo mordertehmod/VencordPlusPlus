@@ -6,6 +6,7 @@
 
 import { plugins } from "@api/PluginManager";
 import { definePluginSettings } from "@api/Settings";
+import { QrCodeIcon } from "@components/Icons";
 import { Paragraph } from "@components/Paragraph";
 import SettingsPlugin from "@plugins/_core/settings";
 import { Devs } from "@utils/constants";
@@ -15,7 +16,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Button } from "@webpack/common";
 
 import { preload, unload } from "./images";
-import { QrCodeIcon } from "./ui";
 import openQrModal from "./ui/modals/QrModal";
 
 const settings = definePluginSettings({
@@ -66,12 +66,13 @@ export default definePlugin({
             Component: openQrModal,
             Icon: QrCodeIcon
         });
-
+        SettingsPlugin.settingsSectionMap.push(["VencordLoginWithQR", "vencord_login_with_qr"]);
         preload();
     },
 
     stop() {
         removeFromArray(SettingsPlugin.customEntries, e => e.key === "vencord_login_with_qr");
+        removeFromArray(SettingsPlugin.settingsSectionMap, entry => entry[1] === "vencord_login_with_qr");
         unload();
     },
 });
