@@ -215,6 +215,7 @@ export default definePlugin({
     description: "Appear deafened to others while still hearing audio",
     authors: [Devs.philhk, Devs.LSDZaddi],
     settings,
+    dependencies: ["PhilsPluginLibraryVisualRefresh"],
 
     patches: [
         {
