@@ -20,7 +20,7 @@ export default definePlugin({
     settings,
     toolboxActions: {
         "Open Theme Library": () => {
-            SettingsRouter.openUserSettings("vencord_theme_library");
+            SettingsRouter.openUserSettings("vencord_theme_library_panel");
         },
     },
 
@@ -31,9 +31,12 @@ export default definePlugin({
             Component: require("./components/ThemeTab").default,
             Icon: ColorPaletteIcon
         });
+
+        SettingsPlugin.settingsSectionMap.push(["VencordThemeLibrary", "vencord_theme_library"]);
     },
 
     stop() {
         removeFromArray(SettingsPlugin.customEntries, e => e.key === "vencord_theme_library");
+        removeFromArray(SettingsPlugin.settingsSectionMap, entry => entry[1] === "vencord_theme_library");
     },
 });
