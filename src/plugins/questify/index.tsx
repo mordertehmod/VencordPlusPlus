@@ -1126,12 +1126,24 @@ function getLastFilterChoices(): { group: string; filter: string; }[] | null {
 }
 
 function setLastSortChoice(sort: string): void {
+    if (!sort) sort = "questify";
     settings.store.lastQuestPageSort = sort;
 }
 
-function setLastFilterChoices(filters: { group: string; filter: string; }[]): void {
-    if (!filters || !Object.keys(filters).length || !Object.values(filters).every(f => f.group && f.filter)) { return; }
-    settings.store.lastQuestPageFilters = JSON.parse(JSON.stringify(filters)).reduce((acc, item) => ({ ...acc, [item.filter]: item }), {});
+function setLastFilterChoices(filters: { group: string; filter: string; }[] | null): void {
+    if (!filters || filters.length === 0) {
+        settings.store.lastQuestPageFilters = {};
+        return;
+    }
+
+    if (!filters.every(f => f && f.group && f.filter)) {
+        return;
+    }
+
+    settings.store.lastQuestPageFilters = (JSON.parse(JSON.stringify(filters)) as { group: string; filter: string; }[]).reduce((acc, item) => {
+        acc[item.filter] = item;
+        return acc;
+    }, {});
 }
 
 function getQuestAcceptedButtonProps(quest: Quest, text: string, disabled: boolean, onClick?: () => void) {
@@ -1227,7 +1239,7 @@ export default definePlugin({
         },
         {
             // Hides Quests tab in the DMs tab list.
-            find: "QUEST_HOME_V2):",
+            find: ".QUEST_HOME):",
             replacement: [
                 {
                     match: /(?<="family-center"\):null,)/,
@@ -1245,8 +1257,8 @@ export default definePlugin({
                     replace: "const shouldHideSponsoredQuestBanner=$self.shouldHideSponsoredQuestBanner();"
                 },
                 {
-                    match: /(?<=if\(null!=\i\))return(.{0,60}?}\))/,
-                    replace: "if(!shouldHideSponsoredQuestBanner)return $1"
+                    match: /(?<=return null;if\(\i)(\).{0,30}?null!=\i)/,
+                    replace: "&&!shouldHideSponsoredQuestBanner$1&&!shouldHideSponsoredQuestBanner"
                 }
             ]
         },
@@ -1374,8 +1386,8 @@ export default definePlugin({
                 },
                 {
                     // Prevent SearchableSelect from force-scrolling into view, causing the dropdown to close.
-                    match: /(?<=\.scrollIntoView\()/,
-                    replace: "{block:\"nearest\",inline:\"nearest\"}"
+                    match: /(&&\i.current\?\.scrollIntoView\(\))/,
+                    replace: ""
                 },
                 {
                     // Passes a popoutClassName and optionClassName to the popout handler.
@@ -1404,6 +1416,14 @@ export default definePlugin({
                     replace: ",...arguments[0]"
                 }
             ]
+        },
+        {
+            // Prevent the new version of SearchableSelect from force-scrolling into view.
+            find: '"data-mana-component":"combobox",',
+            replacement: {
+                match: /\i.current\?\.scrollIntoView\({.{0,50}?}\)/,
+                replace: ""
+            }
         },
         {
             // Formats the Orbs balance on the Quests page with locale string formatting.
@@ -1531,24 +1551,18 @@ export default definePlugin({
                     replace: "$self.getLastSortChoice()??$1"
                 },
                 {
-                    // Set the initial filters.
-                    match: /(get\(\i\)\)\?\?)(\i)/,
-                    replace: "$1$self.getLastFilterChoices()??$2"
-                },
-                {
-                    // Update the last used sort method when it changes.
-                    match: /(onChange:)(\i)(.{0,40}?selectedSortMethod)/,
-                    replace: "$1(value)=>{$self.settings.store.lastQuestPageSort=value;$2(value);}$3"
-                },
-                {
-                    // Update the last used filter choices when they change.
-                    match: /(onChange:)(\i)(.{0,40}?selectedFilters)/,
-                    replace: "$1(value)=>{$self.settings.store.lastQuestPageFilters=value.reduce((acc,item)=>({...acc,[item.filter]:item}),{});$2(value);}$3"
+                    // Set the initial filters and update the filters and sort method when they change.
+                    match: /(get\(\i\)\)\?\?)(\i,\[\i\]\),\i=\i.useCallback\((\i)=>{)(.{0,60}?useCallback\((\i)=>{)/,
+                    replace: "$1$self.getLastFilterChoices()??$2$self.setLastSortChoice($3);$4$self.setLastFilterChoices($5);"
                 },
                 {
                     // Update the last used sort and filter choices when the toggle setting for either is changed.
                     match: /(?<=ALL,\i.useMemo\(\(\)=>\()({sortMethod:(\i),filters:(\i))/,
                     replace: "$self.setLastSortChoice($2),$self.setLastFilterChoices($3),$1"
+                },
+                {
+                    match: /(?<=resetSortingFiltering:\(\)=>{\i\(\),\i\()\i.\i.SUGGESTED/,
+                    replace: '"questify"'
                 }
             ]
         },
@@ -1604,16 +1618,8 @@ export default definePlugin({
             ]
         },
         {
-            // Sets intervals to progress Video Quests in the background.
-            find: "CAPTCHA_FAILED:",
-            replacement: {
-                match: /(?<=SUCCESS:)(\i\({)/,
-                replace: "!$self.processQuestForAutoComplete(arguments[0])&&$1"
-            }
-        },
-        {
             // Adds support for dev://experiment/2025-12-quest-cta-refactor-rollout
-            find: '"sm",preClickCallback:',
+            find: '"primary",preClickCallback:',
             replacement: [
                 {
                     match: /(?=let{quest:)/,
@@ -1624,10 +1630,18 @@ export default definePlugin({
                     replace: "!$self.processQuestForAutoComplete(arguments[0].quest)&&($1)"
                 },
                 {
-                    match: /(?<=,text:)(?=\i)/,
-                    replace: "questifyText??"
+                    match: /(?<=,text:)(\i),icon:\i/,
+                    replace: "questifyText??$1"
                 }
             ]
+        },
+        {
+            // Sets intervals to progress Video Quests in the background.
+            find: "CAPTCHA_FAILED:",
+            replacement: {
+                match: /(?<=SUCCESS:)(\i\({)/,
+                replace: "!$self.processQuestForAutoComplete(arguments[0])&&$1"
+            }
         },
         {
             // Sets intervals to progress Play Game Quests in the background.
