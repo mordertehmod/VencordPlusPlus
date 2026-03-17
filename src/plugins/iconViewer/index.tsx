@@ -24,7 +24,7 @@ export default definePlugin({
     startAt: StartAt.WebpackReady,
     toolboxActions: {
         "Open Icons Tab"() {
-            SettingsRouter.openUserSettings("vencord_icon_viewer");
+            SettingsRouter.openUserSettings("vencord_icon_viewer_panel");
         },
     },
     settingsAboutComponent: SettingsAbout,
@@ -35,8 +35,11 @@ export default definePlugin({
             Component: IconsTab,
             Icon: MagnifyingGlassIcon
         });
+
+        SettingsPlugin.settingsSectionMap.push(["VencordDiscordIcons", "vencord_icon_viewer"]);
     },
     stop() {
         removeFromArray(SettingsPlugin.customEntries, e => e.key === "vencord_icon_viewer");
+        removeFromArray(SettingsPlugin.settingsSectionMap, entry => entry[1] === "vencord_icon_viewer");
     },
 });
