@@ -67,8 +67,8 @@ if (!IS_VANILLA && !IS_EXTENSION) {
         try {
             if (RendererSettings.store.enableReactDevtools)
                 installExt("fmkadmapgofadopljbjfkapdkoienihi")
-                    .then(() => console.info("[Vencord] Installed React Developer Tools"))
-                    .catch(err => console.error("[Vencord] Failed to install React Developer Tools", err));
+                    .then(() => console.info("[VencordPlusPlus] Installed React Developer Tools"))
+                    .catch(err => console.error("[VencordPlusPlus] Failed to install React Developer Tools", err));
         } catch { }
 
         initCsp();
