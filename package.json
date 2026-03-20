@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "1.5.5",
+    "version": "1.6.0",
     "description": "Taking Discord to the Next Level!",
     "homepage": "https://github.com/mordertehmod/VencordPlusPlus#readme",
     "bugs": {
@@ -79,6 +79,7 @@
         "highlight.js": "11.11.1",
         "html-minifier-terser": "^7.2.0",
         "moment": "^2.22.2",
+        "p-limit": "^7.3.0",
         "puppeteer-core": "^24.30.0",
         "standalone-electron-types": "^34.2.0",
         "stylelint": "^16.25.0",
@@ -93,7 +94,7 @@
         "typescript-transform-paths": "^3.5.5",
         "zip-local": "^0.3.5"
     },
-    "packageManager": "pnpm@10.28.2",
+    "packageManager": "pnpm@10.32.1",
     "pnpm": {
         "patchedDependencies": {
             "@types/less@3.0.8": "patches/@types__less@3.0.8.patch"
