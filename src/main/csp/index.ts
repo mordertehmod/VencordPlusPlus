@@ -70,6 +70,7 @@ export const CspPolicies: PolicyMap = {
     "timezone.creations.works": ConnectSrc, // Timezone API
     "api.vmohammad.dev": ConnectSrc, // Custom API
     "ttsvibes.com": ConnectSrc, // TikTok TTS API
+    "ottsy.weilbyte.dev": ConnectSrc, // Custom TTS API
     "tiktok-tts-aio.exampleuser.workers.dev": ConnectSrc, // TikTok TTS API
     "corsproxy.io": ConnectSrc, //Better audio display
     "equicord.org": ImageAndCssSrc, // Equicord CDN
