@@ -43,6 +43,11 @@ const settings = definePluginSettings({
         description: "Do not log blocked users.",
         default: false
     },
+    newestFirst: {
+        type: OptionType.BOOLEAN,
+        description: "Show newest log entries first in the log menu.",
+        default: false
+    },
     soundboardFileType: {
         type: OptionType.SELECT,
         description: "File format for downloading soundboard sounds.",

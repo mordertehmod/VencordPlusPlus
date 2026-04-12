@@ -139,11 +139,8 @@ export default definePlugin({
                     replace: "$&.replace(/^./, c => c.toUpperCase())"
                 },
                 {
-                    match: /"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.Text.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,
-                    replace: (m, _buildOverride, makeRow, component, props) => {
-                        props = props.replace(/children:\[.+\]/, "");
-                        return `${m},$self.makeInfoElements(${component},${props}).map(e=>${makeRow}e})),`;
-                    }
+                    match: /null!=(\i)&&\(0,\i\.jsxs?\)\((\i\.\i),\{tag:"span",variant:"text-xxs\/normal",color:"text-muted",children:\(0,\i\.jsxs?\)\("span",\{className:\i\.\i,children:\["Build Override: ",\1\.id\]\}\)\}\)/,
+                    replace: "$&,...$self.makeInfoElements($2,{tag:\"span\",variant:\"text-xxs/normal\",color:\"text-muted\"})"
                 },
                 {
                     match: /copyValue:\i\.join\(" "\)/g,

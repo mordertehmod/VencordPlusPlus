@@ -66,7 +66,7 @@ export default definePlugin({
         {
             find: 'placeholder:"Search experiments"',
             replacement: {
-                match: /(?<=children:\[)(?=\(0,\i\.jsx?\)\(\i\.\i,{placeholder:"Search experiments")/,
+                match: /(?=\(0,\i\.jsx\)\(\i\.\i,{placeholder:"Search experiments")/,
                 replace: "$self.WarningCard(),"
             }
         },

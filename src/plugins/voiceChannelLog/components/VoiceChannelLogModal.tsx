@@ -12,6 +12,7 @@ import { findStoreLazy } from "@webpack";
 import { Button, React, ScrollerThin } from "@webpack/common";
 
 import { clearLogs, getVcLogs, vcLogSubscribe } from "../logs";
+import settings from "../settings";
 import { cl } from "../utils";
 import { VoiceChannelLogEntryComponent } from "./VoiceChannelLogEntryComponent";
 
@@ -24,7 +25,9 @@ export function openVoiceChannelLog(channel: Channel) {
 }
 
 export function VoiceChannelLogModal({ channel, props }: { channel: Channel; props: ModalProps; }) {
+    const { newestFirst } = settings.use();
     const logs = React.useSyncExternalStore(vcLogSubscribe, () => getVcLogs(channel.id));
+    const orderedLogs = newestFirst ? [...logs].reverse() : logs;
 
     return (
         <ModalRoot {...props} size={ModalSize.LARGE}>
@@ -37,19 +40,20 @@ export function VoiceChannelLogModal({ channel, props }: { channel: Channel; pro
 
             <ModalContent>
                 <ScrollerThin fade className={classes(cl("scroller"), `group-spacing-${AccessibilityStore.messageGroupSpacing}`)}>
-                    {logs.length > 0 ? logs.map((entry, i) => {
+                    {orderedLogs.length > 0 ? orderedLogs.map((entry, i) => {
                         const elements: React.ReactNode[] = [];
+                        const date = entry.timestamp.toDateString();
 
-                        if (i === 0 || entry.timestamp.toDateString() !== logs[i - 1].timestamp.toDateString()) {
+                        if (i === 0 || date !== orderedLogs[i - 1].timestamp.toDateString()) {
                             elements.push(
-                                <div key={`sep-${i}`} className={cl("date-separator")} role="separator" aria-label={entry.timestamp.toDateString()}>
-                                    <span>{entry.timestamp.toDateString()}</span>
+                                <div key={`sep-${date}-${i}`} className={cl("date-separator")} role="separator" aria-label={date}>
+                                    <span>{date}</span>
                                 </div>
                             );
                         }
 
                         elements.push(
-                            <VoiceChannelLogEntryComponent key={`entry-${i}`} logEntry={entry} channel={channel} />
+                            <VoiceChannelLogEntryComponent key={`entry-${entry.userId}-${entry.timestamp.valueOf()}-${i}`} logEntry={entry} channel={channel} />
                         );
 
                         return elements;
