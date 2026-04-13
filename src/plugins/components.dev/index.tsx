@@ -33,11 +33,8 @@ export default definePlugin({
             Component: ComponentsTab,
             Icon: ComponentsIcon
         });
-
-        SettingsPlugin.settingsSectionMap.push(["VencordDiscordComponents", "vencord_components"]);
     },
     stop() {
         removeFromArray(SettingsPlugin.customEntries, e => e.key === "vencord_components");
-        removeFromArray(SettingsPlugin.settingsSectionMap, entry => entry[1] === "vencord_components");
     },
 });

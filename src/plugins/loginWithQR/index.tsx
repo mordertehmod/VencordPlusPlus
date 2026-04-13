@@ -66,13 +66,11 @@ export default definePlugin({
             Component: openQrModal,
             Icon: QrCodeIcon
         });
-        SettingsPlugin.settingsSectionMap.push(["VencordLoginWithQR", "vencord_login_with_qr"]);
         preload();
     },
 
     stop() {
         removeFromArray(SettingsPlugin.customEntries, e => e.key === "vencord_login_with_qr");
-        removeFromArray(SettingsPlugin.settingsSectionMap, entry => entry[1] === "vencord_login_with_qr");
         unload();
     },
 });
