@@ -31,8 +31,8 @@ export default definePlugin({
             find: ".VOICE_PANEL}}",
             replacement: [
                 {
-                    match: /\[\i\.\i\]:\i\}\),children:\[/,
-                    replace: "$&$self.renderButtons(arguments[0].user),"
+                    match: /\}\),children:\[(?=.{0,200}\.VOICE_CHANNEL_GAME_ACTIVITY_INDICATOR_VIEWED)/,
+                    replace: "$&$self.renderButtons(arguments[0]?.user),"
                 }
             ]
         }
