@@ -19,46 +19,48 @@
         "noImplicitAny": false,
         "target": "ESNEXT",
         "jsx": "preserve",
-        "baseUrl": "./src/",
         "paths": {
+            "*": [
+                "./src/*"
+            ],
             "@main/*": [
-                "./main/*"
+                "./src/main/*"
             ],
             "@api/*": [
-                "./api/*"
+                "./src/api/*"
             ],
             "@components/*": [
-                "./components/*"
+                "./src/components/*"
             ],
             "@utils/*": [
-                "./utils/*"
+                "./src/utils/*"
             ],
             "@plugins/*": [
-                "./plugins/*"
+                "./src/plugins/*"
             ],
             "@shared/*": [
-                "./shared/*"
+                "./src/shared/*"
             ],
             "@webpack/common": [
-                "./webpack/common"
+                "./src/webpack/common"
             ],
             "@webpack/common/*": [
-                "./webpack/common/*"
+                "./src/webpack/common/*"
             ],
             "@webpack": [
-                "./webpack/webpack"
+                "./src/webpack/webpack"
             ],
             "@webpack/patcher": [
-                "./webpack/patchWebpack"
+                "./src/webpack/patchWebpack"
             ],
             "@webpack/wreq.d": [
-                "./webpack/wreq.d"
+                "./src/webpack/wreq.d"
             ],
             "@zaddyplugins/*": [
-                "./zaddyplugins/*"
+                "./src/zaddyplugins/*"
             ],
             "@zaddyadditions/*": [
-                "./zaddyadditions/*"
+                "./src/zaddyadditions/*"
             ]
         },
         "plugins": [
