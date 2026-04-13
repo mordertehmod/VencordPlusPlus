@@ -155,7 +155,7 @@ export default definePlugin({
         },
         {
             // Profile banner animation effect
-            find: "bannerAdjustment,noBorderRadius",
+            find: "bannerAdjustment,isHovering",
             replacement: {
                 match: /\i=\i=>\{(?=.{0,50}\.useReducedMotion\))/,
                 replace: "$&return null;"
@@ -173,7 +173,7 @@ export default definePlugin({
         },
         {
             // Always show username
-            find: ".DISPLAY_NAME_STYLES_COACHMARK),",
+            find: ".DISPLAY_NAME_STYLES_COACHMARK)",
             replacement: {
                 match: /hoverText:(\i),forceHover:\i,children:/g,
                 replace: "hoverText:$1,forceHover:!0,children:"
