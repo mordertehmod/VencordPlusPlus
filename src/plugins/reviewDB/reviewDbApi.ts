@@ -29,10 +29,10 @@ export const REVIEWS_PER_PAGE = 50;
 
 export interface UserReviewsData {
     message: string;
-    hasNextPage: boolean;
-    reviewCount: number;
     reviews: Review[];
     updated: boolean;
+    hasNextPage: boolean;
+    reviewCount: number;
     hasOptedOut: boolean;
 }
 
