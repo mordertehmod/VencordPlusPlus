@@ -26,13 +26,13 @@ import esbuild, { build, context } from "esbuild";
 import { constants as FsConstants, readFileSync } from "fs";
 import { access, readdir, readFile } from "fs/promises";
 import { minify as minifyHtml } from "html-minifier-terser";
-import { join, relative, resolve } from "path";
+import { dirname, join, relative, resolve } from "path";
+import { fileURLToPath } from "url";
 import { promisify } from "util";
 
 import { getPluginTarget } from "../utils.mjs";
 
-/** @type {import("../../package.json")} */
-const PackageJSON = JSON.parse(readFileSync("package.json", "utf-8"));
+const PackageJSON = JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../package.json"), "utf-8"));
 
 export const VERSION = PackageJSON.version;
 // https://reproducible-builds.org/docs/source-date-epoch/
@@ -79,11 +79,12 @@ export async function buildOrWatchAll(buildConfigs) {
             context(cfg).then(ctx => ctx.watch())
         ));
     } else {
-        await Promise.all(buildConfigs.map(cfg => build(cfg)))
-            .catch(error => {
+        for (const cfg of buildConfigs) {
+            await build(cfg).catch(error => {
                 console.error(error.message);
-                process.exit(1); // exit immediately to skip the rest of the builds
+                process.exit(1);
             });
+        }
     }
 }
 
