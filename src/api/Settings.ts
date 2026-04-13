@@ -20,11 +20,14 @@ import { SettingsStore as SettingsStoreClass } from "@shared/SettingsStore";
 import { Logger } from "@utils/Logger";
 import { mergeDefaults } from "@utils/mergeDefaults";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
+import { Theme } from "@vencord/discord-types";
 import { React, useEffect } from "@webpack/common";
 
 import plugins from "~plugins";
 
 const logger = new Logger("Settings");
+
+export type ThemeActivationMode = "always" | "light" | "dark";
 
 export interface SettingsPluginUiElement {
     enabled: boolean;
@@ -49,6 +52,7 @@ export interface Settings {
     themeNames: Record<string, string>;
     enableReactDevtools: boolean;
     themeLinks: string[];
+    themeActivationModes: Partial<Record<string, ThemeActivationMode>>;
     mainWindowFrameless: boolean;
     frameless: boolean;
     transparent: boolean;
@@ -116,6 +120,7 @@ const DefaultSettings: Settings = {
     enableOnlineThemes: true,
     pinnedThemes: [],
     themeNames: {},
+    themeActivationModes: {},
     enableReactDevtools: false,
     mainWindowFrameless: false,
     frameless: false,
