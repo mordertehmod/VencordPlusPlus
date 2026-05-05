@@ -120,26 +120,6 @@ export default definePlugin({
 
     patches: [
         {
-            find: "#{intl::COPY_VERSION}",
-            replacement: [
-                {
-                    match: /\.RELEASE_CHANNEL/,
-                    replace: "$&.replace(/^./, c => c.toUpperCase())"
-                },
-                {
-                    match: /"text-xxs\/normal".{0,300}?(?=null!=(\i)&&(.{0,20}\i\.\i.{0,200}?,children:).{0,15}?("span"),({className:\i\.\i,children:\["Build Override: ",\1\.id\]\})\)\}\))/,
-                    replace: (m, _buildOverride, makeRow, component, props) => {
-                        props = props.replace(/children:\[.+\]/, "");
-                        return `${m},$self.makeInfoElements(${component},${props}).map(e=>${makeRow}e})),`;
-                    }
-                },
-                {
-                    match: /copyValue:\i\.join\(" "\)/g,
-                    replace: "$& + $self.getInfoString()"
-                }
-            ]
-        },
-        {
             find: ".buildLayout().map",
             replacement: {
                 match: /(\i)\.buildLayout\(\)(?=\.map)/,

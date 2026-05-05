@@ -662,6 +662,10 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Benjii",
         id: 463702169443368970n
     },
+	Etorix: {
+        name: "Etorix",
+        id: 94597845868355584n
+    },
 } satisfies Record<string, Dev>);
 
 export const VencordPlusPlusDevs = /* #__PURE__*/ Object.freeze({
