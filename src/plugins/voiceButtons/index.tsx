@@ -19,6 +19,7 @@ import { UserChatButton, UserDeafenButton, UserFakeDeafenButton, UserMuteButton 
 export default definePlugin({
     name: "VoiceButtons",
     description: "Quickly DM, mute, or deafen any user right from the voice-call panel.",
+    tags: ["Servers", "Utility", "Voice"],
     authors: [Devs.LSDZaddi],
     settings,
 

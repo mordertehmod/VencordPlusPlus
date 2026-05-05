@@ -32,7 +32,8 @@ function renderBadge(id: number, title: string) {
 export default definePlugin({
     name: "ChannelBadges",
     description: "Adds badges to channels based on their type",
-    authors: [Devs.thororen],
+    tags: ["Appearance", "Customisation", "Servers"],
+    authors: [/* Devs.creations */ Devs.thororen],
     settings,
     patches: [
         // TY TypingIndicator

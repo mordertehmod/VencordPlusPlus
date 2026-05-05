@@ -54,8 +54,9 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
 export default definePlugin({
     name: "VoiceChannelLog",
     description: "Logs voice channel activity including joins, leaves, soundboard, mute, camera, screenshare, and more.",
+    tags: ["Servers", "Utility", "Voice"],
     authors: [Devs.Sqaaakoi, Devs.thororen, Devs.nyx, Devs.Moxxie, Devs.Fres, Devs.amy],
-    dependencies: ["AudioPlayerAPI"],
+    dependencies: ["AudioPlayerAPI", "HeaderBarAPI"],
     settings,
     contextMenus: {
         "channel-context": patchChannelContextMenu

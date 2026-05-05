@@ -129,6 +129,7 @@ function getUsernames(contacts: ContactsList[], type: number): string[] {
 export default definePlugin({
     name: "ExportMessages",
     description: "Allows you to export any message to a file",
+    tags: ["Chat", "Utility"],
     authors: [Devs.LSDZaddi],
     settings,
     contextMenus: {

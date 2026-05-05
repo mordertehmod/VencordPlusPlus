@@ -26,7 +26,7 @@ import { classNameFactory } from "@utils/css";
 import { Margins } from "@utils/margins";
 import { identity, isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
-import { React, Select, UserStore } from "@webpack/common";
+import { Alerts, React, Select, UserStore } from "@webpack/common";
 
 import { isDonor, DonateButtonComponent } from "./DonateButton";
 import { openNotificationSettingsModal } from "./NotificationSettings";
@@ -63,45 +63,38 @@ function VencordSettings() {
         title: string;
         description?: string;
         restartRequired?: boolean;
-        warning: { enabled: boolean; message?: string; };
-    }
-    > = [
+        warning?: string;
+    }>
+        = [
             {
                 key: "useQuickCss",
                 title: "Enable Custom CSS",
                 description: "Load custom CSS from the QuickCSS editor. This allows you to customize Discord's appearance with your own styles.",
-                restartRequired: true,
-                warning: { enabled: false },
             },
             !IS_WEB && {
                 key: "enableReactDevtools",
                 title: "Enable React Developer Tools",
                 description: "Enable the React Developer Tools extension for debugging Discord's React components. Useful for plugin development.",
                 restartRequired: true,
-                warning: { enabled: false },
             },
             (!IS_WEB && !IS_DISCORD_DESKTOP || !IS_WINDOWS) && {
                 key: "mainWindowFrameless",
                 title: "Disable the Main Window Frame",
                 description: "Remove the native window frame for a cleaner look. You can still move the window by dragging the title bar area.",
                 restartRequired: true,
-                warning: { enabled: false },
             },
-            !IS_WEB &&
-            (!IS_DISCORD_DESKTOP || !IS_WINDOWS
+            !IS_WEB && (!IS_DISCORD_DESKTOP || !IS_WINDOWS
                 ? {
                     key: "frameless",
                     title: "Disable All Window Frames",
                     description: "Remove the native window frame for a cleaner look. You can still move the window by dragging the title bar area.",
                     restartRequired: true,
-                    warning: { enabled: false },
                 }
                 : {
                     key: "winNativeTitleBar",
                     title: "Use Windows' native title bar instead of Discord's custom one",
                     description: "Replace Discord's custom title bar with the standard Windows title bar. This may improve compatibility with some window management tools.",
                     restartRequired: true,
-                    warning: { enabled: false },
                 }
             ),
             !IS_WEB && {
@@ -109,27 +102,21 @@ function VencordSettings() {
                 title: "Enable Window Transparency",
                 description: "Make the Discord window transparent. A theme that supports transparency is required or this will do nothing.",
                 restartRequired: true,
-                warning: {
-                    enabled: true,
-                    message: IS_WINDOWS
+                warning: IS_WINDOWS
                         ? "This will stop the window from being resizable and prevents you from snapping the window to screen edges."
                         : "This will stop the window from being resizable.",
-                },
             },
             IS_DISCORD_DESKTOP && {
                 key: "disableMinSize",
                 title: "Disable Minimum Window Size",
                 description: "Allow the Discord window to be resized smaller than its default minimum size. Useful for tiling window managers or small screens.",
                 restartRequired: true,
-                warning: { enabled: false },
             },
-            !IS_WEB &&
-            IS_WINDOWS && {
+            !IS_WEB && IS_WINDOWS && {
                 key: "winCtrlQ",
                 title: "Register Ctrl+Q as shortcut to close Discord",
                 description: "Add Ctrl+Q as a keyboard shortcut to close Discord. This provides an alternative to Alt+F4 for quickly closing the application.",
                 restartRequired: true,
-                warning: { enabled: false },
             },
         ];
 
@@ -242,14 +229,26 @@ function VencordSettings() {
                     <FormSwitch
                         key={s.key}
                         value={settings[s.key]}
-                        onChange={v => (settings[s.key] = v)}
+                        onChange={v => {
+                            settings[s.key] = v;
+
+                            if (s.restartRequired) {
+                                Alerts.show({
+                                    title: "Restart Required",
+                                    body: "A restart is required to apply this change",
+                                    confirmText: "Restart now",
+                                    cancelText: "Later!",
+                                    onConfirm: relaunch
+                                });
+                            }
+                        }}
                         title={s.title}
                         description={
-                            s.warning.enabled ? (
+                            s.warning ? (
                                 <>
                                     {s.description}
                                     <Notice.Warning className={Margins.top8} style={{ width: "100%" }}>
-                                        {s.warning.message}
+                                        {s.warning}
                                     </Notice.Warning>
                                 </>
                             ) : (

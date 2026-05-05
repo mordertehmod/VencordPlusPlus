@@ -100,6 +100,8 @@ const ChatBarContextCheckbox: NavContextMenuPatchCallback = children => {
 export default definePlugin({
     name: "Signature",
     description: "Automated fingerprint/end text",
+    dependencies: ["CommandsAPI", "ChatInputButtonAPI", "MessagePopoverAPI"],
+    tags: ["Appearance", "Chat"],
     authors: [Devs.Ven, Devs.Rini, Devs.ImBanana],
     onBeforeMessageSend(channelId, msg) {
         if (!settings.store.isEnabled) {

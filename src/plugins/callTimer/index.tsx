@@ -109,6 +109,7 @@ let runOneTime = true;
 export default definePlugin({
     name: "CallTimer",
     description: "Add call timers for all users in voice channels and in the connection status.",
+    tags: ["Voice", "Utility"],
     authors: [Devs.Ven, Devs.D3SOX, Devs.LSDZaddi],
     managedStyle: alignedChatInputFix,
     settings,
@@ -137,8 +138,8 @@ export default definePlugin({
         {
             find: "renderConnectionStatus(){",
             replacement: {
-                match: /(lineClamp:1,children:)(\i)(?=,|}\))/,
-                replace: "$1[$2,$self.renderConnectionTimer(this.props.channel.id)]"
+                match: /(renderConnectionStatus\(\).{0,1000}?lineClamp:1,children:)(\i)(?=,|}\))/,
+                replace: "$1[$2,$self.renderConnectionTimer(this.props?.channel?.id)]"
             }
         }
     ],

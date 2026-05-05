@@ -16,16 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { DataStore } from "@api/index";
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
-import { openInviteModal } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { closeAllModals } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
 import { maybePromptToUpdate } from "@utils/updater";
 import { filters, findBulk, proxyLazyWebpack } from "@webpack";
-import { DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore, showToast } from "@webpack/common";
+import { DraftType, ExpressionPickerStore, FluxDispatcher, NavigationRouter, SelectedChannelStore } from "@webpack/common";
 
 const CrashHandlerLogger = new Logger("CrashHandler");
 
@@ -62,8 +62,8 @@ export default definePlugin({
     name: "CrashHandler",
     description: "Utility plugin for handling and possibly recovering from crashes without a restart",
     authors: [Devs.Nuckyz],
+    tags: ["Utility", "Developers"],
     enabledByDefault: true,
-
     settings,
 
     patches: [
@@ -77,6 +77,8 @@ export default definePlugin({
     ],
 
     handleCrash(_this: any, errorState: any) {
+        DataStore.del("KeepCurrentChannel_previousData");
+
         if (IS_DEV) {
             try {
                 if (errorState?.info && "componentStack" in errorState.info) {
@@ -99,11 +101,8 @@ export default definePlugin({
                         showNotification({
                             color: "#eed202",
                             title: "Discord has crashed!",
-                            body: "Awn :( Discord has crashed two times rapidly, not attempting to recover. Click here to join our support server!",
+                            body: "Awn :( Discord has crashed two times rapidly, not attempting to recover.",
                             noPersist: true,
-                            onClick: () => openInviteModal("Qex4dRzfQe").catch(() =>
-                                showToast("Invalid or expired invite"),
-                            )
                         });
                     } catch { }
 
@@ -118,7 +117,7 @@ export default definePlugin({
             try {
                 if (!hasCrashedOnce) {
                     hasCrashedOnce = true;
-                    maybePromptToUpdate("Uh oh, Discord has just crashed... but good news, there is a Vencord update available that might fix this issue! Would you like to update now?", true);
+                    maybePromptToUpdate("Uh oh, Discord has just crashed... but good news, there is a Equicord update available that might fix this issue! Would you like to update now?", true);
                 }
             } catch { }
 
@@ -137,11 +136,8 @@ export default definePlugin({
             showNotification({
                 color: "#eed202",
                 title: "Discord has crashed!",
-                body: "Attempting to recover... Click here to join our support server!",
+                body: "Attempting to recover...",
                 noPersist: true,
-                onClick: () => openInviteModal("Qex4dRzfQe").catch(() =>
-                    showToast("Invalid or expired invite"),
-                )
             });
         } catch { }
 

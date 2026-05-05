@@ -17,7 +17,7 @@
 */
 
 import { addProfileBadge, removeProfileBadge } from "@api/Badges";
-import { addChatBarButton, removeChatBarButton } from "@api/ChatButtons";
+import { addChatBarButton, addChatBarButtonWrapper, removeChatBarButton, removeChatBarButtonWrapper } from "@api/ChatButtons";
 import { registerCommand, unregisterCommand } from "@api/Commands";
 import { addContextMenuPatch, removeContextMenuPatch } from "@api/ContextMenu";
 import keybindsManager from "@api/Keybinds/keybindManager";
@@ -29,6 +29,7 @@ import { addMessagePopoverButton, removeMessagePopoverButton } from "@api/Messag
 import { addNicknameIcon, removeNicknameIcon } from "@api/NicknameIcons";
 import { Settings, SettingsStore } from "@api/Settings";
 import { disableStyle, enableStyle } from "@api/Styles";
+import { traceFunction } from "@debug/Tracer";
 import { Logger } from "@utils/Logger";
 import { onlyOnce } from "@utils/onlyOnce";
 import { canonicalizeFind, canonicalizeReplacement } from "@utils/patches";
@@ -40,7 +41,6 @@ import { patches } from "@webpack/patcher";
 import Plugins from "~plugins";
 export { Plugins as plugins };
 
-import { traceFunction } from "../debug/Tracer";
 import { addAudioProcessor, removeAudioProcessor } from "./AudioPlayer";
 import { addChannelToolbarButton, addHeaderBarButton, removeChannelToolbarButton, removeHeaderBarButton } from "./HeaderBar";
 import { addProfileCollection, removeProfileCollection } from "./ProfileCollections";
@@ -69,6 +69,8 @@ export function isPluginRequired(p: string) {
 }
 
 export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string, pluginPath = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`) {
+    // TODO: this causes crashes
+
     const patch = newPatch as Patch;
     patch.plugin = pluginName;
 
@@ -198,7 +200,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
         chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, messagePopoverButton,
         // Additions //
-        renderNicknameIcon, headerBarButton, audioProcessor, userAreaButton, renderProfileCollection
+        renderNicknameIcon, headerBarButton, audioProcessor, userAreaButton, renderProfileCollection, chatBarButtonWrapper
     } = p;
 
     if (p.start) {
@@ -289,6 +291,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (audioProcessor) addAudioProcessor(name, audioProcessor);
     if (userAreaButton) addUserAreaButton(name, userAreaButton.render, userAreaButton.priority);
     if (renderProfileCollection) addProfileCollection(name, renderProfileCollection);
+    if (chatBarButtonWrapper) addChatBarButtonWrapper(name, chatBarButtonWrapper);
 
     return true;
 }, p => `startPlugin ${p.name}`);
@@ -299,7 +302,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
         chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, messagePopoverButton,
         // Additions //
-        renderNicknameIcon, headerBarButton, audioProcessor, userAreaButton, renderProfileCollection
+        renderNicknameIcon, headerBarButton, audioProcessor, userAreaButton, renderProfileCollection, chatBarButtonWrapper
     } = p;
 
     if (p.stop) {
@@ -380,6 +383,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     if (audioProcessor) removeAudioProcessor(name);
     if (userAreaButton) removeUserAreaButton(name);
     if (renderProfileCollection) removeProfileCollection(name);
+    if (chatBarButtonWrapper) removeChatBarButtonWrapper(name);
 
     return true;
 }, p => `stopPlugin ${p.name}`);
@@ -435,6 +439,7 @@ export const initPluginManager = onlyOnce(function init() {
         if (p.audioProcessor) neededApiPlugins.add("AudioPlayerAPI");
         if (p.userAreaButton) neededApiPlugins.add("UserAreaAPI");
         if (p.renderProfileCollection) neededApiPlugins.add("ProfileCollectionsAPI");
+        if (p.chatBarButtonWrapper) neededApiPlugins.add("ChatInputButtonAPI");
 
         for (const key of pluginKeysToBind) {
             p[key] &&= p[key].bind(p) as any;

@@ -5,7 +5,7 @@
  */
 
 import { DiscordUtils, GlobalShortcut, GlobalShortcutOptions } from "@vencord/discord-types";
-import { findByCodeLazy } from "webpack";
+import { findByCodeLazy } from "@webpack";
 
 import { KeybindManager } from "./types";
 

@@ -32,7 +32,7 @@ import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { OptionType, Plugin } from "@utils/types";
+import { OptionType, Plugin, PluginTag } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
 import { Clickable, FluxDispatcher, React, Toasts, Tooltip, useEffect, useMemo, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
@@ -72,6 +72,16 @@ export function makeDummyUser(user: { username: string; id?: string; avatar?: st
     });
 
     return newUser;
+}
+
+function PluginTags({ tags }: { tags: PluginTag[]; }) {
+    return (
+        <div className={cl("tags")}>
+            {tags.map(tag => (
+                <div key={tag} className={cl("tag")}>{tag}</div>
+            ))}
+        </div>
+    );
 }
 
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {

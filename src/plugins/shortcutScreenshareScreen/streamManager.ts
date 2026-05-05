@@ -5,7 +5,7 @@
  */
 
 import { showToast, Toasts } from "@webpack/common";
-import { findByCodeLazy } from "webpack";
+import { findByCodeLazy } from "@webpack";
 
 import { settings } from "./settings";
 import { ApplicationStreamingStore, MediaEngineStore, RTCConnectionStore, RunningGameStore, StreamRTCConnectionStore } from "./stores";

@@ -118,7 +118,7 @@ function makeContextCallback(
         children.push(
             <Menu.MenuItem
                 id={`c98-view-${name}-raw`}
-                label="View Raw"
+                label="View Raw Variant"
                 action={() => action(value)}
                 icon={CopyIcon}
             />,
@@ -129,6 +129,7 @@ function makeContextCallback(
 export default definePlugin({
     name: "ViewRawVariant",
     description: "Copy/View raw content of any message, channel, or guild, but show in the right click menu.",
+    tags: ["Appearance", "Customisation", "Chat", "Organisation", "Servers"],
     authors: [Devs.KingFish, Devs.Ven, Devs.rad, Devs.ImLvna, Devs.Kyuuhachi],
     contextMenus: {
         "guild-context": makeContextCallback("guild", val =>

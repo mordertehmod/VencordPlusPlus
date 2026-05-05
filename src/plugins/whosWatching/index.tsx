@@ -82,7 +82,8 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "WhosWatching",
     description: "Hover over the screenshare icon to view what users are watching your stream",
-    authors: [Devs.Fres, Devs.LSDZaddi],
+    tags: ["Activity"],
+    authors: [Devs.Fres, Devs.thororen],
     settings,
     patches: [
         {
@@ -93,9 +94,9 @@ export default definePlugin({
             }
         },
         {
-            find: "this.renderEmbeddedActivity()",
+            find: ",setIsForceShowSharingPopout:",
             replacement: {
-                match: /"div"(?=.{0,40}?,this.renderActions\(\))/,
+                match: /"div"(?=.{0,50}stream:\i,canGoLive:\i)/,
                 replace: "$self.WrapperComponent"
             }
         }

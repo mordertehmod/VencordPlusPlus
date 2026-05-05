@@ -35,7 +35,7 @@ import openRolesAndUsersPermissionsModal from "./components/RolesAndUsersPermiss
 import UserPermissions from "./components/UserPermissions";
 import { getSortedRolesForMember, sortPermissionOverwrites } from "./utils";
 
-const PopoutClasses = findCssClassesLazy("container", "scroller", "list");
+const PopoutClasses = findCssClassesLazy("container", "popoutRoleDot");
 
 export const enum PermissionsSortOrder {
     HighestRole,
@@ -160,6 +160,7 @@ function makeContextMenuPatch(childId: string | string[], type?: MenuItemParentT
 export default definePlugin({
     name: "PermissionsViewer",
     description: "View the permissions a user or channel has, and the roles of a server",
+    tags: ["Servers", "Roles", "Utility"],
     authors: [Devs.Nuckyz, Devs.Ven],
     settings,
 

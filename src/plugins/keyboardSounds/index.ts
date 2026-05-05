@@ -126,7 +126,8 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "KeyboardSounds",
     description: "Adds OperaGX or osu! sound effects when typing on your keyboard.",
-    authors: [Devs.HypedDomi, Devs.LSDZaddi],
+    tags: ["Fun"],
+    authors: [Devs.HypedDomi],
     dependencies: ["AudioPlayerAPI"],
     settings,
     start() {

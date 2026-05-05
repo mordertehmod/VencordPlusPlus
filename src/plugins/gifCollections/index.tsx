@@ -26,6 +26,7 @@ let oldTrendingCat: Category[] | null = null;
 export default definePlugin({
     name: "GifCollections",
     description: "Allows you to create collections of gifs.",
+    tags: ["Chat", "Emotes"],
     authors: [Devs.LSDZaddi /* Original Author: creations I'm just the maintainer */],
     settings,
     contextMenus: {
@@ -157,7 +158,7 @@ export default definePlugin({
                 oldTrendingCat = instance.props.trendingCategories;
             }
             if (settings.store.onlyShowCollections) {
-                instance.props.trendingCategories = [...this.sortedCollections(), ...instance.props.favorites];
+                instance.props.trendingCategories = this.sortedCollections();
             } else if (oldTrendingCat != null) {
                 instance.props.trendingCategories = [...this.sortedCollections(), ...oldTrendingCat];
             }

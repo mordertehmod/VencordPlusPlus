@@ -9,7 +9,7 @@ import { Flex } from "@components/Flex";
 import { HeadingPrimary } from "@components/Heading";
 import { Heart } from "@components/Heart";
 import { Paragraph } from "@components/Paragraph";
-import { DonateButton } from "@components/settings";
+import { DonateButton, TranslateButton } from "@components/settings";
 import { Margins } from "@utils/margins";
 import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 

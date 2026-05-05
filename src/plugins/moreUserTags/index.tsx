@@ -6,6 +6,7 @@
 
 import "./styles.css";
 
+import { migratePluginToSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { getCurrentChannel, getIntlMessage } from "@utils/discord";
@@ -31,9 +32,13 @@ const genTagTypes = () => {
     return obj;
 };
 
+migratePluginToSettings(true, "MoreUserTags", "NoAppsAllowed", "noAppsAllowed");
+
 export default definePlugin({
     name: "MoreUserTags",
     description: "Adds tags for webhooks and moderative roles (owner, admin, etc.)",
+    dependencies: ["MemberListDecoratorsAPI", "MessageDecorationsAPI", "NicknameIconsAPI"],
+    tags: ["Appearance", "Chat"],
     authors: [Devs.Cyn, Devs.TheSun, Devs.RyanCaoDev, Devs.LordElias, Devs.AutumnVN],
     settings,
     patches: [

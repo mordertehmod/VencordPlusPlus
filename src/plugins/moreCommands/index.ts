@@ -18,6 +18,7 @@
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, OptionalMessageOption, RequiredMessageOption, sendBotMessage } from "@api/Commands";
 import { addMessagePreEditListener, addMessagePreSendListener, MessageObject, removeMessagePreEditListener, removeMessagePreSendListener } from "@api/MessageEvents";
+import { migratePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
@@ -46,9 +47,13 @@ import {
     uwuifyArray
 } from "./utils";
 
+migratePluginSettings("MoreCommands", "FriendCloud", "GifRoulette", "ImgToGif", "MoreKaomoji");
+
 export default definePlugin({
     name: "MoreCommands",
     description: "Adds various fun and useful commands",
+    dependencies: ["CommandsAPI"],
+    tags: ["Commands", "Fun", "Shortcuts"],
     authors: [
         Devs.Arjix,
         Devs.amy,

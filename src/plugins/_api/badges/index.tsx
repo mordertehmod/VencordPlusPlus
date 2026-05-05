@@ -37,6 +37,7 @@ const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453
 const USERPLUGIN_CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/attachments/1213694361565401118/1450538370559381636/userplugin.png?ex=6942e6a1&is=69419521&hm=d4e116614ea43d69ceb3fb03018d9862de4ac5b18ce4867b0d1107e33c13e54f&"; // TODO: Update URL to our CDN
 
 const ContributorBadge: ProfileBadge = {
+    id: "vencord_contributor_badge",
     description: "Vencord Contributor",
     iconSrc: CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
@@ -45,6 +46,7 @@ const ContributorBadge: ProfileBadge = {
 };
 
 const VencordPlusPlusContributorBadge: ProfileBadge = {
+    id: "vencordplusplus_contributor_badge",
     description: "Vencord++ Contributer",
     iconSrc: undefined,
     position: BadgePosition.START,
@@ -59,6 +61,7 @@ const VencordPlusPlusContributorBadge: ProfileBadge = {
 };
 
 const UserPluginContributorBadge: ProfileBadge = {
+    id: "user_plugin_contributor_badge",
     description: "User Plugin Contributor",
     iconSrc: USERPLUGIN_CONTRIBUTOR_BADGE,
     position: BadgePosition.START,
@@ -98,7 +101,7 @@ async function loadAllBadges(noCache = false) {
 
 let intervalId: any;
 
-export function BadgeContextMenu({ badge }: { badge: ProfileBadge & BadgeUserArgs; }) {
+export function BadgeContextMenu({ badge }: { badge: Omit<ProfileBadge, "id"> & BadgeUserArgs; }) {
     return (
         <Menu.Menu
             navId="vc-badge-context"
@@ -219,7 +222,8 @@ export default definePlugin({
     },
 
     getDonorBadges(userId: string) {
-        return DonorBadges[userId]?.map(badge => ({
+        return DonorBadges[userId]?.map((badge, idx) => ({
+            id: `vencord_donor_badge_${idx}`,
             iconSrc: badge.badge,
             description: badge.tooltip,
             position: BadgePosition.START,

@@ -52,6 +52,7 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "PlatformSpoofer",
     description: "Spoof what platform or device you're on",
+    tags: ["Utility"],
     authors: [Devs.LSDZaddi],
     settingsAboutComponent: () => (
         <Notice.Warning>
@@ -73,6 +74,13 @@ export default definePlugin({
                 },
             ]
         },
+        {
+            find: ".ORBS,label:",
+            replacement: {
+                match: /\{enabled:(\i).{0,25}"collectibles_shop_header_bar"\}\)/,
+                replace: "$1=true"
+            }
+        }
     ],
     getPlatform(bypass, userId?: any) {
         const platform = settings.store.platform ?? "desktop";

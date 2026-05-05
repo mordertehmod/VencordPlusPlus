@@ -20,9 +20,6 @@
         "target": "ESNEXT",
         "jsx": "preserve",
         "paths": {
-            "*": [
-                "./src/*"
-            ],
             "@main/*": [
                 "./src/main/*"
             ],
@@ -31,6 +28,9 @@
             ],
             "@components/*": [
                 "./src/components/*"
+            ],
+            "@debug/*": [
+                "./src/debug/*"
             ],
             "@utils/*": [
                 "./src/utils/*"
@@ -55,6 +55,9 @@
             ],
             "@webpack/wreq.d": [
                 "./src/webpack/wreq.d"
+            ],
+            "@webpack/types": [
+                "./src/webpack/types"
             ],
             "@zaddyplugins/*": [
                 "./src/zaddyplugins/*"

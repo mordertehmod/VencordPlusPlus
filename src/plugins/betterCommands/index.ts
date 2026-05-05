@@ -33,9 +33,10 @@ function fetchIndex(target: object) {
 export default definePlugin({
     name: "BetterCommands",
     description: "Enhances the command system with miscellaneous improvements.",
-    authors: [Devs.thororen, Devs.LSDZaddi],
+    dependencies: ["CommandsAPI"],
+    tags: ["Appearance", "Commands", "Shortcuts"],
+    authors: [Devs.thororen],
     settings,
-    isModified: true,
     patches: [
         {
             find: 'applicationCommand",',
@@ -71,7 +72,7 @@ export default definePlugin({
     commands: [
         {
             name: "refresh",
-            description: "Refreshes Discord application commands locally",
+            description: "Refreshes the specified applications commands locally",
             options: [
                 {
                     name: "user",

@@ -20,7 +20,6 @@ import { SettingsStore as SettingsStoreClass } from "@shared/SettingsStore";
 import { Logger } from "@utils/Logger";
 import { mergeDefaults } from "@utils/mergeDefaults";
 import { DefinedSettings, OptionType, SettingsChecks, SettingsDefinition } from "@utils/types";
-import { Theme } from "@vencord/discord-types";
 import { React, useEffect } from "@webpack/common";
 
 import plugins from "~plugins";
@@ -50,9 +49,9 @@ export interface Settings {
     enableOnlineThemes: boolean;
     pinnedThemes: string[];
     themeNames: Record<string, string>;
+    themeActivationModes: Partial<Record<string, ThemeActivationMode>>;
     enableReactDevtools: boolean;
     themeLinks: string[];
-    themeActivationModes: Partial<Record<string, ThemeActivationMode>>;
     mainWindowFrameless: boolean;
     frameless: boolean;
     transparent: boolean;
@@ -114,7 +113,7 @@ const DefaultSettings: Settings = {
     autoUpdateNotification: true,
     useQuickCss: true,
     themeLinks: [],
-    eagerPatches: IS_REPORTER,
+    eagerPatches: false, // Eagerly patching no longer works due to module factories with the same id being able to have different sources now.
     enabledThemes: [],
     enabledThemeLinks: [],
     enableOnlineThemes: true,

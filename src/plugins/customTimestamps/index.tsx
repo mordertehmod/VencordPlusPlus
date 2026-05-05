@@ -125,7 +125,8 @@ const settings = definePluginSettings({
 export default definePlugin({
     name: "CustomTimestamps",
     description: "Custom timestamps on messages and tooltips",
-    authors: [Devs.Rini, Devs.Obsidian, Devs.LSDZaddi],
+    tags: ["Appearance", "Customisation"],
+    authors: [Devs.Rini, Devs.Obsidian],
     settings,
     settingsAboutComponent: () => (
         <div className={"vc-cmt-info-card"}>

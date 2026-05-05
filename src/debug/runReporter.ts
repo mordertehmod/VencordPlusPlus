@@ -25,8 +25,8 @@ async function runReporter() {
         addPatch({
             find: '"Could not find app-mount"',
             replacement: {
-                match: /(?<="use strict";)/,
-                replace: "Vencord.Webpack._initReporter();"
+                match: /"Could not find app-mount"/,
+                replace: "(Vencord.Webpack._initReporter(),$&)"
             }
         }, "Vencord Reporter");
 
@@ -38,6 +38,13 @@ async function runReporter() {
         };
 
         await loadLazyChunksDone;
+
+        // Manually require all modules to make sure all lazily required modules are patched
+        for (const moduleId of Object.keys(Webpack.wreq.m)) {
+            try {
+                Webpack.wreq(moduleId);
+            } catch { }
+        }
 
         if (IS_REPORTER && IS_WEB && !IS_VESKTOP) {
             console.log("[REPORTER_META]", {
@@ -55,7 +62,7 @@ async function runReporter() {
         }
 
         for (const [plugin, moduleId, match, totalTime] of patchTimings) {
-            if (totalTime > 5) {
+            if (totalTime > 10) {
                 new Logger("WebpackPatcher").warn(`Patch by ${plugin} took ${Math.round(totalTime * 100) / 100}ms (Module id is ${String(moduleId)}): ${match}`);
             }
         }
@@ -70,7 +77,6 @@ async function runReporter() {
                 else method = "find";
             }
             if (searchType === "waitForStore") method = "findStore";
-            if (searchType === "waitForStore" && args[0] === "PermissionStore") continue;
 
             let result: any;
             try {
@@ -125,5 +131,7 @@ async function runReporter() {
 }
 
 // Imported in webpack for reporterData, wrap to avoid running reporter
+// Run after the Equicord object has been created.
+// We need to add extra properties to it, and it is only created after all of Equicord code has ran
 if (IS_REPORTER)
     setTimeout(runReporter, 0);

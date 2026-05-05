@@ -17,21 +17,23 @@ let updateFunc = (v: any) => { };
 export default definePlugin({
     name: "BetterBlockedUsers",
     description: "Allows you to search in blocked users list and makes names selectable in settings.",
+    tags: ["Appearance", "Shortcuts"],
     authors: [Devs.LSDZaddi],
     patches: [
         {
             find: '"],{numberOfBlockedUsers:',
+            group: true,
             replacement: [
                 {
-                    match: /(?<=\}=(\i).*?\]\}\))/,
-                    replace: ",$1.listType==='blocked'?$self.renderSearchInput():null"
+                    match: /(?<=\(0,\i\.jsx\)\(\i,\{listType:(\i),numberOfUsers:\i\.length\}\),)/,
+                    replace: "$1==='blocked'?$self.renderSearchInput():null,"
                 },
                 {
-                    match: /(?<=userId:(\i).*?\}\)\]\}\),)(\(.*?loading:\i\}\))/,
+                    match: /(?<=\{userId:(\i).*?\.globalName.{0,25}\}\)\]\}\),)(\(.*?loading:\i\}\))/,
                     replace: "$self.renderUser($1,$2)",
                 },
                 {
-                    match: /(?<=\}=(\i).{0,10}(\i).useState.{0,5};)/,
+                    match: /(?<=userIds:\i,listType:\i\}=(\i).{0,30}(\i)\.useState\(\d+\);)/,
                     replace: "let [searchResults,setSearchResults]=$2.useState([]);$self.setUpdateFunc($1,setSearchResults);"
                 },
                 {
