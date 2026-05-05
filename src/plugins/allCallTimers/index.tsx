@@ -10,9 +10,13 @@ import roleColorEverywhere from "@plugins/roleColorEverywhere";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { PassiveUpdateState, VoiceState } from "@vencord/discord-types";
+import { findCssClassesLazy } from "@webpack";
 import { FluxDispatcher, GuildStore, UserStore } from "@webpack/common";
 
 import { Timer } from "./Timer";
+
+const containerClasses = findCssClassesLazy("container", "chipletParent");
+const voiceUserClasses = findCssClassesLazy("voiceUser", "content");
 
 export const settings = definePluginSettings({
     showWithoutHover: {
@@ -99,16 +103,30 @@ let myLastChannelId: string | undefined;
 // Allow user updates on discord first load
 let runOneTime = true;
 
-function injectCSS() {
+export function injectCSS() {
+       let voiceUser: string;
+    let content: string;
+    let container: string;
+    let chipletParent: string;
+
+    try {
+        voiceUser = voiceUserClasses.voiceUser;
+        content = voiceUserClasses.content;
+        container = containerClasses.container;
+        chipletParent = containerClasses.chipletParent;
+    } catch {
+        return;
+    }
+
     if (document.getElementById("allCallTimers-css")) return;
     const style = document.createElement("style");
     style.id = "allCallTimers-css";
     style.textContent = `
-        [class*="voiceUser"] [class*="container"] [class*="chipletParent"] {
+        .${voiceUser} .${container} .${chipletParent} {
             top: -5px;
         }
-        [class*="voiceUser"] [class*="content"] {
-            padding: 0 var(--space-xs);
+        .${voiceUser} .${content} {
+            padding: 0px var(--space-xs);
         }
     `;
     document.head.appendChild(style);
@@ -212,9 +230,6 @@ export default definePlugin({
     start() {
         if (settings.store.watchLargeGuilds) {
             this.subscribeToAllGuilds();
-        }
-        if (settings.store.fixUI) {
-            injectCSS();
         }
     },
 

@@ -6,9 +6,9 @@
 
 import { useFixedTimer } from "@utils/react";
 import { formatDurationMs } from "@utils/text";
-import { Tooltip } from "@webpack/common";
+import { Tooltip, useEffect } from "@webpack/common";
 
-import { settings } from "./index";
+import { injectCSS, settings } from "./index";
 import { TimerIcon } from "./TimerIcon";
 import { TimerText } from "./timerText";
 
@@ -16,6 +16,10 @@ export function Timer({ time, defaultColorClassName, defaultStyle }: Readonly<{ 
     const durationMs = useFixedTimer({ initialTime: time });
     const formatted = formatDurationMs(durationMs, settings.store.format === "human", settings.store.showSeconds);
     const finalColorClassName = settings.store.showRoleColor ? defaultColorClassName || "" : "";
+
+    useEffect(() => {
+        if (settings.store.fixUI) injectCSS();
+    }, []);
 
     if (settings.store.showWithoutHover) {
         return <TimerText text={formatted} className={finalColorClassName} style={defaultStyle} />;
