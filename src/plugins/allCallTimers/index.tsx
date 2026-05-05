@@ -10,13 +10,9 @@ import roleColorEverywhere from "@plugins/roleColorEverywhere";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 import { PassiveUpdateState, VoiceState } from "@vencord/discord-types";
-import { findCssClassesLazy } from "@webpack";
-import { FluxDispatcher, GuildStore, Tooltip, UserStore } from "@webpack/common";
+import { FluxDispatcher, GuildStore, UserStore } from "@webpack/common";
 
 import { Timer } from "./Timer";
-
-const containerClasses = findCssClassesLazy("container", "chipletParent");
-const voiceUserClasses = findCssClassesLazy("voiceUser", "content");
 
 export const settings = definePluginSettings({
     showWithoutHover: {
@@ -72,7 +68,6 @@ export const settings = definePluginSettings({
     }
 });
 
-
 // Save the join time of all users in a Map
 type userJoinData = { channelId: string, time: number; guildId: string; };
 const userJoinTimes = new Map<string, userJoinData>();
@@ -109,11 +104,11 @@ function injectCSS() {
     const style = document.createElement("style");
     style.id = "allCallTimers-css";
     style.textContent = `
-        .${voiceUserClasses.voiceUser} .${containerClasses.container} .${containerClasses.chipletParent} {
+        [class*="voiceUser"] [class*="container"] [class*="chipletParent"] {
             top: -5px;
         }
-        .${voiceUserClasses.voiceUser} .${voiceUserClasses.content} {
-            padding: 0px var(--space-xs);
+        [class*="voiceUser"] [class*="content"] {
+            padding: 0 var(--space-xs);
         }
     `;
     document.head.appendChild(style);

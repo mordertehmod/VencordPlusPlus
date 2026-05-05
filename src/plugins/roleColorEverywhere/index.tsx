@@ -207,10 +207,6 @@ export default definePlugin({
             const member = GuildMemberStore.getMember(guildId, userId);
             const result = member?.colorStrings ?? (member?.colorString ? { primaryColor: member.colorString, secondaryColor: null, tertiaryColor: null } : null);
 
-            if (!result && member) {
-                new Logger("RoleColorEverywhere").warn("No color found for user:", userId, "in guild:", guildId, "member:", member);
-            }
-
             return result;
         } catch (e) {
             new Logger("RoleColorEverywhere").error("Failed to get color string", e);

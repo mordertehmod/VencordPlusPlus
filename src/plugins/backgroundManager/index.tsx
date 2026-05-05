@@ -14,22 +14,18 @@ import { clear, createStore, del, entries, set } from "@api/DataStore";
 import { HeaderBarButton } from "@api/HeaderBar";
 import { definePluginSettings, Settings as AppSettings, useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Switch } from "@components/Switch";
 import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { chooseFile } from "@utils/web";
 import type { Message } from "@vencord/discord-types";
-import { findComponentByCodeLazy } from "@webpack";
 import { Alerts, Dialog, Menu, Popout, ThemeStore, Toasts, Tooltip, useCallback, useEffect, useRef, useState } from "@webpack/common";
-import type { ComponentType, SVGProps } from "react";
+import type { SVGProps } from "react";
 
 const cl = classNameFactory("vc-bgmanager-");
 const imageStore = createStore("BackgroundManager", "ImageStore");
-const ManaSwitch = findComponentByCodeLazy('"data-mana-component":"switch"') as ComponentType<{
-    checked: boolean;
-    onChange?: (checked: boolean) => void;
-}>;
 const SLIDESHOW_INTERVAL_MS = 5 * 60 * 1000;
 const THEME_BACKGROUND_PROP_RE = /background|bg|wallpaper|backdrop/i;
 const THEME_IMAGE_PROP_RE = /image|img/i;
@@ -1044,7 +1040,7 @@ function ManagerPopout() {
                             <span className={cl("slideshow-label")}>Slideshow</span>
                             <span className={cl("slideshow-note")}>Every 5 minutes</span>
                         </div>
-                        <ManaSwitch checked={settings.store.enableSlideshow} onChange={toggleSlideshow} />
+                        <Switch checked={settings.store.enableSlideshow} onChange={toggleSlideshow} />
                     </div>
                     <Tooltip text="Upload Backgrounds">
                         {tooltipProps => (

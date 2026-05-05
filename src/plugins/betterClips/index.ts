@@ -23,7 +23,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import { Activity } from "@vencord/discord-types";
 import { PresenceStore, UserStore } from "@webpack/common";
 
-
 const settings = definePluginSettings({
     clipAllStreams: {
         description: "Allows clipping on all streams regardless of the streamer's settings.",
@@ -118,15 +117,8 @@ export default definePlugin({
         {
             find: "2026-03-clips-experiment",
             replacement: {
-                match: /defaultConfig:\{enableClips:!\d,ignorePlatformRestriction:!\d,showClipsHeaderEntrypoint:!\d,enableScreenshotKeybind:!\d,enableVoiceOnlyClips:!\d,enableAdvancedSignals:!\d\}/,
-                replace: "defaultConfig:{enableClips:!0,ignorePlatformRestriction:$self.settings.store.ignorePlatformRestriction,showClipsHeaderEntrypoint:!0,enableScreenshotKeybind:$self.settings.store.enableScreenshotKeybind,enableVoiceOnlyClips:$self.settings.store.enableVoiceOnlyClips,enableAdvancedSignals:$self.settings.store.enableAdvancedSignals}"
-            }
-        },
-        {
-            find: "2023-10_viewer_clipping",
-            replacement: {
-                match: /defaultConfig:\{enableViewerClipping:!\d,ignoreSenderPreference:!\d\}/,
-                replace: "defaultConfig:{enableViewerClipping:!0,ignoreSenderPreference:!0}"
+                match: /defaultConfig:\{enableClips:!\d,ignorePlatformRestriction:!\d,enableScreenshotKeybind:!\d,enableVoiceOnlyClips:!\d,enableSpeakingIndicators:!\d,enableAdvancedSignals:!\d\}/,
+                replace: "defaultConfig:{enableClips:!0,ignorePlatformRestriction:$self.settings.store.ignorePlatformRestriction,enableScreenshotKeybind:$self.settings.store.enableScreenshotKeybind,enableVoiceOnlyClips:$self.settings.store.enableVoiceOnlyClips,enableSpeakingIndicators:!0,enableAdvancedSignals:$self.settings.store.enableAdvancedSignals}"
             }
         },
         {
@@ -150,7 +142,7 @@ export default definePlugin({
             })
         }));
 
-        return newDurations.sort((a, b) => a.value - b.value);;
+        return newDurations.sort((a, b) => a.value - b.value);
     },
 
     patchFramerates(framerates: { id: string; value: number; label: string; }[]) {
