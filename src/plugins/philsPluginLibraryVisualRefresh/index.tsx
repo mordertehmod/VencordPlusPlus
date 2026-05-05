@@ -16,7 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { renderVoicePanelButtons, replacedUserPanelComponent } from "@plugins/philsPluginLibraryVisualRefresh/patches";
+import { renderVoicePanelButtons } from "@plugins/philsPluginLibraryVisualRefresh";
+import { replacedUserPanelComponent } from "@plugins/philsPluginLibraryVisualRefresh/patches";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
@@ -28,8 +29,8 @@ const plugin = definePlugin({
         {
             find: '"--custom-app-panels-height",',
             replacement: {
-                match: /(document\.body\.style\.setProperty\("--custom-app-panels-height",`\$\{\i\}px`\)},\[\]\);let\{isSorting:\i\}=\(0,\i\.\i\)\(\);return\(0,\i\.jsx\)\("section",\{.{0,180}containerRef:\i,children:\[\(0,\i\.jsx\)\(\i,\{\}\),)/,
-                replace: "$1$self.replacedUserPanelComponent(),"
+                match: /(\(0,\s*\w+\.\w+\)\(\w+(?:\.\w+)?\s*,\s*\{\s*section:\s*\w+\.\w+\.ACCOUNT_PANEL\b)/,
+                replace: "$self.replacedUserPanelComponent(),$1"
             }
         },
         {

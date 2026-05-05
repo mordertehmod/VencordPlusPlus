@@ -21,7 +21,6 @@ import { Flex } from "@components/Flex";
 import { Tooltip } from "@webpack/common";
 import React, { JSX } from "react";
 
-
 export interface IconTooltipButtonProps {
     tooltipText?: string;
     icon?: JSX.Element;

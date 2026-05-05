@@ -18,5 +18,5 @@
 
 export * from "./audio";
 export * from "./userPanel";
-export * from "./voicePanel";
 export * from "./video";
+export * from "./voicePanel";
