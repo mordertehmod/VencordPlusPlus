@@ -1,7 +1,7 @@
 {
     "name": "vencord",
     "private": "true",
-    "version": "2.0.0",
+    "version": "2.0.5",
     "description": "Taking Discord to the Next Level!",
     "homepage": "https://github.com/mordertehmod/VencordPlusPlus#readme",
     "bugs": {
