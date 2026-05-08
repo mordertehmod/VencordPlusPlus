@@ -51,17 +51,19 @@ export default definePlugin({
             updateFunc(searchResults);
         }, []);
 
-        return <TextInput
-            placeholder="Search users..."
-            style={{ width: "200px" }}
-            onInput={e => {
-                const search = (e.target as HTMLInputElement).value.toLowerCase().trim();
-                setValue(search);
-                lastSearch = search;
-                const searchResults = this.getFilteredUsers(search);
-                updateFunc(searchResults);
-            }} value={value}
-        ></TextInput>;
+        return <div className="vc-bbu-search">
+            <TextInput
+                placeholder="Search users..."
+                style={{ width: "200px" }}
+                onInput={e => {
+                    const search = (e.target as HTMLInputElement).value.toLowerCase().trim();
+                    setValue(search);
+                    lastSearch = search;
+                    const searchResults = this.getFilteredUsers(search);
+                    updateFunc(searchResults);
+                }} value={value}
+            />
+        </div>;
     },
     renderUser(userId: string, rest: any) {
         return (
