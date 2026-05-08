@@ -7,7 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs } from "@utils/constants";
-import { useTimer } from "@utils/react";
+import { useFixedTimer } from "@utils/react";
 import { formatDurationMs } from "@utils/text";
 import definePlugin, { OptionType } from "@utils/types";
 import { PassiveUpdateState, VoiceState } from "@vencord/discord-types";
@@ -139,7 +139,7 @@ export default definePlugin({
             find: "renderConnectionStatus(){",
             replacement: {
                 match: /(renderConnectionStatus\(\).{0,1000}?lineClamp:1,children:)(\i)(?=,|}\))/,
-                replace: "$1[$2,$self.renderTimer({ channelId: this?.props?.channel?.id })]"
+                replace: "$1[$2,$self.renderConnectionTimer({ channelId: this?.props?.channel?.id })]"
             }
         }
     ],
@@ -264,16 +264,17 @@ export default definePlugin({
         );
     },
 
-    renderConnectionTimer(channelId: string) {
+    renderConnectionTimer({ channelId }: { channelId: string | undefined; }) {
         return <ErrorBoundary noop>
             <this.ConnectionTimer channelId={channelId} />
         </ErrorBoundary>;
     },
 
-    ConnectionTimer: ErrorBoundary.wrap(({ channelId }: { channelId: string; }) => {
-        const time = useTimer({
-            deps: [channelId]
-        });
+    ConnectionTimer: ErrorBoundary.wrap((_: { channelId: string | undefined; }) => {
+        const joinTime = userJoinTimes.get(UserStore.getCurrentUser().id)?.time;
+        const time = useFixedTimer({ initialTime: joinTime });
+
+        if (joinTime == null) return null;
 
         return (
             <p style={{ margin: 0, fontFamily: "var(--font-code)" }}>
