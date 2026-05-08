@@ -82,6 +82,7 @@ async function applyUpdates() {
     );
 
     PendingUpdates = [];
+
     return true;
 }
 
