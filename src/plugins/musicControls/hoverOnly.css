@@ -23,4 +23,3 @@
     /* only transition opacity on show to prevent clipping */
     transition-property: height, opacity;
 }
-
