@@ -410,7 +410,7 @@ export default function PluginSettings() {
                 />
             </ErrorBoundary>
 
-                <ErrorBoundary noop>
+            <ErrorBoundary noop>
                 <div className={classes(Margins.bottom20, Margins.top8, cl("filter-controls"))}>
                     <Select
                         options={[
@@ -426,9 +426,9 @@ export default function PluginSettings() {
                         serialize={String}
                         select={status => setSearchValue(prev => ({ ...prev, status }))}
                         isSelected={v => v === searchValue.status}
-                            closeOnSelect={true}
-                            placeholder="Filter by Type"
-                        />
+                        closeOnSelect={true}
+                        placeholder="Filter by Type"
+                    />
                     <SearchableSelect
                         options={PluginTags.map(tag => ({ label: tag, value: tag }))}
                         value={searchValue.tags}
