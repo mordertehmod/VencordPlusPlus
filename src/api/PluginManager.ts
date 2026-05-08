@@ -44,6 +44,7 @@ export { Plugins as plugins };
 import { addAudioProcessor, removeAudioProcessor } from "./AudioPlayer";
 import { addChannelToolbarButton, addHeaderBarButton, removeChannelToolbarButton, removeHeaderBarButton } from "./HeaderBar";
 import { addProfileCollection, removeProfileCollection } from "./ProfileCollections";
+import { addProfileSection, removeProfileSection } from "./ProfileSections";
 import { addUserAreaButton, removeUserAreaButton } from "./UserArea";
 
 const logger = new Logger("PluginManager", "#a6d189");
@@ -219,8 +220,9 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
         name, commands, keybinds, contextMenus, managedStyle, userProfileBadges,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
         chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, messagePopoverButton,
-        // Additions //
-        renderNicknameIcon, headerBarButton, audioProcessor, userAreaButton, renderProfileCollection, chatBarButtonWrapper
+        // Custom
+        renderNicknameIcon, headerBarButton, audioProcessor, userAreaButton, renderProfileCollection, chatBarButtonWrapper,
+        renderProfileSection
     } = p;
 
     if (p.start) {
@@ -299,7 +301,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (renderMessageAccessory) addMessageAccessory(name, renderMessageAccessory);
     if (messagePopoverButton) addMessagePopoverButton(name, messagePopoverButton.render, messagePopoverButton.icon);
 
-    // Additions //
+    // Custom
     if (renderNicknameIcon) addNicknameIcon(name, renderNicknameIcon);
     if (headerBarButton) {
         if (headerBarButton.location === "channeltoolbar") {
@@ -312,6 +314,7 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     if (userAreaButton) addUserAreaButton(name, userAreaButton.render, userAreaButton.priority);
     if (renderProfileCollection) addProfileCollection(name, renderProfileCollection);
     if (chatBarButtonWrapper) addChatBarButtonWrapper(name, chatBarButtonWrapper);
+    if (renderProfileSection) addProfileSection(name, renderProfileSection);
 
     return true;
 }, p => `startPlugin ${p.name}`);
@@ -321,8 +324,9 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
         name, commands, keybinds, contextMenus, managedStyle, userProfileBadges,
         onBeforeMessageEdit, onBeforeMessageSend, onMessageClick,
         chatBarButton, renderMemberListDecorator, renderMessageAccessory, renderMessageDecoration, messagePopoverButton,
-        // Additions //
-        renderNicknameIcon, headerBarButton, audioProcessor, userAreaButton, renderProfileCollection, chatBarButtonWrapper
+        // Custom
+        renderNicknameIcon, headerBarButton, audioProcessor, userAreaButton, renderProfileCollection, chatBarButtonWrapper,
+        renderProfileSection
     } = p;
 
     if (p.stop) {
@@ -391,7 +395,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     if (renderMessageAccessory) removeMessageAccessory(name);
     if (messagePopoverButton) removeMessagePopoverButton(name);
 
-    // Additions //
+    // Custom
     if (renderNicknameIcon) removeNicknameIcon(name);
     if (headerBarButton) {
         if (headerBarButton.location === "channeltoolbar") {
@@ -404,6 +408,7 @@ export const stopPlugin = traceFunction("stopPlugin", function stopPlugin(p: Plu
     if (userAreaButton) removeUserAreaButton(name);
     if (renderProfileCollection) removeProfileCollection(name);
     if (chatBarButtonWrapper) removeChatBarButtonWrapper(name);
+    if (renderProfileSection) removeProfileSection(name);
 
     return true;
 }, p => `stopPlugin ${p.name}`);
@@ -415,7 +420,7 @@ export const initPluginManager = onlyOnce(function init() {
     const pluginKeysToBind: Array<keyof PluginDef & `${"on" | "render"}${string}`> = [
         "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
         "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration",
-        // Additions //
+        // Custom
         "renderNicknameIcon", "renderProfileCollection"
     ];
 
@@ -453,13 +458,14 @@ export const initPluginManager = onlyOnce(function init() {
         if (p.messagePopoverButton) neededApiPlugins.add("MessagePopoverAPI");
         if (p.userProfileBadge) neededApiPlugins.add("BadgeAPI");
 
-        // Additions //
+        // Custom
         if (p.renderNicknameIcon) neededApiPlugins.add("NicknameIconsAPI");
         if (p.headerBarButton) neededApiPlugins.add("HeaderBarAPI");
         if (p.audioProcessor) neededApiPlugins.add("AudioPlayerAPI");
         if (p.userAreaButton) neededApiPlugins.add("UserAreaAPI");
         if (p.renderProfileCollection) neededApiPlugins.add("ProfileCollectionsAPI");
         if (p.chatBarButtonWrapper) neededApiPlugins.add("ChatInputButtonAPI");
+        if (p.renderProfileSection) neededApiPlugins.add("ProfileSectionsAPI");
 
         for (const key of pluginKeysToBind) {
             p[key] &&= p[key].bind(p) as any;
