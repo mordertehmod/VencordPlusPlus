@@ -7,7 +7,7 @@
         "editor.defaultFormatter": "vscode.typescript-language-features"
     },
     "[typescriptreact]": {
-        "editor.defaultFormatter": "vscode.typescript-language-features"
+        "editor.defaultFormatter": "TypeScriptTeam.native-preview"
     },
     "javascript.format.semicolons": "insert",
     "typescript.format.semicolons": "insert",
@@ -22,5 +22,9 @@
     "css.format.spaceAroundSelectorSeparator": true,
     "[css]": {
         "editor.defaultFormatter": "vscode.css-language-features"
+    },
+    "sonarlint.connectedMode.project": {
+        "connectionId": "mordertehmod",
+        "projectKey": "mordertehmod_VencordPlusPlus"
     }
 }
