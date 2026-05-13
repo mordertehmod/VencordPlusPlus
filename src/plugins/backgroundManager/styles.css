@@ -1,343 +1,340 @@
-
-
-/* Background layer */
-.vc-bgmanager-host {
-    background: transparent !important;
+.vc-bgmanager-shell {
+    position: fixed !important;
+    inset: 0 !important;
     overflow: hidden;
+    background: transparent !important;
+    background-image: none !important;
     pointer-events: none;
+}
+
+.vc-bgmanager-root {
+    --vc-bgmanager-transition-ms: 0ms;
+    --vc-bgmanager-position: 50% 50%;
+    --vc-bgmanager-filter: none;
+    --vc-bgmanager-dimming: 0;
+
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    isolation: isolate;
 }
 
 .vc-bgmanager-layer {
-    position: fixed;
+    position: absolute;
     inset: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    overflow: hidden;
+    opacity: 0;
+    transition: opacity var(--vc-bgmanager-transition-ms) ease;
 }
 
-.vc-bgmanager-layer-image,
-.vc-bgmanager-layer-video {
+.vc-bgmanager-layer-visible {
+    opacity: 1;
+}
+
+.vc-bgmanager-media,
+.vc-bgmanager-overlay {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
 }
 
-.vc-bgmanager-layer-image {
-    background-repeat: no-repeat;
-    background-size: cover;
-}
-
-.vc-bgmanager-layer-video {
+.vc-bgmanager-media {
+    display: block;
     object-fit: cover;
+    object-position: var(--vc-bgmanager-position);
+    filter: var(--vc-bgmanager-filter);
+    user-select: none;
+    -webkit-user-drag: none;
 }
 
-.vc-bgmanager-layer-dim {
-    position: absolute;
-    inset: 0;
+.vc-bgmanager-overlay {
     background: var(--black-500);
-    pointer-events: none;
+    opacity: var(--vc-bgmanager-dimming);
 }
 
-.vc-bgmanager-host ~ [class*="layers_"] [class*="base_"],
-.vc-bgmanager-host ~ [class*="layers_"] [class*="base_"] :where(
-    [class*="app_"],
-    [class*="chat_"],
-    [class*="chatContent_"],
-    [class*="container_"],
-    [class*="content_"],
-    [class*="guilds_"],
-    [class*="members_"],
-    [class*="page_"],
-    [class*="panels_"],
-    [class*="privateChannels_"],
-    [class*="scroller_"],
-    [class*="sidebar_"],
-    [class*="tabBody_"],
-    [class*="peopleColumn_"],
-    [class*="nowPlayingColumn_"]
-) {
-    background: rgb(0 0 0 / 20%) !important;
+.vc-bgmanager-app-content,
+.vc-bgmanager-page,
+.vc-bgmanager-guilds,
+.vc-bgmanager-sidebar,
+.vc-bgmanager-sidebar-list,
+.vc-bgmanager-header,
+.vc-bgmanager-chat,
+.vc-bgmanager-chat-content,
+.vc-bgmanager-members,
+.vc-bgmanager-titlebar,
+.vc-bgmanager-systembar-trailing {
+    --background-base-lowest: transparent;
+    --background-base-lower: transparent;
+    --background-base-lower-alt: transparent;
+    --background-base-low: transparent;
+    --background-surface-high: transparent;
+    --background-surface-higher: transparent;
+    --background-surface-highest: transparent;
+    --background-primary: transparent;
+    --background-secondary: transparent;
+    --background-tertiary: transparent;
+    --bg-overlay-chat: transparent;
+    --bg-overlay-2: transparent;
+    --custom-channel-members-bg: transparent;
+    --profile-gradient-primary-color: transparent;
+    --profile-gradient-secondary-color: transparent;
+    --profile-gradient-overlay-color: transparent;
+    --profile-gradient-modal-background-color: transparent;
+
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
 }
 
-/* Popout */
+.vc-bgmanager-chat [class*="membersWrap_"],
+.vc-bgmanager-chat [class*="members_"],
+.vc-bgmanager-chat .user-profile-sidebar,
+.vc-bgmanager-chat .user-profile-sidebar [class*="inner_"],
+.vc-bgmanager-chat .user-profile-sidebar [class*="body_"],
+.vc-bgmanager-chat .user-profile-sidebar [class*="overlay_"],
+.vc-bgmanager-chat .user-profile-sidebar [class*="footer_"] {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+.vc-bgmanager-members {
+    --custom-channel-members-bg: transparent;
+}
+
 .vc-bgmanager-popout {
-    --vc-bgmanager-control-height: 34px;
+    --vc-bgmanager-control-size: 34px;
 
     width: min(420px, calc(100vw - 32px));
     max-height: 85vh;
-    box-sizing: border-box;
-    background: var(--modal-background);
-    backdrop-filter: blur(8px);
     overflow: hidden;
+    background: var(--modal-background);
+    color: var(--white-500) !important;
+    border: 1px solid var(--border-faint);
+    border-radius: calc(var(--radius-md) + 2px);
+    box-shadow: var(--shadow-border), var(--shadow-high);
 }
 
-.vc-bgmanager-content {
+.vc-bgmanager-popout-content {
     display: flex;
     flex-direction: column;
     gap: 8px;
     min-height: 0;
-    box-sizing: border-box;
     padding: 12px;
 }
 
-.vc-bgmanager-title-row {
+.vc-bgmanager-title-row,
+.vc-bgmanager-info-row,
+.vc-bgmanager-slideshow-control {
     display: flex;
     align-items: center;
+}
+
+.vc-bgmanager-title-row,
+.vc-bgmanager-info-row {
     justify-content: space-between;
     gap: 12px;
 }
 
 .vc-bgmanager-title {
-    font-weight: 600;
+    color: var(--white-500) !important;
     font-size: 16px;
-    color: var(--text-normal);
-}
-
-.vc-bgmanager-summary {
-    color: var(--text-muted);
-    font-size: 12px;
     font-weight: 600;
 }
 
-/* Input area */
-.vc-bgmanager-input-row {
+.vc-bgmanager-summary,
+.vc-bgmanager-slideshow-note,
+.vc-bgmanager-info-row {
+    color: var(--text-muted) !important;
+    font-size: 12px;
+}
+
+.vc-bgmanager-controls {
     display: flex;
-    justify-content: flex-end;
-    padding: 0;
-    gap: 8px;
     align-items: center;
-    width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
+    gap: 8px;
 }
 
 .vc-bgmanager-slideshow-control {
-    display: inline-flex;
-    align-items: center;
+    min-width: 0;
     gap: 10px;
     margin-right: auto;
-    min-width: 0;
-    width: min(220px, 100%);
 }
 
 .vc-bgmanager-slideshow-meta {
-    display: flex;
-    flex-direction: column;
     min-width: 0;
 }
 
 .vc-bgmanager-slideshow-label {
-    color: var(--text-normal);
+    color: var(--white-500) !important;
     font-size: 13px;
     font-weight: 600;
     line-height: 1.15;
 }
 
 .vc-bgmanager-slideshow-note {
-    color: var(--text-muted);
-    font-size: 11px;
     line-height: 1.15;
+    color: var(--text-muted) !important;
 }
 
-/* Buttons */
-.vc-bgmanager-btn {
+.vc-bgmanager-summary {
+    color: var(--text-muted) !important;
+}
+
+.vc-bgmanager-icon-button {
     display: grid;
     place-items: center;
+    width: var(--vc-bgmanager-control-size);
+    min-width: var(--vc-bgmanager-control-size);
+    height: var(--vc-bgmanager-control-size);
     padding: 4px;
-    width: var(--vc-bgmanager-control-height);
-    min-width: var(--vc-bgmanager-control-height);
-    height: var(--vc-bgmanager-control-height);
-    min-height: var(--vc-bgmanager-control-height);
-    box-sizing: border-box;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
     background: var(--background-modifier-hover);
-    border: 1px solid var(--background-modifier-accent);
-    border-radius: 4px;
-    cursor: pointer;
     color: var(--interactive-normal);
-    transition: color 200ms, background 200ms, border-color 200ms;
+    cursor: pointer;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
 }
 
-.vc-bgmanager-btn:hover {
+.vc-bgmanager-icon-button:hover {
     background: var(--background-modifier-selected);
-    border-color: var(--interactive-accent);
+    border-color: var(--border-focus);
     color: var(--interactive-hover);
 }
 
-.vc-bgmanager-btn-upload {
+.vc-bgmanager-icon-button-upload {
     color: var(--status-positive);
 }
 
-.vc-bgmanager-btn-upload:hover {
-    color: var(--status-positive);
-}
-
-.vc-bgmanager-btn-remove {
+.vc-bgmanager-icon-button-remove,
+.vc-bgmanager-delete-button {
     color: var(--status-danger);
 }
 
-.vc-bgmanager-btn-remove:hover {
-    color: var(--status-danger);
-}
-
-.vc-bgmanager-btn-next {
-    padding: 0;
-}
-
-/* Info bar */
-.vc-bgmanager-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-    color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 600;
-}
-
-/* Image grid */
 .vc-bgmanager-grid {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
-    padding: 0;
-    overflow-y: auto;
-    scrollbar-gutter: stable;
-    align-content: start;
-    flex: 1;
-    width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
     max-height: 60vh;
-    mask-image: linear-gradient(transparent, var(--black-500) 8px, var(--black-500) calc(100% - 8px), transparent);
+    overflow-y: auto;
+    align-content: start;
     scrollbar-width: thin;
-    scrollbar-color: var(--scrollbar-thin-thumb) transparent;
 }
 
-.vc-bgmanager-grid::-webkit-scrollbar {
-    width: 8px;
-}
-
-.vc-bgmanager-grid::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.vc-bgmanager-grid::-webkit-scrollbar-thumb {
-    background-color: var(--scrollbar-thin-thumb);
-    border-radius: 4px;
-    border: 2px solid transparent;
-    background-clip: content-box;
-}
-
-.vc-bgmanager-thumb-loading {
-    color: var(--text-muted);
-    font-size: 12px;
-}
-
-.vc-bgmanager-thumb-error {
-    color: var(--text-danger);
-    font-size: 12px;
-}
-
-.vc-bgmanager-hidden {
-    display: none;
-}
-
-/* Thumbnails */
-.vc-bgmanager-thumb {
+.vc-bgmanager-card {
     position: relative;
-    flex: 0 0 calc(50% - 4px);
-    max-width: calc(50% - 4px);
-    aspect-ratio: 16 / 9;
-    border-radius: 4px;
     overflow: hidden;
     border: 2px solid transparent;
-    cursor: pointer;
+    border-radius: var(--radius-md);
     background: var(--background-modifier-hover);
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: border-color 300ms;
+    aspect-ratio: 16 / 9;
+    cursor: pointer;
+    transition: border-color .15s ease, transform .15s ease;
 }
 
-.vc-bgmanager-thumb.vc-bgmanager-selected {
+.vc-bgmanager-card:focus-visible,
+.vc-bgmanager-card:hover {
+    border-color: var(--border-focus);
+    transform: translateY(-1px);
+}
+
+.vc-bgmanager-card-selected {
     border-color: var(--brand-500);
 }
 
-.vc-bgmanager-thumb img,
-.vc-bgmanager-thumb video {
-    object-fit: cover;
+.vc-bgmanager-card-media {
+    display: block;
     width: 100%;
     height: 100%;
-    min-width: 100%;
-    min-height: 100%;
+    object-fit: cover;
 }
 
-.vc-bgmanager-thumb-info {
+.vc-bgmanager-card-status {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.vc-bgmanager-card-meta {
     position: absolute;
+    inset-inline: 0;
     bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 2px 4px;
     display: flex;
     justify-content: space-between;
-    font-size: 11px;
+    gap: 8px;
+    padding: 4px 6px;
     color: var(--white-500);
+    font-size: 11px;
     pointer-events: none;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 85%);
 }
 
-.vc-bgmanager-thumb-info::before {
+.vc-bgmanager-card-meta::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(transparent, var(--black-500));
-    opacity: 0.7;
+    background: linear-gradient(transparent, rgb(0 0 0 / 80%));
 }
 
-.vc-bgmanager-thumb-info > * {
+.vc-bgmanager-card-meta > span {
     position: relative;
     z-index: 1;
-    opacity: 0.7;
 }
 
-.vc-bgmanager-delete {
+.vc-bgmanager-delete-button {
     position: absolute;
     top: 4px;
     right: 4px;
-    display: flex;
-    padding: 2px;
-    border-radius: 4px;
-    border: none;
-    background: var(--status-danger);
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--button-danger-background) 75%, white 10%);
+    border-radius: calc(var(--radius-sm) + 2px);
+    background: color-mix(in srgb, var(--button-danger-background) 90%, black 10%);
     color: var(--white-500);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 35%);
     cursor: pointer;
     opacity: 0;
-    transition: opacity 200ms, background 200ms;
+    transition: opacity .15s ease, background .15s ease, transform .15s ease, border-color .15s ease;
 }
 
-.vc-bgmanager-delete:hover {
-    background: var(--red-500);
-}
-
-.vc-bgmanager-delete:focus-visible,
-.vc-bgmanager-thumb:hover .vc-bgmanager-delete {
+.vc-bgmanager-delete-button:focus-visible {
     opacity: 1;
 }
 
-/* Settings clear button */
-.vc-bgmanager-clear-btn {
+.vc-bgmanager-delete-button:hover {
+    opacity: 1;
+    background: var(--button-danger-background-hover);
+    border-color: color-mix(in srgb, var(--button-danger-background-hover) 75%, white 18%);
+    transform: scale(1.04);
+}
+
+.vc-bgmanager-card:hover .vc-bgmanager-delete-button {
+    opacity: 1;
+}
+
+.vc-bgmanager-delete-button svg {
+    width: 14px;
+    height: 14px;
+}
+
+.vc-bgmanager-clear-button {
     padding: 8px 16px;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     background: var(--button-danger-background);
     color: var(--white-500);
     font-weight: 600;
     cursor: pointer;
-    transition: background 200ms;
+    transition: background .15s ease;
 }
 
-.vc-bgmanager-clear-btn:hover {
+.vc-bgmanager-clear-button:hover {
     background: var(--button-danger-background-hover);
 }
