@@ -33,7 +33,7 @@ importers:
         version: 0.0.22
       '@types/less':
         specifier: ^3.0.8
-        version: 3.0.8(patch_hash=c41cb25318d9994f654bbdd10249d76f0caeb5b69fab254135afd76cdc452ae6)
+        version: 3.0.8(patch_hash=641e6c93bb737bac7fc283416857bd095cd85bcbcba63becb7a8bbcc78f73076)
       '@types/stylus':
         specifier: ^0.48.42
         version: 0.48.42
