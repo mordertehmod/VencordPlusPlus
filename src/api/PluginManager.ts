@@ -91,6 +91,7 @@ export function hasAnyVisibleSettings({ settings }: Plugin) {
 
 export function addPatch(newPatch: Omit<Patch, "plugin">, pluginName: string, pluginPath = `Vencord.Plugins.plugins[${JSON.stringify(pluginName)}]`) {
     // TODO: this causes crashes
+    if (pluginName === "Vesktop" && newPatch.find === ".STREAMING_AUTO_STREAMER_MODE,") return;
 
     const patch = newPatch as Patch;
     patch.plugin = pluginName;
@@ -312,9 +313,9 @@ export const startPlugin = traceFunction("startPlugin", function startPlugin(p: 
     }
     if (audioProcessor) addAudioProcessor(name, audioProcessor);
     if (userAreaButton) addUserAreaButton(name, userAreaButton.render, userAreaButton.priority);
-    if (renderProfileCollection) addProfileCollection(name, renderProfileCollection);
-    if (chatBarButtonWrapper) addChatBarButtonWrapper(name, chatBarButtonWrapper);
-    if (renderProfileSection) addProfileSection(name, renderProfileSection);
+    if (renderProfileCollection) addProfileCollection(name, renderProfileCollection.render, renderProfileCollection.priority);
+    if (chatBarButtonWrapper) addChatBarButtonWrapper(name, chatBarButtonWrapper.wrapper, chatBarButtonWrapper.priority);
+    if (renderProfileSection) addProfileSection(name, renderProfileSection.render, renderProfileSection.priority);
 
     return true;
 }, p => `startPlugin ${p.name}`);
@@ -421,7 +422,7 @@ export const initPluginManager = onlyOnce(function init() {
         "onBeforeMessageEdit", "onBeforeMessageSend", "onMessageClick",
         "renderMemberListDecorator", "renderMessageAccessory", "renderMessageDecoration",
         // Custom
-        "renderNicknameIcon", "renderProfileCollection"
+        "renderNicknameIcon"
     ];
 
     const neededApiPlugins = new Set<string>();
@@ -468,7 +469,7 @@ export const initPluginManager = onlyOnce(function init() {
         if (p.renderProfileSection) neededApiPlugins.add("ProfileSectionsAPI");
 
         for (const key of pluginKeysToBind) {
-            p[key] &&= p[key].bind(p) as any;
+            p[key] &&= (p[key] as Function).bind(p) as any;
         }
     }
 
