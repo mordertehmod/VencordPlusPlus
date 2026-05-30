@@ -9,9 +9,8 @@ import { Span } from "@components/Span";
 import { fetchReposByUserId, fetchReposByUsername, fetchUserInfo, GitHubUserInfo } from "@plugins/githubRepos/githubApi";
 import { GitHubRepo } from "@plugins/githubRepos/types";
 import { classes } from "@utils/misc";
-import { openModal } from "@utils/modal";
 import { findCssClassesLazy } from "@webpack";
-import { Clickable, React, useEffect, UserProfileStore, useState } from "@webpack/common";
+import { Clickable, openModal,React, useEffect, UserProfileStore, useState } from "@webpack/common";
 
 import { ReposModal } from "./ReposModal";
 

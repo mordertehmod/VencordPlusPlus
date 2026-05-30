@@ -1,153 +1,39 @@
-/* Plugin name */
-.vc-plugin-modal-header-title {
+.vc-plugin-modal-header {
+    align-items: flex-start;
+    position: relative;
+}
+
+.vc-plugin-modal-header-content {
     display: flex;
+    flex-direction: column;
+    gap: 8px;
     flex: 1;
-    align-items: center;
-    justify-content: center;
+}
+
+.vc-plugin-modal-header-trailing {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
     gap: 4px;
 }
 
-/* Hacky ass spacer to keep the close element in the
-*  flex container and maintain our title centering */
-.vc-plugin-modal-header-spacer {
-    display: flex;
-    align-items: flex-start;
-    width: 32px;
-}
-
-/* Info toggle button */
-.vc-plugin-modal-info-button {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-}
-
-.vc-plugin-modal-info-button svg {
-    transition: transform 0.2s ease;
-    flex-shrink: 0;
-}
-
-.vc-plugin-modal-info-button-expanded svg {
-    transform: rotate(180deg);
-}
-
-/* Plugin info section */
-.vc-plugin-modal-info {
-    flex-grow: 1;
-    align-items: center;
-}
-
-.vc-plugin-modal-info-section {
-    animation: slidedown 0.2s ease;
+.vc-plugin-modal-title {
+    color: var(--text-strong);
+    padding-right: 32px;
 }
 
 .vc-plugin-modal-description {
-    text-align: center;
-    margin: auto;
-    max-width: 90%;
-}
-
-/* Authors and source link buttons component */
-.vc-plugin-modal-authorsAndButtons {
-    display: flex;
-    align-items: center;
-}
-
-.vc-plugin-modal-authors-label {
-    text-align: center;
-    line-height: 28px;
+    color: var(--text-subtle);
+    padding-right: 60px;
 }
 
 .vc-plugin-modal-links {
     display: flex;
     gap: 4px;
     margin-left: auto;
-}
-
-/* Tab nav */
-.vc-plugin-modal-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--background-modifier-accent);
-    justify-content: center;
-
-    /* Sticky tabs??
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    */
-}
-
-.vc-plugin-modal-tab {
-    flex: 1;
-    padding: 12px 24px;
-    cursor: pointer;
-    border-bottom: 2px solid grey;
-    transition: color 0.15s ease;
-    color: var(--text-muted);
-    text-align: center;
-    position: relative;
-    font-weight: 500;
-}
-
-/* Tab hover effect */
-.vc-plugin-modal-tab::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-color: var(--background-modifier-hover); /* TODO: FIX */
-    opacity: .3;
-    transition: opacity 0.15s ease;
-    pointer-events: none;
-}
-
-/* Animated tab underline */
-.vc-plugin-modal-tab::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    bottom: -2px;
-    width: 0;
-    height: 2px;
-    background-color: var(--brand-experiment);
-    transform: translateX(-50%);
-    transition: width 0.15s ease;
-}
-
-.vc-plugin-modal-tab:hover::before {
-    opacity: 1;
-}
-
-.vc-plugin-modal-tab:hover {
-    color: var(--text-strong);
-}
-
-.vc-plugin-modal-tab-active {
-    color: var(--text-strong);
-    border-bottom-color: var(--brand-experiment);
-}
-
-.vc-plugin-modal-tab-active::after {
-    width: 60%
-}
-
-.vc-plugin-modal-tab-active::before {
-    opacity: 0;
-}
-
-.vc-plugin-modal-tab:active {
-    transform: scale(0.98);
-}
-
-@keyframes slidedown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 .vc-plugin-modal-confirm [class*="footer"] {
@@ -170,4 +56,34 @@
 
 .vc-settings-modal-content {
     padding-bottom: 24px;
+}
+
+.vc-plugin-modal-info {
+    display: flex;
+    gap: 1em;
+    justify-content: space-between;
+    align-items: start;
+}
+
+.vc-plugin-modal-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+.vc-plugin-modal-tag {
+    align-items: center;
+    border: 1px solid var(--border-normal);
+    border-radius: 9999px;
+    display: flex;
+    justify-content: center;
+    padding: 6px 12px;
+    color: var(--text-default);
+}
+
+.vc-plugin-modal-about-box {
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border-normal, var(--background-modifier-accent));
 }

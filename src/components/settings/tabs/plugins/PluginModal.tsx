@@ -32,11 +32,10 @@ import { classNameFactory } from "@utils/css";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
-import { ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { OptionType, Plugin, PluginTag } from "@utils/types";
-import { User } from "@vencord/discord-types";
+import { RenderModalProps, User } from "@vencord/discord-types";
 import { findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
-import { Clickable, FluxDispatcher, React, Toasts, Tooltip, useEffect, useMemo, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
+import { Clickable, FluxDispatcher, Modal, openModal, React, Text, Toasts, Tooltip, useEffect, useMemo, UserStore, UserSummaryItem, UserUtils, useState } from "@webpack/common";
 import { Constructor } from "type-fest";
 
 import { PluginMeta } from "~plugins";
@@ -44,16 +43,17 @@ import { PluginMeta } from "~plugins";
 import { OptionComponentMap } from "./components";
 import { openContributorModal } from "./ContributorModal";
 import { GithubButton, WebsiteButton } from "./LinkIconButton";
-import { PluginTabContent, Tabs, TabType } from "./PluginTabs";
+// import { PluginTabContent, Tabs, TabType } from "./PluginTabs";
 
 const cl = classNameFactory("vc-plugin-modal-");
 
 const AvatarStyles = findCssClassesLazy("moreUsers", "avatar", "clickableAvatar");
+const CloseButton = findComponentByCodeLazy("CLOSE_BUTTON_LABEL");
 const ConfirmModal = findComponentByCodeLazy('parentComponent:"ConfirmModal"');
 const WarningIcon = findComponentByCodeLazy("3.15H3.29c-1.74");
 const UserRecord: Constructor<Partial<User>> = proxyLazy(() => UserStore.getCurrentUser().constructor) as any;
 
-interface PluginModalProps extends ModalProps {
+interface PluginModalProps extends RenderModalProps {
     plugin: Plugin;
     onRestartNeeded(key: string): void;
 }
@@ -93,9 +93,11 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     const fallbackAuthors = useMemo(() => [makeDummyUser({ username: "Loading...", id: "-1465912127305809920" })], []);
     const [authors, setAuthors] = useState<Partial<User>[]>([]);
 
+    /*
     const [activeTab, setActiveTab] = useState<TabType>("settings");
     const [tabsError, setTabsError] = useState(false);
     const [infoExpanded, setInfoExpanded] = useState(false);
+    */
 
     useEffect(() => {
         (async () => {
@@ -124,7 +126,9 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             return <Paragraph>There are no settings for this plugin.</Paragraph>;
 
         const options = Object.entries(settings.def).map(([key, setting]) => {
-            if (setting.type === OptionType.CUSTOM || isSettingHidden(settings, setting)) return null;
+            if (setting.type === OptionType.CUSTOM) return null;
+
+            if (isSettingHidden(settings, setting)) return null;
 
             function onChange(newValue: any) {
                 const option = plugin.settings!.def[key];
@@ -144,6 +148,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                         onChange={debounce(onChange)}
                         pluginSettings={pluginSettings}
                         definedSettings={settings}
+                        closePluginSettings={onClose}
                     />
                 </ErrorBoundary>
             );
@@ -178,130 +183,68 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
     const isCustomPlugin = pluginMeta.folderName.startsWith("src/zaddyplugins/") ?? false;
 
     return (
-        <ModalRoot transitionState={transitionState} size={ModalSize.MEDIUM}>
-            <ModalHeader separator={false} className={Margins.bottom8}>
-                <div className={cl("header-spacer")} /> {/* This is hacky as fuck, but it centers the text without fucking up the flexbox*/}
-                <div className={cl("header-title")}>
-                    <BaseText size="xl" weight="bold">{plugin.name}</BaseText>
-                        <Tooltip text={infoExpanded ? "Hide plugin info" : "Show plugin info"}>
-                        {({ onMouseEnter, onMouseLeave }) => (
-                            <Clickable
-                                className={classes(cl("info-button"), infoExpanded && cl("info-button-expanded"))}
-                                onClick={() => setInfoExpanded(!infoExpanded)}
-                                onMouseEnter={onMouseEnter}
-                                onMouseLeave={onMouseLeave}
-                            >
-                                <svg width="24" height="24" viewBox="0 0 24 24"><path fill="var(--interactive-normal)" d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z" /></svg>
-                            </Clickable>
-                        )}
-                    </Tooltip>
+        <Modal
+            transitionState={transitionState}
+            onClose={onClose}
+            size="lg"
+            title={
+                <div className={cl("header")}>
+                    <BaseText tag="h1" weight="semibold" size="lg">{plugin.name}</BaseText>
                 </div>
-                <ModalCloseButton onClick={onClose} />
-            </ModalHeader>
-
-            <ModalContent className={Margins.bottom16}>
+            }
+            subtitle={
+                <div className={cl("info")}>
+                    <div>
+                        <Paragraph size="md">{plugin.description}</Paragraph>
+                        {!!plugin.tags?.length && <PluginTags tags={plugin.tags} />}
+                    </div>
+                </div>
+            }
+        >
+            {!!plugin.settingsAboutComponent && (
+                <div className={classes(Margins.top16, cl("about-box"))}>
                     <section>
-                        {infoExpanded && (
-                            <Flex className={classes(cl("info"), cl("info-section"))}>
-                                <Paragraph className={classes(cl("description"), Margins.bottom16)}>{plugin.description}</Paragraph>
-                            </Flex>
-                        )}
-                    <Flex className={classes(cl("authorsAndButtons"), Margins.bottom16)}>
-                        <Flex gap="8px">
-                            <BaseText size="md" weight="semibold" color="text-strong" className={cl("authors-label")}>Authors:</BaseText>
-                                <div style={{ width: "fit-content" }}>
-                                    <ErrorBoundary noop>
-                                        <UserSummaryItem
-                                            users={authors.length ? authors : fallbackAuthors}
-                                            guildId={undefined}
-                                            renderIcon={false}
-                                            showDefaultAvatarsForNullUsers
-                                            renderMoreUsers={renderMoreUsers}
-                                            renderUser={(user: User) => (
-                                                <Clickable
-                                                className={AvatarStyles.clickableAvatar}
-                                                onClick={() => openContributorModal(user)}
-                                                >
-                                                    <img
-                                                        className={AvatarStyles.avatar}
-                                                        src={user.getAvatarURL(void 0, 80, true)}
-                                                        alt={user.username}
-                                                        title={user.username}
-                                                    />
-                                                </Clickable>
-                                            )}
+                        <ErrorBoundary message="An error occurred while rendering this plugin's custom Info Component">
+                            <plugin.settingsAboutComponent />
+                        </ErrorBoundary>
+                    </section>
+                </div>
+            )}
+            <div className={"vc-settings-modal-content"}>
+                <section>
+                    <Text variant="heading-lg/semibold" className={classes(Margins.top8, Margins.bottom8)}>Authors</Text>
+                    <div style={{ width: "fit-content" }}>
+                        <ErrorBoundary noop>
+                            <UserSummaryItem
+                                users={authors.length ? authors : fallbackAuthors}
+                                guildId={undefined}
+                                renderIcon={false}
+                                showDefaultAvatarsForNullUsers
+                                renderMoreUsers={renderMoreUsers}
+                                renderUser={(user: User) => (
+                                    <Clickable
+                                        className={AvatarStyles.clickableAvatar}
+                                        onClick={() => isCustomPlugin ? openContributorModal(user) : openContributorModal(user)}
+                                    >
+                                        <img
+                                            className={AvatarStyles.avatar}
+                                            src={user.getAvatarURL(void 0, 80, true)}
+                                            alt={user.username}
+                                            title={user.username}
                                         />
-                                    </ErrorBoundary>
-                                </div>
-                        </Flex>
-
-                        {!pluginMeta.userPlugin && (
-                            <Flex gap="4px" className={cl("links")}>
-                                <Tooltip text="View more info">
-                                    {({ onMouseEnter, onMouseLeave }) => (
-                                        <WebsiteButton
-                                            text=""
-                                            href={isCustomPlugin ? `https://zaddi.dev/VencordPlusPlus/plugins/${plugin.name}` : `https://vencord.dev/plugins/${plugin.name}`}
-                                            onMouseEnter={onMouseEnter}
-                                            onMouseLeave={onMouseLeave}
-                                        />
-                                    )}
-                                </Tooltip>
-                                <Tooltip text="Source Code">
-                                    {({ onMouseEnter, onMouseLeave }) =>(
-                                        <GithubButton
-                                            text=""
-                                            href={`https://github.com/${gitRemote}/tree/main/${pluginMeta.folderName}`}
-                                            onMouseEnter={onMouseEnter}
-                                            onMouseLeave={onMouseLeave}
-                                        />
-                                    )}
-                                </Tooltip>
-                            </Flex>
-                        )}
-                    </Flex>
-                </section>
-
-                <ErrorBoundary noop onError={() => setTabsError(true)}>
-                    {!tabsError ? (
-                        <>
-                            <Tabs activeTab={activeTab} onTabChange={setActiveTab} />
-                            <PluginTabContent
-                                activeTab={activeTab}
-                                renderSettings={renderSettings}
-                                renderAboutComponent={() => plugin.settingsAboutComponent && (
-                                    <div className={Margins.top16}>
-                                        <section>
-                                            <ErrorBoundary message="An error occurred while rendering this plugin's custom Info Component">
-                                                <plugin.settingsAboutComponent />
-                                            </ErrorBoundary>
-                                        </section>
-                                    </div>
+                                    </Clickable>
                                 )}
                             />
-                        </>
-                    ) : (
-                        <>
-                            {plugin.settingsAboutComponent && (
-                                <div className={Margins.top16}>
-                                    <section>
-                                        <ErrorBoundary message="An error occurred while rendering this plugin's custom Info Component">
-                                            <plugin.settingsAboutComponent />
-                                        </ErrorBoundary>
-                                    </section>
-                                </div>
-                            )}
+                        </ErrorBoundary>
+                    </div>
+                </section>
 
-                            <section>
-                                <BaseText size="lg" weight="semibold" color="text-strong" className={classes(Margins.top16, Margins.bottom8)}>Settings</BaseText>
-                                {renderSettings()}
-                            </section>
-                        </>
-                    )}
-                </ErrorBoundary>
-            </ModalContent>
-            {((tabsError && hasSettings) || (!tabsError && activeTab === "settings" && hasSettings)) && (
-            <ModalFooter>
+                <section>
+                    <BaseText size="lg" weight="semibold" color="text-strong" className={classes(Margins.top16, Margins.bottom8)}>Settings</BaseText>
+                    {renderSettings()}
+                </section>
+            </div>
+            <div>
                 <Flex flexDirection="column" style={{ width: "100%" }}>
                     <Flex style={{ justifyContent: "space-between", alignItems: "center" }}>
                         {hasSettings ? (
@@ -320,11 +263,22 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                                 )}
                             </Tooltip>
                         ) : <div />}
-                        </Flex>
+                        {!pluginMeta.userPlugin && (
+                            <div className={cl("links")}>
+                                <WebsiteButton
+                                    text="Website"
+                                    href={isCustomPlugin ? `https://google.com/` : `https://vencord.dev/plugins/${plugin.name}`}
+                                />
+                                <GithubButton
+                                    text="Source Code"
+                                    href={`https://github.com/${gitRemote}/tree/main/${pluginMeta.folderName}`}
+                                />
+                            </div>
+                        )}
                     </Flex>
-                </ModalFooter>
-            )}
-        </ModalRoot>
+                </Flex>
+            </div>
+        </Modal >
     );
 }
 
