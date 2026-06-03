@@ -1,3 +1,9 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import "../../styles.css";
 
 import { useSettings } from "@api/Settings";
@@ -12,9 +18,9 @@ import { resizeUIElements } from "../../settings/ResizeUIElements";
 export function ResizeUITab()
 {
     const pluginName = "BetterUI";
-    const pluginSettings = useSettings( [ `plugins.${pluginName}.*` ] ).plugins[ pluginName ];
+    const pluginSettings = useSettings([ `plugins.${pluginName}.*` ]).plugins[ pluginName ];
 
-    const options = Object.entries( resizeUIElements.def ).map( ( [ key, setting ] ) =>
+    const options = Object.entries(resizeUIElements.def).map(([ key, setting ]) =>
     {
         const Component = OptionComponentMap[ setting.type ];
 
@@ -22,20 +28,21 @@ export function ResizeUITab()
             <ErrorBoundary noop key={ key }>
                 <Component
                     id={ key }
-                    option={ setting }
-                    onChange={ debounce( newValue =>
+                    setting={ setting }
+                    onChange={ debounce(newValue =>
                     {
                         const option = resizeUIElements.def[ key ];
-                        if ( !option || option.type === OptionType.CUSTOM ) return;
+                        if (!option || option.type === OptionType.CUSTOM) return;
 
                         pluginSettings[ key ] = newValue;
-                    } ) }
+                    }) }
                     pluginSettings={ pluginSettings }
                     definedSettings={ resizeUIElements }
+                    closePluginSettings={ () => void 0 }
                 />
             </ErrorBoundary>
         );
-    } );
+    });
 
     return (
         <div className="vc-plugins-settings">
@@ -44,4 +51,4 @@ export function ResizeUITab()
     );
 }
 
-export default wrapTab( ResizeUITab, "ResizeUITab" );
+export default wrapTab(ResizeUITab, "ResizeUITab");

@@ -21,14 +21,17 @@ import "./shiki.css";
 import { enableStyle } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { ReporterTestable } from "@utils/types";
+import { React } from "@webpack/common";
 import previewExampleText from "file://previewExample.tsx";
 
 import { shiki } from "./api/shiki";
-import { createHighlighter } from "./components/Highlighter";
+import { HighlighterContainer, type HighlighterProps } from "./components/Highlighter";
 import deviconStyle from "./devicon.css?managed";
 import { settings } from "./settings";
 import { DeviconSetting } from "./types";
 import { clearStyles } from "./utils/createStyle";
+
+const createHighlighter = (props: HighlighterProps) => React.createElement(HighlighterContainer, props);
 
 export default definePlugin({
     name: "ShikiCodeblocks",

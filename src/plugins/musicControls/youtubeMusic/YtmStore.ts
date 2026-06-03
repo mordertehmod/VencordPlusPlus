@@ -5,10 +5,10 @@
  */
 
 import { isPluginEnabled } from "@api/PluginManager";
+import { Settings } from "@api/Settings";
 import { Logger } from "@utils/Logger";
 import { proxyLazyWebpack } from "@webpack";
 import { Flux, FluxDispatcher } from "@webpack/common";
-import { Settings } from "Vencord";
 
 enum MediaType {
     /**

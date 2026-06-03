@@ -1,3 +1,9 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import "../../../styles.css";
 
 import { useSettings } from "@api/Settings";
@@ -11,8 +17,8 @@ import { TabBar, useState } from "@webpack/common";
 import { collapsibleChannelListSettings } from "../../../settings/ChannelList/CollapsibleChannelListSettings";
 
 const CollapsibleChannelListTabs = [
-    { id: "uiSettings", label: "Settings"},
-    { id: "uiKeybind", label: "Collapse on Keybind"},
+    { id: "uiSettings", label: "Settings" },
+    { id: "uiKeybind", label: "Collapse on Keybind" },
 ];
 
 type TabId = typeof CollapsibleChannelListTabs[number]["id"];
@@ -20,7 +26,7 @@ type TabId = typeof CollapsibleChannelListTabs[number]["id"];
 const CollapsibleChannelListComponents: Record<TabId, React.ComponentType> = {
     uiSettings: UISettingsTab,
     uiKeybind: UIKeybindTab
-    //animations: AnimationsTab,
+    // animations: AnimationsTab,
 };
 
 function UIKeybindTab() {
@@ -67,7 +73,7 @@ function UISettingsTab() {
             <ErrorBoundary noop key={key}>
                 <Component
                     id={key}
-                    option={setting}
+                    setting={setting}
                     onChange={debounce(newValue => {
                         const option = collapsibleChannelListSettings.def[key];
                         if (!option || option.type === OptionType.CUSTOM) return;
@@ -76,6 +82,7 @@ function UISettingsTab() {
                     })}
                     pluginSettings={pluginSettings}
                     definedSettings={collapsibleChannelListSettings}
+                    closePluginSettings={() => void 0}
                 />
             </ErrorBoundary>
         );

@@ -383,7 +383,7 @@ export interface PluginSettingSliderDef extends PluginSettingDefCommon {
     stickToMarkers?: boolean;
 }
 
-export interface PluginSettingKeybindDef {
+export interface PluginSettingKeybindDef extends PluginSettingDefCommon {
     type: OptionType.KEYBIND;
     /**
      * If true, this keybind will be global (works outside of the app window).

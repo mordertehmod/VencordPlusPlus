@@ -24,7 +24,7 @@ import { classNameFactory } from "@api/Styles";
 import { ScreenshareIcon, WebsiteIcon } from "@components/Icons";
 import { Switch } from "@components/settings";
 import { classes } from "@utils/index";
-import { OptionType, PluginOptionKeybind } from "@utils/types";
+import { OptionType, type PluginSettingKeybindDef } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
 import { React, Text, Tooltip, useEffect, useRef, useState } from "@webpack/common";
 
@@ -37,7 +37,7 @@ const RecorderClasses = findByPropsLazy("recorderContainer", "keybindInput");
 
 export const cl = classNameFactory("vc-plugins-setting-keybind");
 
-export function KeybindSetting({ option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginOptionKeybind>) {
+export function KeybindSetting({ setting: option, pluginSettings, definedSettings, id, onChange }: SettingProps<PluginSettingKeybindDef>) {
     const inputId = "vc-key-recorder-" + id;
     const { global } = option;
     const available = (global ? IS_DISCORD_DESKTOP : window) && keybindsManager.isAvailable(global);
