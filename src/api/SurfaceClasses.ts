@@ -1,0 +1,261 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { classes } from "@utils/misc";
+import { useForceUpdater } from "@utils/react";
+import { useEffect } from "@webpack/common";
+import type { CSSProperties, FocusEventHandler, MouseEventHandler, MutableRefObject, Ref } from "react";
+
+export type SurfaceId =
+    | "base"
+    | "sidebar"
+    | "guildBar"
+    | "channelList"
+    | "membersList"
+    | "titleBar"
+    | "headerBar"
+    | "userArea";
+
+export interface SurfaceProvidedProps {
+    ref?: Ref<HTMLElement>;
+    className?: string;
+    style?: CSSProperties;
+    "data-vc-surface-classes"?: string;
+    [dataAttribute: `data-${string}`]: string | undefined;
+    onFocusCapture?: FocusEventHandler<HTMLElement>;
+    onBlurCapture?: FocusEventHandler<HTMLElement>;
+    onMouseDownCapture?: MouseEventHandler<HTMLElement>;
+    onMouseOverCapture?: MouseEventHandler<HTMLElement>;
+    onMouseOutCapture?: MouseEventHandler<HTMLElement>;
+}
+
+export type SurfaceClassProvider = () => string | undefined;
+export type SurfacePropsProvider = () => SurfaceProvidedProps | undefined;
+
+interface SurfaceInstance {
+    forceUpdate(callback?: () => void): void;
+}
+
+const providers = new Map<SurfaceId, Set<SurfaceClassProvider>>();
+const propsProviders = new Map<SurfaceId, Set<SurfacePropsProvider>>();
+const listeners = new Map<SurfaceId, Set<() => void>>();
+const surfaceInstances = new Map<SurfaceId, WeakRef<SurfaceInstance>>();
+
+/**
+ * Adds semantic class/state props to stable Discord-owned layout surfaces.
+ *
+ * It exists so plugins do not patch compiled Discord JSX layout directly.
+ *
+ * Prop providers are limited to small hover/focus state handoff
+ * props needed to support semantic surface classes.
+ */
+
+function getProviderSet(surfaceId: SurfaceId) {
+    let set = providers.get(surfaceId);
+
+    if (set == null) {
+        set = new Set();
+        providers.set(surfaceId, set);
+    }
+
+    return set;
+}
+
+function getPropsProviderSet(surfaceId: SurfaceId) {
+    let set = propsProviders.get(surfaceId);
+
+    if (set == null) {
+        set = new Set();
+        propsProviders.set(surfaceId, set);
+    }
+
+    return set;
+}
+
+function getListenerSet(surfaceId: SurfaceId) {
+    let set = listeners.get(surfaceId);
+
+    if (set == null) {
+        set = new Set();
+        listeners.set(surfaceId, set);
+    }
+
+    return set;
+}
+
+function composeClassNames(...values: Array<string | undefined>) {
+    return classes(...values.flatMap(value => value?.split(/\s+/).filter(Boolean) ?? []));
+}
+
+function chainHandlers<E>(
+    first?: (event: E) => void,
+    second?: (event: E) => void
+) {
+    if (!first) return second;
+    if (!second) return first;
+
+    return (event: E) => {
+        first(event);
+        second(event);
+    };
+}
+
+function setRef<T>(ref: Ref<T>, value: T | null) {
+    if (typeof ref === "function") {
+        ref(value);
+        return;
+    }
+
+    (ref as MutableRefObject<T | null>).current = value;
+}
+
+function composeRefs<T>(first?: Ref<T>, second?: Ref<T>) {
+    if (!first) return second;
+    if (!second) return first;
+
+    return (value: T | null) => {
+        setRef(first, value);
+        setRef(second, value);
+    };
+}
+
+export function getSurfaceClasses(surfaceId: SurfaceId) {
+    return composeClassNames(...Array.from(providers.get(surfaceId) ?? [], provider => provider()));
+}
+
+function mergeSurfaceProvidedProps(target: SurfaceProvidedProps, source: SurfaceProvidedProps) {
+    const ref = composeRefs(target.ref, source.ref);
+    if (ref) target.ref = ref;
+    const mergedClass = composeClassNames(target.className, source.className);
+    if (mergedClass) target.className = mergedClass;
+    const onFocusCapture = chainHandlers(target.onFocusCapture, source.onFocusCapture);
+    if (onFocusCapture) target.onFocusCapture = onFocusCapture;
+    const onBlurCapture = chainHandlers(target.onBlurCapture, source.onBlurCapture);
+    if (onBlurCapture) target.onBlurCapture = onBlurCapture;
+    const onMouseDownCapture = chainHandlers(target.onMouseDownCapture, source.onMouseDownCapture);
+    if (onMouseDownCapture) target.onMouseDownCapture = onMouseDownCapture;
+    const onMouseOverCapture = chainHandlers(target.onMouseOverCapture, source.onMouseOverCapture);
+    if (onMouseOverCapture) target.onMouseOverCapture = onMouseOverCapture;
+    const onMouseOutCapture = chainHandlers(target.onMouseOutCapture, source.onMouseOutCapture);
+    if (onMouseOutCapture) target.onMouseOutCapture = onMouseOutCapture;
+    if (source.style) target.style = { ...target.style, ...source.style };
+
+    for (const [key, value] of Object.entries(source)) {
+        if (key.startsWith("data-") && typeof value === "string") {
+            target[key as `data-${string}`] = value;
+        }
+    }
+
+    return target;
+}
+
+export function getSurfaceProps(surfaceId: SurfaceId) {
+    const className = getSurfaceClasses(surfaceId);
+    const props: SurfaceProvidedProps = {};
+
+    if (className) {
+        props["data-vc-surface-classes"] = className;
+
+        for (const token of className.split(/\s+/)) {
+            if (token) {
+                props[`data-${token}` as `data-${string}`] = "";
+            }
+        }
+    }
+
+    for (const provider of propsProviders.get(surfaceId) ?? []) {
+        const providedProps = provider();
+
+        if (providedProps) {
+            mergeSurfaceProvidedProps(props, providedProps);
+        }
+    }
+
+    return props;
+}
+
+export function mergeSurfaceProps<T extends object>(surfaceId: SurfaceId, props: T) {
+    return mergeSurfaceProvidedProps({ ...props } as SurfaceProvidedProps, getSurfaceProps(surfaceId)) as T & SurfaceProvidedProps;
+}
+
+function notifyOneSurface(surfaceId: SurfaceId) {
+    const surfaceInstance = surfaceInstances.get(surfaceId)?.deref();
+    if (surfaceInstance) {
+        surfaceInstance.forceUpdate();
+    } else {
+        surfaceInstances.delete(surfaceId);
+    }
+
+    for (const listener of listeners.get(surfaceId) ?? []) {
+        listener();
+    }
+}
+
+export function addSurfaceClassProvider(surfaceId: SurfaceId, provider: SurfaceClassProvider) {
+    getProviderSet(surfaceId).add(provider);
+    notifyOneSurface(surfaceId);
+
+    return () => {
+        providers.get(surfaceId)?.delete(provider);
+        notifyOneSurface(surfaceId);
+    };
+}
+
+export function addSurfacePropsProvider(surfaceId: SurfaceId, provider: SurfacePropsProvider) {
+    getPropsProviderSet(surfaceId).add(provider);
+    notifyOneSurface(surfaceId);
+
+    return () => {
+        propsProviders.get(surfaceId)?.delete(provider);
+        notifyOneSurface(surfaceId);
+    };
+}
+
+export function notifySurfaceClassesChanged(surfaceId: SurfaceId) {
+    notifyOneSurface(surfaceId);
+}
+
+/** @internal Injected by SurfaceClassesAPI patch (do NOT call directly) */
+export function _getSurfaceProps(surfaceId: SurfaceId) {
+    return getSurfaceProps(surfaceId);
+}
+
+/** @internal Injected by SurfaceClassesAPI patch (do NOT call directly) */
+export function _useSurfaceProps(surfaceId: SurfaceId) {
+    const forceUpdate = useForceUpdater();
+
+    useEffect(() => {
+        const listener = () => forceUpdate();
+
+        getListenerSet(surfaceId).add(listener);
+        return () => { listeners.get(surfaceId)?.delete(listener); };
+    }, [surfaceId]);
+
+    return getSurfaceProps(surfaceId);
+}
+
+/** @internal Injected by SurfaceClassesAPI patch (do NOT call directly) */
+export function _useMergedSurfaceProps<T extends object>(surfaceId: SurfaceId, props: T) {
+    const forceUpdate = useForceUpdater();
+
+    useEffect(() => {
+        const listener = () => forceUpdate();
+
+        getListenerSet(surfaceId).add(listener);
+        return () => { listeners.get(surfaceId)?.delete(listener); };
+    }, [surfaceId]);
+
+    return mergeSurfaceProps(surfaceId, props);
+}
+
+/**
+ * @internal Injected by SurfaceClassesAPI patch (do NOT call directly).
+ * Only used for class component surfaces where hooks cannot be injected into render().
+ * Function component surfaces use _useSurfaceProps instead.
+ */
+export function _trackSurfaceInstance(surfaceId: SurfaceId, instance: SurfaceInstance) {
+    surfaceInstances.set(surfaceId, new WeakRef(instance));
+}

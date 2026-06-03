@@ -1,416 +1,341 @@
-@property --vc-cui-collapsed-size {
-    syntax: "<length>";
-    inherits: true;
-    initial-value: 12px;
-}
-
-@property --vc-cui-transition {
-    syntax: "<time>";
-    inherits: true;
-    initial-value: 160ms;
-}
-
-:root {
-    --vc-cui-chat-buttons-width: min(320px, 36vw);
-    --vc-cui-hover-peek: var(--vc-cui-collapsed-size);
-    --vc-cui-hover-delay: 120ms;
-    --vc-cui-header-bar-height: 32px;
+[data-vc-collapsible-ui-base],
+[data-vc-collapsible-ui-guild-bar],
+[data-vc-collapsible-ui-channel-list],
+[data-vc-collapsible-ui-members-list],
+[data-vc-collapsible-ui-title-bar],
+[data-vc-collapsible-ui-header-bar],
+[data-vc-collapsible-ui-user-area],
+.vc-collapsible-ui-chat-buttons {
+    --vc-cui-peek-size: 12px;
     --vc-cui-user-area-collapsed-width: 52px;
-    --vc-cui-ease: cubic-bezier(.2, 0, 0, 1);
-    --vc-cui-fade-transition: opacity var(--vc-cui-transition) var(--vc-cui-ease);
-    --vc-cui-inline-transition:
-        width var(--vc-cui-transition) var(--vc-cui-ease),
-        inline-size var(--vc-cui-transition) var(--vc-cui-ease),
-        min-width var(--vc-cui-transition) var(--vc-cui-ease),
-        min-inline-size var(--vc-cui-transition) var(--vc-cui-ease),
-        max-width var(--vc-cui-transition) var(--vc-cui-ease),
-        max-inline-size var(--vc-cui-transition) var(--vc-cui-ease),
-        flex-basis var(--vc-cui-transition) var(--vc-cui-ease);
-    --vc-cui-block-transition:
-        height var(--vc-cui-transition) var(--vc-cui-ease),
-        block-size var(--vc-cui-transition) var(--vc-cui-ease),
-        min-height var(--vc-cui-transition) var(--vc-cui-ease),
-        min-block-size var(--vc-cui-transition) var(--vc-cui-ease),
-        max-height var(--vc-cui-transition) var(--vc-cui-ease),
-        max-block-size var(--vc-cui-transition) var(--vc-cui-ease),
-        padding var(--vc-cui-transition) var(--vc-cui-ease)
+    --vc-cui-header-bar-height: 32px;
+    --vc-cui-collapsed-block-size: 8px;
+    --vc-cui-guild-bar-expanded-width: 64px;
+    --vc-cui-channel-list-min-width: 264px;
+    --vc-cui-channel-list-max-width: 432px;
+    --vc-cui-members-list-expanded-width: 240px;
+    --vc-cui-title-bar-expanded-height: 46px;
+    --vc-cui-chat-buttons-offset: 24px;
+    --vc-cui-restore-button-size: 24px;
+    --vc-cui-fade-delay: 80ms;
+    --vc-cui-transition: 140ms ease;
 }
 
-body:has(.vc-collapsible-ui-collapsed-size-8) {
-    --vc-cui-collapsed-size: 8px
-}
-
-body:has(.vc-collapsible-ui-collapsed-size-12) {
-    --vc-cui-collapsed-size: 12px
-}
-
-body:has(.vc-collapsible-ui-collapsed-size-16) {
-    --vc-cui-collapsed-size: 16px
-}
-
-body:has(.vc-collapsible-ui-collapsed-size-20) {
-    --vc-cui-collapsed-size: 20px
-}
-
-body:has(.vc-collapsible-ui-collapsed-size-24) {
-    --vc-cui-collapsed-size: 24px
-}
-
-body:has(.vc-collapsible-ui-collapsed-size-28) {
-    --vc-cui-collapsed-size: 28px
-}
-
-body:has(.vc-collapsible-ui-collapsed-size-32) {
-    --vc-cui-collapsed-size: 32px
-}
-
-body:has(.vc-collapsible-ui-collapsed-size-40) {
-    --vc-cui-collapsed-size: 40px
-}
-
-body:has(.vc-collapsible-ui-collapsed-size-48) {
-    --vc-cui-collapsed-size: 48px
-}
-
-body:has(.vc-collapsible-ui-transition-0) {
-    --vc-cui-transition: 0ms
-}
-
-body:has(.vc-collapsible-ui-transition-80) {
-    --vc-cui-transition: 80ms
-}
-
-body:has(.vc-collapsible-ui-transition-120) {
-    --vc-cui-transition: 120ms
-}
-
-body:has(.vc-collapsible-ui-transition-160) {
-    --vc-cui-transition: 160ms
-}
-
-body:has(.vc-collapsible-ui-transition-200) {
-    --vc-cui-transition: 200ms
-}
-
-body:has(.vc-collapsible-ui-transition-260) {
-    --vc-cui-transition: 260ms
-}
-
-body:has(.vc-collapsible-ui-transition-320) {
-    --vc-cui-transition: 320ms
-}
-
-body:has(.vc-collapsible-ui-guild-bar-collapsed) nav[class*="guilds_"]:not(:is(.vc-betterFolders-sidebar nav[class*="guilds_"])) {
-    position: relative;
-    z-index: 1;
-    overflow: hidden !important;
-    transition: var(--vc-cui-inline-transition) !important
-}
-
-body:has(.vc-collapsible-ui-guild-bar-collapsed) nav[class*="guilds_"]:not(:is(.vc-betterFolders-sidebar nav[class*="guilds_"])):is(:hover, :focus-within) {
-    z-index: 3
-}
-
-body:has(.vc-collapsible-ui-guild-bar-collapsed) nav[class*="guilds_"]:not(:is(.vc-betterFolders-sidebar nav[class*="guilds_"]), :is(:hover, :focus-within), :is(.vc-betterFolders-sidebar-grid:has(.vc-betterFolders-sidebar:is(:hover, :focus-within)) nav[class*="guilds_"])) {
-    background: var(--background-gradient-low, var(--background-base-lowest)) !important;
-    border-start-end-radius: var(--radius-sm, 8px);
-    width: var(--vc-cui-collapsed-size) !important;
-    inline-size: var(--vc-cui-collapsed-size) !important;
-    min-width: var(--vc-cui-collapsed-size) !important;
-    min-inline-size: var(--vc-cui-collapsed-size) !important;
-    max-width: var(--vc-cui-collapsed-size) !important;
-    max-inline-size: var(--vc-cui-collapsed-size) !important;
-    flex: 0 0 var(--vc-cui-collapsed-size) !important
-}
-
-body:has(.vc-collapsible-ui-guild-bar-collapsed) .vc-betterFolders-sidebar {
-    position: relative;
-    z-index: 1;
-    overflow: hidden !important;
-    transition: var(--vc-cui-inline-transition) !important
-}
-
-body:has(.vc-collapsible-ui-guild-bar-collapsed) .vc-betterFolders-sidebar-grid:has(nav[class*="guilds_"]:is(:hover, :focus-within), .vc-betterFolders-sidebar:is(:hover, :focus-within)) .vc-betterFolders-sidebar {
-    z-index: 3;
-    transition-delay: var(--vc-cui-hover-delay)
-}
-
-body:has(.vc-collapsible-ui-guild-bar-collapsed) .vc-betterFolders-sidebar-grid:not(:has(nav[class*="guilds_"]:is(:hover, :focus-within), .vc-betterFolders-sidebar:is(:hover, :focus-within))) .vc-betterFolders-sidebar {
-    width: 0 !important;
-    inline-size: 0 !important;
-    min-width: 0 !important;
-    min-inline-size: 0 !important;
-    max-width: 0 !important;
-    max-inline-size: 0 !important;
-    flex: 0 0 0 !important
-}
-
-body:has(.vc-collapsible-ui-channel-list-collapsed) [class*="sidebarList_"] {
-    overflow: hidden !important;
-    transition: var(--vc-cui-inline-transition) !important
-}
-
-body:has(.vc-collapsible-ui-channel-list-collapsed) [class*="sidebarList_"]:is(:hover, :focus-within) {
-    transition-delay: var(--vc-cui-hover-delay)
-}
-
-body:has(.vc-collapsible-ui-channel-list-collapsed) [class*="sidebarList_"]:is(:hover, :focus-within) > * {
-    opacity: 1;
-    pointer-events: auto;
-    transition: var(--vc-cui-fade-transition);
-    transition-delay: var(--vc-cui-hover-delay)
-}
-
-body:has(.vc-collapsible-ui-channel-list-collapsed):not(:has([class*="sidebar_"] > [class*="panels_"]:is(:hover, :focus-within))) [class*="sidebarList_"]:not(:is(:hover, :focus-within)) {
-    width: var(--vc-cui-collapsed-size) !important;
-    inline-size: var(--vc-cui-collapsed-size) !important;
-    min-width: var(--vc-cui-collapsed-size) !important;
-    min-inline-size: var(--vc-cui-collapsed-size) !important;
-    max-width: var(--vc-cui-collapsed-size) !important;
-    max-inline-size: var(--vc-cui-collapsed-size) !important;
-    flex: 0 0 var(--vc-cui-collapsed-size) !important
-}
-
-body:has(.vc-collapsible-ui-channel-list-collapsed) [class*="sidebar_"] > [class*="panels_"] {
-    overflow: hidden !important;
-    transition: var(--vc-cui-inline-transition) !important
-}
-
-body:has(.vc-collapsible-ui-channel-list-collapsed) [class*="sidebar_"] > [class*="panels_"]:not(:is(:hover, :focus-within)) {
-    width: var(--vc-cui-user-area-collapsed-width) !important;
-    inline-size: var(--vc-cui-user-area-collapsed-width) !important;
-    min-width: var(--vc-cui-user-area-collapsed-width) !important;
-    min-inline-size: var(--vc-cui-user-area-collapsed-width) !important;
-    max-width: var(--vc-cui-user-area-collapsed-width) !important;
-    max-inline-size: var(--vc-cui-user-area-collapsed-width) !important
-}
-
-body:has(.vc-collapsible-ui-channel-list-collapsed) [class*="sidebar_"] > [class*="panels_"]:not(:is(:hover, :focus-within)) .vc-collapsible-ui-user-area-controls {
-    max-width: 0 !important;
-    min-width: 0 !important;
-    overflow: hidden !important;
-    opacity: 0;
-    pointer-events: none;
-    transition:
-        max-width var(--vc-cui-transition) var(--vc-cui-ease),
-        opacity var(--vc-cui-transition) var(--vc-cui-ease) !important
-}
-
-body:has(.vc-collapsible-ui-channel-list-collapsed) [class*="sidebar_"] > [class*="panels_"]:is(:hover, :focus-within) .vc-collapsible-ui-user-area-controls {
-    opacity: 1;
-    pointer-events: auto
-}
-
-body:has(.vc-collapsible-ui-members-list-collapsed) [class*="membersWrap"] {
-    overflow: hidden !important;
-    transition: var(--vc-cui-inline-transition) !important
-}
-
-body:has(.vc-collapsible-ui-members-list-collapsed) [class*="membersWrap"]:is(:hover, :focus-within) {
-    transition-delay: var(--vc-cui-hover-delay)
-}
-
-body:has(.vc-collapsible-ui-members-list-collapsed) [class*="membersWrap"]:is(:hover, :focus-within) > * {
-    opacity: 1;
-    pointer-events: auto;
-    transition: var(--vc-cui-fade-transition);
-    transition-delay: var(--vc-cui-hover-delay)
-}
-
-body:has(.vc-collapsible-ui-members-list-collapsed) [class*="membersWrap"]:not(:is(:hover, :focus-within)) {
-    width: var(--vc-cui-collapsed-size) !important;
-    min-width: var(--vc-cui-collapsed-size) !important;
-    max-width: var(--vc-cui-collapsed-size) !important
-}
-
-body:has(.vc-collapsible-ui-members-list-collapsed) [class*="membersWrap"]:not(:is(:hover, :focus-within)) > * {
-    opacity: 0;
-    pointer-events: none;
-    transition: var(--vc-cui-fade-transition)
-}
-
-body:has(.vc-collapsible-ui-user-area-collapsed) [class*="sidebar_"] > [class*="panels_"]:is(:hover, :focus-within) > * {
-    opacity: 1;
-    pointer-events: auto;
-    transition: var(--vc-cui-fade-transition)
-}
-
-body:has(.vc-collapsible-ui-user-area-collapsed) [class*="sidebar_"] > [class*="panels_"]:not(:is(:hover, :focus-within)) {
-    height: var(--vc-cui-hover-peek) !important;
-    block-size: var(--vc-cui-hover-peek) !important;
-    min-height: var(--vc-cui-hover-peek) !important;
-    min-block-size: var(--vc-cui-hover-peek) !important;
-    max-height: var(--vc-cui-hover-peek) !important;
-    max-block-size: var(--vc-cui-hover-peek) !important;
-    overflow: hidden !important;
-    border-top-width: 0 !important;
-    padding-block: 0 !important;
-    transition: var(--vc-cui-block-transition) !important
-}
-
-body:has(.vc-collapsible-ui-user-area-collapsed) [class*="sidebar_"] > [class*="panels_"]:not(:is(:hover, :focus-within)) > * {
-    opacity: 0;
-    pointer-events: none;
-    transition: var(--vc-cui-fade-transition)
-}
-
-body:has(.vc-collapsible-ui-guild-bar-collapsed):has(.vc-collapsible-ui-channel-list-collapsed) [class*="sidebar_"] > [class*="panels_"]:not(:is(:hover, :focus-within)) {
-    width: calc(var(--vc-cui-hover-peek) + 4px) !important;
-    inline-size: calc(var(--vc-cui-hover-peek) + 4px) !important;
-    min-width: calc(var(--vc-cui-hover-peek) + 4px) !important;
-    min-inline-size: calc(var(--vc-cui-hover-peek) + 4px) !important;
-    max-width: calc(var(--vc-cui-hover-peek) + 4px) !important;
-    max-inline-size: calc(var(--vc-cui-hover-peek) + 4px) !important
-}
-
-body:has(.vc-collapsible-ui-title-bar-collapsed) section[class*="title_"][class*="container__"] {
-    overflow: hidden !important;
-    transition: var(--vc-cui-block-transition) !important
-}
-
-body:has(.vc-collapsible-ui-title-bar-collapsed) section[class*="title_"][class*="container__"]:is(:hover, :focus-within) {
-    transition-delay: var(--vc-cui-hover-delay)
-}
-
-body:has(.vc-collapsible-ui-title-bar-collapsed) section[class*="title_"][class*="container__"]:is(:hover, :focus-within) > * {
-    opacity: 1;
-    pointer-events: auto;
-    transition: var(--vc-cui-fade-transition);
-    transition-delay: var(--vc-cui-hover-delay)
-}
-
-body:has(.vc-collapsible-ui-title-bar-collapsed) section[class*="title_"][class*="container__"]:not(:is(:hover, :focus-within)) {
-    height: var(--vc-cui-hover-peek) !important;
-    block-size: var(--vc-cui-hover-peek) !important;
-    min-height: var(--vc-cui-hover-peek) !important;
-    min-block-size: var(--vc-cui-hover-peek) !important;
-    max-height: var(--vc-cui-hover-peek) !important;
-    max-block-size: var(--vc-cui-hover-peek) !important;
-    padding-block: 0 !important
-}
-
-body:has(.vc-collapsible-ui-title-bar-collapsed) section[class*="title_"][class*="container__"]:not(:is(:hover, :focus-within)) > * {
-    opacity: 0;
-    pointer-events: none;
-    transition: var(--vc-cui-fade-transition)
-}
-
-/* stylelint-disable no-descending-specificity */
-body:has(.vc-collapsible-ui-header-bar-collapsed) [class*="bar_"]:has(> [class*="title_"]) {
-    position: relative;
-    z-index: 3;
-    overflow: hidden !important;
-    transition: var(--vc-cui-block-transition) !important
-}
-
-body:has(.vc-collapsible-ui-header-bar-collapsed) [class*="base_"]:has(> [class*="bar_"] > [class*="title_"]) {
+[data-vc-collapsible-ui-base-channel-list-collapsed] {
     /* stylelint-disable-next-line value-keyword-case */
-    grid-template-rows: [top] var(--vc-cui-hover-peek) [titleBarEnd] auto [noticeEnd] minmax(0, 1fr) [end] !important
+    grid-template-columns: [start] min-content [guildsEnd] var(--vc-cui-peek-size) [channelsEnd] 1fr [end] !important; /* Override Discord app grid columns while the channel list is collapsed. */
 }
 
-body:has(.vc-collapsible-ui-header-bar-collapsed) [class*="base_"]:has(> [class*="bar_"]:is(:hover, :focus-within) > [class*="title_"]) {
+[data-vc-collapsible-ui-base-channel-list-expanded] {
     /* stylelint-disable-next-line value-keyword-case */
-    grid-template-rows: [top] var(--vc-cui-header-bar-height) [titleBarEnd] auto [noticeEnd] minmax(0, 1fr) [end] !important
+    grid-template-columns: [start] min-content [guildsEnd] var(--custom-guild-sidebar-width, 312px) [channelsEnd] 1fr [end] !important; /* Override Discord app grid columns while the channel list is expanded. */
 }
 
-body:has(.vc-collapsible-ui-header-bar-collapsed) [class*="bar_"]:has(> [class*="title_"]):is(:hover, :focus-within) {
-    height: var(--vc-cui-header-bar-height) !important;
-    block-size: var(--vc-cui-header-bar-height) !important;
-    min-height: var(--vc-cui-header-bar-height) !important;
-    min-block-size: var(--vc-cui-header-bar-height) !important;
-    max-height: var(--vc-cui-header-bar-height) !important;
-    max-block-size: var(--vc-cui-header-bar-height) !important;
-    transition-delay: var(--vc-cui-hover-delay)
+[data-vc-collapsible-ui-base-channel-list-collapsed][data-vc-collapsible-ui-base-channel-list-interaction-expanded] {
+    /* stylelint-disable-next-line value-keyword-case */
+    grid-template-columns: [start] min-content [guildsEnd] var(--custom-guild-sidebar-width, 312px) [channelsEnd] 1fr [end] !important; /* Override Discord app grid columns during channel-list hover expansion. */
 }
 
-body:has(.vc-collapsible-ui-header-bar-collapsed) [class*="bar_"]:has(> [class*="title_"]):is(:hover, :focus-within) > * {
+[data-vc-collapsible-ui-guild-bar],
+[data-vc-collapsible-ui-channel-list],
+[data-vc-collapsible-ui-members-list],
+[data-vc-collapsible-ui-title-bar],
+[data-vc-collapsible-ui-header-bar],
+[data-vc-collapsible-ui-user-area] {
+    overflow: hidden;
+    transition: opacity var(--vc-cui-transition);
+}
+
+[data-vc-collapsible-ui-sidebar] {
+    position: relative;
+}
+
+[data-vc-collapsible-ui-sidebar-user-area-detached] {
+    --custom-app-panels-height: 0px !important; /* Override Discord sidebar panel reservation while the user area is detached. */
+}
+
+[data-vc-collapsible-ui-sidebar-channel-list-collapsed] {
+    z-index: 5;
+    overflow: visible !important; /* Override Discord sidebar clipping so collapsed surfaces can expand on interaction. */
+}
+
+[data-vc-collapsible-ui-guild-bar-collapsed],
+[data-vc-collapsible-ui-channel-list-collapsed],
+[data-vc-collapsible-ui-members-list-collapsed] {
+    width: var(--vc-cui-peek-size) !important; /* Override Discord surface width while collapsed. */
+    min-width: var(--vc-cui-peek-size) !important; /* Override Discord surface minimum width while collapsed. */
+    max-width: var(--vc-cui-peek-size) !important; /* Override Discord surface maximum width while collapsed. */
+    flex: 0 0 var(--vc-cui-peek-size) !important; /* Override Discord flex sizing while collapsed. */
+    height: 100% !important; /* Override Discord surface height so collapsed columns still fill the sidebar. */
+    max-height: none !important; /* Override Discord maximum height so collapsed columns still fill the sidebar. */
+    opacity: 0.01;
+
+    /* Delay only the opacity fade; dimensions change immediately to avoid animated layout work. */
+    transition-delay: var(--vc-cui-fade-delay);
+}
+
+[data-vc-collapsible-ui-guild-bar-collapsed]:is(:hover, :focus-within) {
+    width: var(--vc-cui-guild-bar-expanded-width) !important; /* Override Discord guild bar width during hover expansion. */
+    min-width: var(--vc-cui-guild-bar-expanded-width) !important; /* Override Discord guild bar minimum width during hover expansion. */
+    max-width: var(--vc-cui-guild-bar-expanded-width) !important; /* Override Discord guild bar maximum width during hover expansion. */
+    flex-basis: var(--vc-cui-guild-bar-expanded-width) !important; /* Override Discord guild bar flex basis during hover expansion. */
+    opacity: 1;
+    transition-delay: 0ms;
+}
+
+[data-vc-collapsible-ui-channel-list-expanded],
+[data-vc-collapsible-ui-channel-list-collapsed]:is(:hover, :focus-within) {
+    width: var(--custom-guild-sidebar-width, 312px) !important; /* Override Discord channel list width during hover expansion. */
+    min-width: var(--vc-cui-channel-list-min-width) !important; /* Override Discord channel list minimum width during hover expansion. */
+    max-width: var(--vc-cui-channel-list-max-width) !important; /* Override Discord channel list maximum width during hover expansion. */
+    flex-basis: var(--custom-guild-sidebar-width, 312px) !important; /* Override Discord channel list flex basis during hover expansion. */
+    background: var(--background-secondary) !important; /* Override Discord collapsed sidebar background during channel-list hover expansion. */
+    opacity: 1;
+    transition-delay: 0ms;
+}
+
+[data-vc-collapsible-ui-sidebar-channel-list-expanded] {
+    width: var(--custom-guild-sidebar-width, 312px) !important; /* Override Discord sidebar width while the channel list is interaction-expanded. */
+    min-width: var(--custom-guild-sidebar-width, 312px) !important; /* Override Discord sidebar minimum width while the channel list is interaction-expanded. */
+    max-width: var(--custom-guild-sidebar-width, 312px) !important; /* Override Discord sidebar maximum width while the channel list is interaction-expanded. */
+    background: var(--background-secondary) !important; /* Override Discord sidebar background while the channel list is interaction-expanded. */
+}
+
+[data-vc-collapsible-ui-sidebar-channel-list-expanded] [data-vc-collapsible-ui-channel-list-collapsed] {
+    width: var(--custom-guild-sidebar-width, 312px) !important; /* Override Discord channel list width while the sidebar is interaction-expanded. */
+    min-width: var(--vc-cui-channel-list-min-width) !important; /* Override Discord channel list minimum width while the sidebar is interaction-expanded. */
+    max-width: var(--vc-cui-channel-list-max-width) !important; /* Override Discord channel list maximum width while the sidebar is interaction-expanded. */
+    flex-basis: var(--custom-guild-sidebar-width, 312px) !important; /* Override Discord channel list flex basis while the sidebar is interaction-expanded. */
+    background: var(--background-secondary) !important; /* Override Discord channel list background while the sidebar is interaction-expanded. */
+    opacity: 1;
+}
+
+[data-vc-collapsible-ui-members-list-collapsed] {
+    flex: 0 1 auto !important; /* Override Discord members list flex sizing while collapsed. */
+    flex-basis: auto !important; /* Override Discord members list flex basis while collapsed. */
+}
+
+[data-vc-collapsible-ui-members-list-collapsed]:is(:hover, :focus-within) {
+    width: var(--vc-cui-members-list-expanded-width) !important; /* Override Discord members list width during hover expansion. */
+    min-width: var(--vc-cui-members-list-expanded-width) !important; /* Override Discord members list minimum width during hover expansion. */
+    max-width: var(--vc-cui-members-list-expanded-width) !important; /* Override Discord members list maximum width during hover expansion. */
+    flex-basis: auto !important; /* Override Discord members list flex basis during hover expansion. */
+    opacity: 1;
+}
+
+[data-vc-collapsible-ui-title-bar-collapsed] {
+    height: var(--vc-cui-collapsed-block-size) !important; /* Override Discord title bar height while collapsed. */
+    min-height: var(--vc-cui-collapsed-block-size) !important; /* Override Discord title bar minimum height while collapsed. */
+    max-height: var(--vc-cui-collapsed-block-size) !important; /* Override Discord title bar maximum height while collapsed. */
+    padding-block: 0 !important; /* Override Discord title bar padding while collapsed. */
+    color: transparent !important; /* Override Discord title bar text color while collapsed. */
+    opacity: 0.01 !important; /* Override Discord title bar opacity while collapsed. */
+}
+
+[data-vc-collapsible-ui-title-bar-collapsed]:is(:hover, :focus-within) {
+    height: var(--vc-cui-title-bar-expanded-height) !important; /* Override Discord title bar height during hover expansion. */
+    min-height: var(--vc-cui-title-bar-expanded-height) !important; /* Override Discord title bar minimum height during hover expansion. */
+    max-height: var(--vc-cui-title-bar-expanded-height) !important; /* Override Discord title bar maximum height during hover expansion. */
+    color: inherit !important; /* Override collapsed title bar text color during hover expansion. */
+    opacity: 1 !important; /* Override collapsed title bar opacity during hover expansion. */
+}
+
+[data-vc-collapsible-ui-base-header-bar-collapsed] {
+    --custom-app-top-bar-height: var(--vc-cui-collapsed-block-size) !important; /* Override Discord top bar height variable while collapsed. */
+}
+
+[data-vc-collapsible-ui-base-header-bar-expanded] {
+    --custom-app-top-bar-height: var(--vc-cui-header-bar-height) !important; /* Override Discord top bar height variable while expanded. */
+}
+
+[data-vc-collapsible-ui-header-bar-collapsed] {
+    position: relative;
+    z-index: 10;
+    height: var(--vc-cui-collapsed-block-size) !important; /* Override Discord header bar height while collapsed. */
+    min-height: var(--vc-cui-collapsed-block-size) !important; /* Override Discord header bar minimum height while collapsed. */
+    max-height: var(--vc-cui-collapsed-block-size) !important; /* Override Discord header bar maximum height while collapsed. */
+    opacity: 0.01;
+    -webkit-app-region: drag;
+    overflow: visible;
+}
+
+[data-vc-collapsible-ui-header-bar-expanded] {
+    opacity: 1;
+}
+
+[data-vc-collapsible-ui-header-bar-collapsed]::before {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    height: var(--vc-cui-collapsed-block-size);
+    content: "";
+    pointer-events: auto;
+    -webkit-app-region: no-drag;
+}
+
+[data-vc-collapsible-ui-header-bar-collapsed] > * {
+    pointer-events: none;
+}
+
+[data-vc-collapsible-ui-user-area-collapsed] > * {
+    opacity: 0;
+    pointer-events: none;
+}
+
+[data-vc-collapsible-ui-header-bar-collapsed][data-vc-collapsible-ui-header-bar-interaction-expanded] {
+    height: var(--vc-cui-header-bar-height) !important; /* Override Discord header bar height during pointer expansion. */
+    min-height: var(--vc-cui-header-bar-height) !important; /* Override Discord header bar minimum height during pointer expansion. */
+    max-height: var(--vc-cui-header-bar-height) !important; /* Override Discord header bar maximum height during pointer expansion. */
+    opacity: 1;
+    overflow: visible;
+}
+
+[data-vc-collapsible-ui-header-bar-collapsed][data-vc-collapsible-ui-header-bar-interaction-expanded]::before {
+    display: none;
+}
+
+[data-vc-collapsible-ui-header-bar-collapsed][data-vc-collapsible-ui-header-bar-interaction-expanded] > * {
+    pointer-events: auto;
+}
+
+[data-vc-collapsible-ui-user-area] {
+    background: var(--background-secondary-alt) !important; /* Override Discord user area background when surface state is injected. */
+}
+
+[data-vc-collapsible-ui-user-area-collapsed] {
+    height: var(--vc-cui-peek-size) !important; /* Override Discord user area height while collapsed. */
+    min-height: var(--vc-cui-peek-size) !important; /* Override Discord user area minimum height while collapsed. */
+    max-height: var(--vc-cui-peek-size) !important; /* Override Discord user area maximum height while collapsed. */
+    padding-block: 0 !important; /* Override Discord user area padding while collapsed. */
+    border-top-width: 0 !important; /* Override Discord user area border while collapsed. */
+}
+
+[data-vc-collapsible-ui-user-area-collapsed]:is(:hover, :focus-within) {
+    height: auto !important; /* Override collapsed user area height during hover expansion. */
+    min-height: 0 !important; /* Override collapsed user area minimum height during hover expansion. */
+    max-height: none !important; /* Override collapsed user area maximum height during hover expansion. */
+}
+
+[data-vc-collapsible-ui-user-area-collapsed]:is(:hover, :focus-within) > * {
     opacity: 1;
     pointer-events: auto;
-    transition: var(--vc-cui-fade-transition);
-    transition-delay: var(--vc-cui-hover-delay)
 }
 
-body:has(.vc-collapsible-ui-header-bar-collapsed) [class*="bar_"]:has(> [class*="title_"]):not(:is(:hover, :focus-within)) {
-    height: var(--vc-cui-hover-peek) !important;
-    block-size: var(--vc-cui-hover-peek) !important;
-    min-height: var(--vc-cui-hover-peek) !important;
-    min-block-size: var(--vc-cui-hover-peek) !important;
-    max-height: var(--vc-cui-hover-peek) !important;
-    max-block-size: var(--vc-cui-hover-peek) !important;
-    padding-block: 0 !important
+[data-vc-collapsible-ui-sidebar-channel-list-collapsed] [data-vc-collapsible-ui-user-area-sidebar-collapsed] {
+    width: var(--custom-guild-sidebar-width, 312px) !important; /* Override Discord user area width while sidebar surfaces are collapsed. */
+    min-width: var(--vc-cui-channel-list-min-width) !important; /* Override Discord user area minimum width while sidebar surfaces are collapsed. */
+    max-width: var(--vc-cui-channel-list-max-width) !important; /* Override Discord user area maximum width while sidebar surfaces are collapsed. */
+    z-index: 4;
 }
 
-body:has(.vc-collapsible-ui-header-bar-collapsed) [class*="bar_"]:has(> [class*="title_"]):not(:is(:hover, :focus-within)) > * {
-    opacity: 0;
-    pointer-events: none;
-    transition: var(--vc-cui-fade-transition)
-}
-/* stylelint-enable no-descending-specificity */
-
-/* stylelint-disable no-descending-specificity */
-body:has(.vc-collapsible-ui-guild-bar-collapsed) .vc-betterFolders-sidebar-grid:has(nav[class*="guilds_"]:is(:hover, :focus-within), .vc-betterFolders-sidebar:is(:hover, :focus-within)) .vc-betterFolders-sidebar > *,
-body:has(.vc-collapsible-ui-guild-bar-collapsed) nav[class*="guilds_"]:not(:is(.vc-betterFolders-sidebar nav[class*="guilds_"])):is(:hover, :focus-within) > * {
-    opacity: 1;
-    pointer-events: auto;
-    transition: var(--vc-cui-fade-transition);
-    transition-delay: calc(var(--vc-cui-hover-delay) + var(--vc-cui-transition))
+[data-vc-collapsible-ui-user-area-detached] {
+    position: fixed !important; /* Override Discord user area positioning while detached. */
+    right: auto !important; /* Override Discord anchored right position while detached. */
+    bottom: auto !important; /* Override Discord anchored bottom position while detached. */
+    width: var(--custom-guild-sidebar-width, 312px) !important; /* Override Discord user area width while detached. */
+    min-width: var(--custom-guild-sidebar-width, 312px) !important; /* Override Discord user area minimum width while detached. */
+    max-width: var(--custom-guild-sidebar-width, 312px) !important; /* Override Discord user area maximum width while detached. */
+    height: auto !important; /* Override Discord user area height while detached. */
+    min-height: 0 !important; /* Override Discord user area minimum height while detached. */
+    max-height: none !important; /* Override Discord user area maximum height while detached. */
+    cursor: grab;
+    z-index: 2 !important; /* Override Discord user area stacking while detached. */
 }
 
-body:has(.vc-collapsible-ui-guild-bar-collapsed) nav[class*="guilds_"]:not(:is(.vc-betterFolders-sidebar nav[class*="guilds_"])):is(:hover, :focus-within) > [class*="unreadMentionsIndicator"] {
-    pointer-events: none
+[data-vc-collapsible-ui-user-area-detached]:active {
+    cursor: grabbing;
 }
 
-body:has(.vc-collapsible-ui-guild-bar-collapsed) .vc-betterFolders-sidebar-grid:not(:has(nav[class*="guilds_"]:is(:hover, :focus-within), .vc-betterFolders-sidebar:is(:hover, :focus-within))) .vc-betterFolders-sidebar > *,
-body:has(.vc-collapsible-ui-guild-bar-collapsed) nav[class*="guilds_"]:not(:is(.vc-betterFolders-sidebar nav[class*="guilds_"]), :is(:hover, :focus-within), :is(.vc-betterFolders-sidebar-grid:has(.vc-betterFolders-sidebar:is(:hover, :focus-within)) nav[class*="guilds_"])) > * {
-    opacity: 0;
-    pointer-events: none;
-    transition: var(--vc-cui-fade-transition)
+[data-vc-collapsible-ui-sidebar-channel-list-collapsed] [data-vc-collapsible-ui-guild-bar],
+[data-vc-collapsible-ui-sidebar-channel-list-collapsed] [data-vc-collapsible-ui-channel-list] {
+    height: 100% !important; /* Override Discord sidebar child height while channel list is collapsed. */
+    max-height: none !important; /* Override Discord sidebar child maximum height while channel list is collapsed. */
 }
 
-body:has(.vc-collapsible-ui-channel-list-collapsed):not(:has([class*="sidebar_"] > [class*="panels_"]:is(:hover, :focus-within))) [class*="sidebarList_"]:not(:is(:hover, :focus-within)) > * {
-    opacity: 0;
-    pointer-events: none;
-    transition: var(--vc-cui-fade-transition)
+[data-vc-collapsible-ui-sidebar-channel-list-collapsed] [data-vc-collapsible-ui-user-area-collapsed] {
+    width: var(--vc-cui-user-area-collapsed-width) !important; /* Override Discord user area width while both sidebar and user area are collapsed. */
+    min-width: var(--vc-cui-user-area-collapsed-width) !important; /* Override Discord user area minimum width while both sidebar and user area are collapsed. */
+    max-width: var(--vc-cui-user-area-collapsed-width) !important; /* Override Discord user area maximum width while both sidebar and user area are collapsed. */
+    z-index: 4;
 }
-/* stylelint-enable no-descending-specificity */
+
+[data-vc-collapsible-ui-sidebar-channel-list-collapsed] [data-vc-collapsible-ui-user-area-collapsed][data-vc-collapsible-ui-user-area-guild-bar-collapsed] {
+    width: var(--vc-cui-peek-size) !important; /* Override Discord user area width when guild bar is also collapsed. */
+    min-width: var(--vc-cui-peek-size) !important; /* Override Discord user area minimum width when guild bar is also collapsed. */
+    max-width: var(--vc-cui-peek-size) !important; /* Override Discord user area maximum width when guild bar is also collapsed. */
+}
+
+[data-vc-collapsible-ui-sidebar-channel-list-collapsed]:not([data-vc-collapsible-ui-sidebar-user-area-detached]):is(:hover, :focus-within) [data-vc-collapsible-ui-user-area-collapsed] {
+    width: var(--custom-guild-sidebar-width, 312px) !important; /* Override Discord user area width during sidebar hover expansion. */
+    min-width: var(--vc-cui-channel-list-min-width) !important; /* Override Discord user area minimum width during sidebar hover expansion. */
+    max-width: var(--vc-cui-channel-list-max-width) !important; /* Override Discord user area maximum width during sidebar hover expansion. */
+}
 
 .vc-collapsible-ui-chat-buttons {
+    position: relative;
     display: flex;
     align-items: center;
-    min-inline-size: 0
-}
-
-.vc-collapsible-ui-chat-buttons-collapsed {
-    min-inline-size: var(--vc-cui-hover-peek)
+    gap: 4px;
+    min-inline-size: 0;
 }
 
 .vc-collapsible-ui-chat-buttons-items {
     display: flex;
     align-items: center;
     min-inline-size: 0;
-    max-inline-size: var(--vc-cui-chat-buttons-width);
     overflow: hidden;
     transition:
-        max-inline-size var(--vc-cui-transition) var(--vc-cui-ease),
-        opacity var(--vc-cui-transition) var(--vc-cui-ease),
-        margin var(--vc-cui-transition) var(--vc-cui-ease)
+        transform var(--vc-cui-transition),
+        opacity var(--vc-cui-transition);
+    transform-origin: right center;
 }
 
 .vc-collapsible-ui-chat-buttons-collapsed .vc-collapsible-ui-chat-buttons-items {
-    max-inline-size: 0;
+    position: absolute;
+    top: 50%;
+    right: var(--vc-cui-chat-buttons-offset);
+    width: max-content;
     opacity: 0;
-    pointer-events: none
+    pointer-events: none;
+    transform: translateY(-50%) scaleX(0);
+    transition-delay: var(--vc-cui-fade-delay);
 }
 
 .vc-collapsible-ui-chat-buttons-collapsed:is(:hover, :focus-within) .vc-collapsible-ui-chat-buttons-items {
-    max-inline-size: var(--vc-cui-chat-buttons-width);
     opacity: 1;
     pointer-events: auto;
-    transition-delay: var(--vc-cui-hover-delay)
+    transform: translateY(-50%) scaleX(1);
+    transition-delay: 0ms;
+}
+
+.vc-collapsible-ui-restore-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--vc-cui-restore-button-size);
+    height: var(--vc-cui-restore-button-size);
+    border-radius: var(--radius-sm);
+    color: var(--interactive-normal);
+}
+
+.vc-collapsible-ui-restore-button:hover {
+    color: var(--interactive-hover);
+    background: var(--background-modifier-hover);
+}
+
+.vc-collapsible-ui-chat-buttons:not(.vc-collapsible-ui-chat-buttons-collapsed) .vc-collapsible-ui-restore-button {
+    display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    body:has(.vc-collapsible-ui-state) {
-        --vc-cui-transition: 0ms
+    [data-vc-collapsible-ui-guild-bar],
+    [data-vc-collapsible-ui-channel-list],
+    [data-vc-collapsible-ui-members-list],
+    [data-vc-collapsible-ui-title-bar],
+    [data-vc-collapsible-ui-header-bar],
+    [data-vc-collapsible-ui-user-area],
+    .vc-collapsible-ui-chat-buttons,
+    .vc-collapsible-ui-chat-buttons-items {
+        --vc-cui-transition: 0ms;
     }
 }

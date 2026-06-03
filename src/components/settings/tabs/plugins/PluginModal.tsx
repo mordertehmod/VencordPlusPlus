@@ -88,6 +88,8 @@ function PluginTags({ tags }: { tags: PluginTag[]; }) {
 export default function PluginModal({ plugin, onRestartNeeded, onClose, transitionState }: PluginModalProps) {
     const pluginSettings = useSettings([`plugins.${plugin.name}.*`]).plugins[plugin.name];
     const hasSettings = hasAnyVisibleSettings(plugin);
+    const isCollapsibleUI = plugin.name === "CollapsibleUI";
+    const hasFooterAction = hasSettings || isCollapsibleUI;
 
     // avoid layout shift by showing dummy users while loading users
     const fallbackAuthors = useMemo(() => [makeDummyUser({ username: "Loading...", id: "-1465912127305809920" })], []);
@@ -136,7 +138,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
 
                 pluginSettings[key] = newValue;
 
-                if (option.restartNeeded) onRestartNeeded(key);
+                if ("restartNeeded" in option && option.restartNeeded) onRestartNeeded(key);
             }
 
             const Component = OptionComponentMap[setting.type];
@@ -247,8 +249,8 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
             <div>
                 <Flex flexDirection="column" style={{ width: "100%" }}>
                     <Flex style={{ justifyContent: "space-between", alignItems: "center" }}>
-                        {hasSettings ? (
-                            <Tooltip text="Reset to default settings" shouldShow={!isObjectEmpty(pluginSettings)}>
+                        {hasFooterAction ? (
+                            <Tooltip text={isCollapsibleUI ? "Disable all collapsed surfaces" : "Reset to default settings"} shouldShow={!isObjectEmpty(pluginSettings)}>
                                 {({ onMouseEnter, onMouseLeave }) => (
                                     <Button
                                         className={cl("disable-warning")}
@@ -258,7 +260,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                                         onMouseEnter={onMouseEnter}
                                         onMouseLeave={onMouseLeave}
                                     >
-                                        Reset
+                                        {isCollapsibleUI ? "Disable all" : "Reset"}
                                     </Button>
                                 )}
                             </Tooltip>
@@ -267,7 +269,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             <div className={cl("links")}>
                                 <WebsiteButton
                                     text="Website"
-                                    href={isCustomPlugin ? `https://google.com/` : `https://vencord.dev/plugins/${plugin.name}`}
+                                    href={isCustomPlugin ? "https://google.com/" : `https://vencord.dev/plugins/${plugin.name}`}
                                 />
                                 <GithubButton
                                     text="Source Code"
@@ -313,7 +315,7 @@ function resetSettings(plugin: Plugin, onRestartNeeded?: (pluginName: string) =>
             newSettings[key] = setting.default;
         }
 
-        if (setting?.restartNeeded) {
+        if ("restartNeeded" in setting && setting.restartNeeded) {
             restartNeeded = true;
         }
     }

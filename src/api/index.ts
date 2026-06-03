@@ -39,6 +39,7 @@ import * as $ProfileSections from "./ProfileSections";
 import * as $ServerList from "./ServerList";
 import * as $Settings from "./Settings";
 import * as $Styles from "./Styles";
+import * as $SurfaceClasses from "./SurfaceClasses";
 import * as $Themes from "./Themes";
 import * as $UserSettings from "./UserSettings";
 
@@ -177,3 +178,8 @@ export const ProfileCollections = $ProfileCollections;
  * An API allowing you to add sections near the 'Member Since' area of user profile panels.
  */
 export const ProfileSections = $ProfileSections;
+
+/**
+ * An API allowing plugins to add semantic surface classes and limited state props without coupling to Discord className output.
+ */
+export const SurfaceClasses = $SurfaceClasses;
