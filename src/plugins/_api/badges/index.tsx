@@ -26,12 +26,11 @@ import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
 import { shouldShowContributorBadge } from "@utils/misc";
 import definePlugin from "@utils/types";
-import { User } from "@vencord/discord-types";
 import { ContextMenuApi, Menu, Toasts, UserStore } from "@webpack/common";
 
 import Plugins, { PluginMeta } from "~plugins";
 
-import { VencordDonorModal, VencordPlusPlusDonorModal } from "./modals";
+import { VencordDonorModal } from "./modals";
 
 const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1092089799109775453.png?size=64";
 const USERPLUGIN_CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/attachments/1213694361565401118/1450538370559381636/userplugin.png?ex=6942e6a1&is=69419521&hm=d4e116614ea43d69ceb3fb03018d9862de4ac5b18ce4867b0d1107e33c13e54f&"; // TODO: Update URL to our CDN
@@ -83,7 +82,7 @@ const UserPluginContributorBadge: ProfileBadge = {
 };
 
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
-let VencordPlusPlusDonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
+const VencordPlusPlusDonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
 
 async function loadBadges(url: string, noCache = false) {
     const init = {} as RequestInit;

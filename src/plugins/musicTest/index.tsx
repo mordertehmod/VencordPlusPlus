@@ -1,15 +1,15 @@
 /*
  * Vencord, a Discord client mod
- * KeyboardInteractions — Settings-Driven + POST /interactions
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import definePlugin, { OptionType } from "@utils/types";
-import { Devs } from "@utils/constants";
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType } from "@utils/types";
 import { findByPropsLazy } from "@webpack";
-import { RestAPI, showToast, Toasts } from "@webpack/common";
-import { SelectedGuildStore, SelectedChannelStore, MessageStore } from "@webpack/common";
+import { MessageStore, RestAPI, SelectedGuildStore, showToast, Toasts } from "@webpack/common";
+
 import { createNotifier, log } from "./util/utils";
 
 const IPC_EVENT = "KEYBOARDINTERACTIONS_HOTKEY";
@@ -25,7 +25,6 @@ declare global {
         };
     }
 }
-
 
 // ===== helpers from webpack (optional, best-effort) =====
 const SuperProps = findByPropsLazy("getSuperPropertiesBase64");
@@ -157,10 +156,10 @@ function renderText(label: string, key: keyof typeof settings.store, placeholder
       <span style={{ fontSize: 13 }}>{label}</span>
       <input
         type="text"
-        //@ts-ignore
+        // @ts-ignore
         placeholder={placeholder ?? settings.options[key]?.placeholder ?? ""}
         value={(settings.store[key] as any) ?? ""}
-        //@ts-ignore
+        // @ts-ignore
         onChange={e => (settings.store[key] = (e.currentTarget.value as any))}
         style={{ padding: "6px 10px", borderRadius: 4, border: "1px solid var(--background-modifier-accent)", background: "var(--background-secondary)", color: "var(--text-normal)" }}
       />
@@ -313,8 +312,8 @@ async function fetchMessage(token: string, channelId: string, messageId: string)
         },
         {
             loading: "Fetching…",
-            success: (res) => `Done! [${res.source}]`,
-            error: (e) => `Failed: ${String(e?.message ?? e)}`
+            success: res => `Done! [${res.source}]`,
+            error: e => `Failed: ${String(e?.message ?? e)}`
         }
     );
 }
@@ -373,10 +372,10 @@ async function pressOnce() {
   }
 
   const guildId = settings.store.guildId || null;
-  const channelId = settings.store.channelId;
-  const messageId = settings.store.messageId;
-  const applicationId = settings.store.applicationId;
-  const customId = settings.store.customId;
+  const { channelId } = settings.store;
+  const { messageId } = settings.store;
+  const { applicationId } = settings.store;
+  const { customId } = settings.store;
 
   if (!channelId || !messageId || !applicationId || !customId) {
     notify("Target fields incomplete (channel/message/app/custom)", "failure");
@@ -406,9 +405,9 @@ async function handleKeybind(action: string) {
     switch(action) {
         case "skip": {
             if (settings.store.debugMode) {
-                //@ts-ignore
+                // @ts-ignore
                 const { perfResult } = await pressOnce();
-                notify(`Pressed ✓ (in ${perfResult} ms)`, "success")
+                notify(`Pressed ✓ (in ${perfResult} ms)`, "success");
             }
             testPress();
             break;

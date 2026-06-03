@@ -127,7 +127,7 @@ const settings = definePluginSettings({
     },
 });
 
-export default definePlugin( {
+export default definePlugin({
     name: "BetterScreenshare",
     description: "This plugin allows you to further customize your screen sharing.",
     authors: [Devs.philhk, Devs.LSDZaddi],

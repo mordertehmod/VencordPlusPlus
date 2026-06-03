@@ -12,8 +12,7 @@ import { findComponentByCodeLazy, findStoreLazy } from "@webpack";
 import { Button, ChannelStore, GuildActions, MediaEngineStore, NavigationRouter, PermissionsBits, PermissionStore, Tooltip, useEffect, UserStore, useState, VoiceActions, VoiceStateStore } from "@webpack/common";
 import { JSX } from "react";
 
-import { ButtonVisibility } from "./settings";
-import { settings } from "./settings";
+import { ButtonVisibility, settings } from "./settings";
 
 const SoundboardStore = findStoreLazy("SoundboardStore");
 const DeafenIconSelf = findComponentByCodeLazy("M22.7 2.7a1", "1.4l20-20ZM17") as Icon;
@@ -112,7 +111,7 @@ export function UserChatButton({ user, visibility }: { user: User; visibility?: 
     );
 }
 
-export function UserMuteButton({ user, visibility }: { user: User; visibility?: ButtonVisibility;}) {
+export function UserMuteButton({ user, visibility }: { user: User; visibility?: ButtonVisibility; }) {
     const isCurrent = (user.id === UserStore.getCurrentUser().id);
     const { canMute: canServerMute } = canServerMuteDeafen(user.id);
     const { isServerMuted } = getServerMuteDeafenState(user.id);
@@ -283,8 +282,6 @@ function FakeDeafenIconSmall({ active }: { active: boolean }) {
         </svg>
     );
 }
-
-
 
 export function UserFakeDeafenButton({ user, visibility }: { user: User; visibility?: ButtonVisibility; }) {
     const isCurrent = user.id === UserStore.getCurrentUser().id;

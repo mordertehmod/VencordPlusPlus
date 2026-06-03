@@ -1,9 +1,14 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import "../index";
+
 import { Logger } from "@utils/Logger";
+import { showToast as notification,Toasts } from "@webpack/common"; // or from your custom Toasts source
 import React from "react";
-import { settings } from "../settings";
-import { Toasts, showToast as notification } from "@webpack/common"; // or from your custom Toasts source
-import { Notification } from './../../reviewDB/entities';
 
 const vc = new Logger("KeyboardInteractions", "#86b3ff");
 

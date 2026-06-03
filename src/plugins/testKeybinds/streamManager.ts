@@ -1,5 +1,11 @@
-import { showToast, Toasts } from "@webpack/common";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { findByCodeLazy } from "@webpack";
+import { showToast, Toasts } from "@webpack/common";
 
 import { settings } from "./settings";
 import { ApplicationStreamingStore, MediaEngineStore, RTCConnectionStore, RunningGameStore, StreamRTCConnectionStore } from "./stores";

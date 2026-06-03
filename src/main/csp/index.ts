@@ -72,7 +72,7 @@ export const CspPolicies: PolicyMap = {
     "ttsvibes.com": ConnectSrc, // TikTok TTS API
     "ottsy.weilbyte.dev": ConnectSrc, // Custom TTS API
     "tiktok-tts-aio.exampleuser.workers.dev": ConnectSrc, // TikTok TTS API
-    "corsproxy.io": ConnectSrc, //Better audio display
+    "corsproxy.io": ConnectSrc, // Better audio display
     "equicord.org": ImageAndCssSrc, // Equicord CDN
     "themes.equicord.org": ImageAndCssSrc // Equicord Themes CDN
 };

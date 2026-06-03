@@ -6,7 +6,7 @@
 
 import { definePluginSettings } from "@api/Settings";
 import { BaseText } from "@components/BaseText";
-import { Devs, Maintainers } from "@utils/constants";
+import { Maintainers } from "@utils/constants";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
 import { ReactNode } from "react";
 

@@ -9,7 +9,6 @@ import { OptionType } from "@utils/types";
 
 import { updateStream } from "./streamManager";
 
-
 export type ShikiSettings = typeof settings.store;
 export const settings = definePluginSettings({
     testKeybind: {

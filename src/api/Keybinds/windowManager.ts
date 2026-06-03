@@ -79,7 +79,6 @@ window.addEventListener("gamepaddisconnected", e => {
     }
 }, false); */
 
-
 type EventKeyChecks = {
     ctrl: boolean;
     shift: boolean;

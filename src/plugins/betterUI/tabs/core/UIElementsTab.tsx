@@ -1,6 +1,12 @@
-import { findComponentByCodeLazy } from "@webpack";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
+import { findComponentByCodeLazy } from "@webpack";
 import { useState } from "@webpack/common";
+
 import { CollapsibleChannelListTab } from "./ChannelList/CollapsibleChannelListTab";
 
 export const ManaSelect = findComponentByCodeLazy('"data-mana-component":"select"') as React.ComponentType<ManaSelectProps>;
@@ -29,17 +35,17 @@ export interface ManaSelectProps {
 }
 
 const UIElements: ManaSelectOption[] = [
-    { id: "serverList", value: "openServerListUI", label: "Server List"},
-    { id: "channelList", value: "openChannelListUI", label: "Channel List"},
-    { id: "memberList", value: "openMemberListUI", label: "Member List"},
-    { id: "userProfile", value: "openUserProfileUI", label: "User Profile"},
-    { id: "messageInput", value: "openMessageInputUI", label: "Message Input"},
-    { id: "windowBar", value: "openWindowBarUI", label: "Window Bar"},
-    { id: "callWindow", value: "openCallWindowUI", label: "Call Window"},
-    { id: "userArea", value: "openUserAreaUI", label: "User Area"},
-    { id: "searchPanel", value: "openSearchPanelUI", label: "Search Panel"},
-    { id: "forumPopout", value: "openForumPopoutUI", label: "Forum Popout"},
-    { id: "activityPanel", value: "openActivityPanelUI", label: "Activity Panel"},
+    { id: "serverList", value: "openServerListUI", label: "Server List" },
+    { id: "channelList", value: "openChannelListUI", label: "Channel List" },
+    { id: "memberList", value: "openMemberListUI", label: "Member List" },
+    { id: "userProfile", value: "openUserProfileUI", label: "User Profile" },
+    { id: "messageInput", value: "openMessageInputUI", label: "Message Input" },
+    { id: "windowBar", value: "openWindowBarUI", label: "Window Bar" },
+    { id: "callWindow", value: "openCallWindowUI", label: "Call Window" },
+    { id: "userArea", value: "openUserAreaUI", label: "User Area" },
+    { id: "searchPanel", value: "openSearchPanelUI", label: "Search Panel" },
+    { id: "forumPopout", value: "openForumPopoutUI", label: "Forum Popout" },
+    { id: "activityPanel", value: "openActivityPanelUI", label: "Activity Panel" },
 ];
 
 const UIComponentMap: Record<string, React.ComponentType> = {
@@ -87,9 +93,10 @@ function openCorrespondingUITab(value: string) {
 
     switch(value) {
         case "openServerListUI":
-
+            break;
         case "openChannelListUI":
             CollapsibleChannelListTab();
+            break;
         case "openMemberListUI":
         case "openUserProfileUI":
         case "openMessageInputUI":

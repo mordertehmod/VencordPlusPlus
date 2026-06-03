@@ -1,9 +1,8 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2024 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
-
 
 import { definePluginSettings } from "@api/Settings";
 import { classNameFactory } from "@api/Styles";
@@ -11,7 +10,7 @@ import { FormSwitch } from "@components/FormSwitch";
 import { Devs } from "@utils/constants";
 import { closeModal, ModalCloseButton, ModalContent, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin, { OptionType } from "@utils/types";
-import { Button, Forms, Switch, Text } from "@webpack/common";
+import { Button, Forms, Text } from "@webpack/common";
 
 // definitely not stolen from glide :P
 async function injectCSS() {
@@ -126,7 +125,6 @@ async function playSound(url: string) {
     });
     audio.remove();
 }
-
 
 export default definePlugin({
     name: "Demonstration",

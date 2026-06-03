@@ -1,3 +1,9 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import ErrorBoundary from "@components/ErrorBoundary";
 import { closeModal, openModal } from "@utils/modal";
 import { findComponentByCodeLazy } from "@webpack";
@@ -7,7 +13,7 @@ import { CustomStreamPreviewState } from "../state";
 import { ScreenSharePreviewImageModal } from "./ScreenSharePreviewImageModal";
 import { StreamPreviewChangeIcon } from "./StreamPreviewChangeIcon";
 
-const PanelButton = findComponentByCodeLazy("tooltipPositionKey", ".greenTooltip")
+const PanelButton = findComponentByCodeLazy("tooltipPositionKey", ".greenTooltip");
 
 export function SendCustomScreenSharePreviewImageButton() {
     const [isStreaming, setIsStreaming] = useState(() => {

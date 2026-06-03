@@ -1,15 +1,21 @@
-import { classNameFactory } from "@api/Styles";
-import { Flex } from "@components/Flex";
-import { Margins } from '@utils/margins';
-import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
-import { Forms, Select, Switch, TabBar, Text, useState } from "@webpack/common";
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
-import { settings } from "../settings";
-import React from "react";
+import { classNameFactory } from "@api/Styles";
 import { BaseText } from "@components/BaseText";
+import { Flex } from "@components/Flex";
+import { FormSwitch } from "@components/FormSwitch";
 import { Heading } from "@components/Heading";
 import { Paragraph } from "@components/Paragraph";
-import { FormSwitch } from "@components/FormSwitch";
+import { Margins } from "@utils/margins";
+import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { Forms, Select, TabBar, Text, useState } from "@webpack/common";
+import React from "react";
+
+import { settings } from "../settings";
 
 const cl = classNameFactory("vc-voicebuttons-settings-");
 

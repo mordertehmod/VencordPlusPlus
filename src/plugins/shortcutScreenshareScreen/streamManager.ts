@@ -4,8 +4,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { showToast, Toasts } from "@webpack/common";
 import { findByCodeLazy } from "@webpack";
+import { showToast, Toasts } from "@webpack/common";
 
 import { settings } from "./settings";
 import { ApplicationStreamingStore, MediaEngineStore, RTCConnectionStore, RunningGameStore, StreamRTCConnectionStore } from "./stores";

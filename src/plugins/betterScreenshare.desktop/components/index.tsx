@@ -18,7 +18,7 @@
 
 export * from "./AudioSourceSelect";
 export * from "./OpenScreenshareSettingsButton";
-export * from "./ScreenshareSettingsModal";
 export * from "./ScreenSharePreviewImageModal";
+export * from "./ScreenshareSettingsModal";
 export * from "./SendCustomScreenSharePreviewImageButton";
 export * from "./StreamPreviewChangeIcon";

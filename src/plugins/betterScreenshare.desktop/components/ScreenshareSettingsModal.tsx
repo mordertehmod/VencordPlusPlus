@@ -21,8 +21,8 @@ import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
 import { Switch } from "@components/Switch";
 import { ModalSize, openModalLazy } from "@utils/modal";
-import { Forms, React, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
 import { SelectOption } from "@vencord/discord-types";
+import { Forms, React, Select, Slider, TextInput, useEffect, useState } from "@webpack/common";
 
 import { MicrophoneSettingsModal } from "../../betterMicrophone.desktop/components";
 import {
@@ -133,7 +133,6 @@ export const ScreenshareSettingsModal = (props: ScreenshareSettingsModalProps) =
         getCurrentProfile,
         getProfiles
     } = screenshareStore.use();
-
 
     const {
         name,
@@ -424,7 +423,6 @@ export const ScreenshareSettingsModal = (props: ScreenshareSettingsModalProps) =
             <Forms.FormTitle style={{ margin: 0 }} tag="h5">Simple</Forms.FormTitle>
             <Switch checked={simpleMode ?? false} disabled={isSaving} onChange={checked => setSimpleMode(checked)} />
         </Flex>;
-
 
     return (
         <SettingsModal

@@ -1,3 +1,9 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import "../styles.css";
 
 import { Heading } from "@components/Heading";
@@ -5,7 +11,6 @@ import { SettingsTab, wrapTab } from "@components/settings";
 import { Margins } from "@utils/margins";
 import { TabBar, useState } from "@webpack/common";
 
-import CollapsibleTab from "./core/CollapsibleTab";
 import ResizeUITab from "./core/ResizeUiTab";
 import { UIElementTab } from "./core/UIElementsTab";
 
@@ -19,12 +24,12 @@ type TabId = typeof BetterUITabs[ number ][ "id" ];
 const BetterUIComponents: Record<TabId, React.ComponentType> = {
     uiElements: UIElementTab,
     toolbarButtons: ResizeUITab,
-    //animations: AnimationsTab,
+    // animations: AnimationsTab,
 };
 
 function BetterUITab()
 {
-    const [ currentTab, setCurrentTab ] = useState<TabId>( "uiElements" );
+    const [ currentTab, setCurrentTab ] = useState<TabId>("uiElements");
     const TabComponent = BetterUIComponents[ currentTab ];
 
     return (
@@ -37,11 +42,11 @@ function BetterUITab()
                 onItemSelect={ setCurrentTab }
                 className="vc-betterui-tabbar"
             >
-                { BetterUITabs.map( tab => (
+                { BetterUITabs.map(tab => (
                     <TabBar.Item key={ tab.id } id={ tab.id } className="vc-betterui-tab">
                         { tab.label }
                     </TabBar.Item>
-                ) ) }
+                )) }
             </TabBar>
             <div>
                 <TabComponent />
@@ -50,4 +55,4 @@ function BetterUITab()
     );
 }
 
-export default wrapTab( BetterUITab, "BetterUITab" );
+export default wrapTab(BetterUITab, "BetterUITab");

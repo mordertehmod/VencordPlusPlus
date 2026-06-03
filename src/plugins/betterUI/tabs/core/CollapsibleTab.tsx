@@ -1,15 +1,21 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import "../../styles.css";
 
-import { TabBar, useState } from "@webpack/common";
 import { SettingsTab, wrapTab } from "@components/settings";
+import { TabBar, useState } from "@webpack/common";
 
 import CollapsibleChannelListTabs from "./ChannelList/CollapsibleChannelListTab";
 
 const CollapsibleUITab = [
-    { id: "collapsibleChannelList", label: "Collapse Channel List"},
-    { id: "collapsibleMessageInput", label: "Collapse Message Input"},
-    { id: "collapsibleServerList", label: "Collapse Server List"},
-    { id: "collapsibleUserAreaButtons", label: "Collapse User Area"},
+    { id: "collapsibleChannelList", label: "Collapse Channel List" },
+    { id: "collapsibleMessageInput", label: "Collapse Message Input" },
+    { id: "collapsibleServerList", label: "Collapse Server List" },
+    { id: "collapsibleUserAreaButtons", label: "Collapse User Area" },
 ].sort((a, b) => a.label.localeCompare(b.label));
 
 type TabId = typeof CollapsibleUITab[number]["id"];
@@ -19,7 +25,7 @@ const CollapsibleUIComponents: Record<TabId, React.ComponentType> = {
     collapsibleMessageInput: CollapsibleUserMessageInputTab,
     collapsibleServerList: CollapsibleServerListTab,
     collapsibleUserAreaButtons: CollapsibleUserAreaButtonsTab,
-    //animations: AnimationsTab,
+    // animations: AnimationsTab,
 };
 
 function CollapsibleUserAreaButtonsTab() {

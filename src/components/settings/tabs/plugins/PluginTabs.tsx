@@ -20,7 +20,6 @@ import { classNameFactory } from "@api/Styles";
 import { Paragraph } from "@components/Paragraph";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
-import { Plugin } from "@utils/types";
 import { Clickable, React } from "@webpack/common";
 
 const cl = classNameFactory("vc-plugin-modal-");
@@ -37,7 +36,7 @@ interface TabsProps {
 export function Tabs({ activeTab, onTabChange }: TabsProps) {
     return (
         <div className={classes(cl("tabs"), Margins.bottom16)}>
-            {PluginTabs.map((tab) => (
+            {PluginTabs.map(tab => (
                 <Clickable
                     key={tab}
                     className={classes(cl("tab"), activeTab === tab && cl("tab-active"))}

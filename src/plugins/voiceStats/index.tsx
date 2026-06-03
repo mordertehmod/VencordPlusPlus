@@ -9,7 +9,7 @@ import "./styles.css";
 import { get, set } from "@api/DataStore";
 import { BaseText } from "@components/BaseText";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs, Maintainers } from "@utils/constants";
+import { Maintainers } from "@utils/constants";
 import { useTimer } from "@utils/react";
 import definePlugin from "@utils/types";
 import { VoiceState } from "@vencord/discord-types";

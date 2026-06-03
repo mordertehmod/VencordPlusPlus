@@ -17,9 +17,9 @@
 */
 
 import { ApplicationCommandInputType, ApplicationCommandOptionType, findOption, sendBotMessage } from "@api/Commands";
-import { Channel, Message } from "@vencord/discord-types";
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { Channel, Message } from "@vencord/discord-types";
 import { Forms, MessageActions, MessageStore, UserStore } from "@webpack/common";
 
 async function deleteMessages(amount: number, channel: Channel, delay: number = 1500): Promise<number> {

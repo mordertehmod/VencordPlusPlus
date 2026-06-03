@@ -17,7 +17,7 @@
 */
 
 import { Notice } from "@components/Notice";
-import { Devs, Maintainers } from "@utils/constants";
+import { Maintainers } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({

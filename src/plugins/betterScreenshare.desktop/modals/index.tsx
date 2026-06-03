@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { closeModal, openModalLazy } from "@utils/modal";
+import { openModalLazy } from "@utils/modal";
 
 import Plugin from "..";
 import { ScreenSharePreviewImageModal, ScreenshareSettingsModal } from "../components";

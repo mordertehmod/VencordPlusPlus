@@ -22,7 +22,10 @@ import { isPluginEnabled } from "@api/PluginManager";
 import { Settings } from "@api/Settings";
 import { Button } from "@components/Button";
 import { Card } from "@components/Card";
+import { Flex } from "@components/Flex";
+import { HeadingPrimary } from "@components/Heading";
 import { Link } from "@components/Link";
+import { Paragraph } from "@components/Paragraph";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
 import { ThemeTab } from "@plugins/themeLibrary/components/ThemeTab";
 import { getStylusWebStoreUrl } from "@utils/web";
@@ -31,9 +34,6 @@ import { Forms, React, TabBar, useState } from "@webpack/common";
 import { CspErrorCard } from "./CspErrorCard";
 import { LocalThemesTab } from "./LocalThemesTab";
 import { OnlineThemesTab } from "./OnlineThemesTab";
-import { HeadingPrimary } from "@components/Heading";
-import { Paragraph } from "@components/Paragraph";
-import { Flex } from "@components/Flex";
 
 const enum ThemeTabs {
     LOCAL,
@@ -99,12 +99,12 @@ function EnableThemeLibraryPlugin({ onEnabled }: { onEnabled: () => void }) {
                         variant="positive"
                         title="Enable Theme Library Plugin"
                         onClick={() => {
-                            const settings = Settings.plugins["ThemeLibrary"];
-                            const result = Vencord.Plugins.startPlugin(Vencord.Plugins.plugins["ThemeLibrary"]);
+                            const settings = Settings.plugins.ThemeLibrary;
+                            const result = Vencord.Plugins.startPlugin(Vencord.Plugins.plugins.ThemeLibrary);
 
                             if (!result) {
                                 settings.enabled = false;
-                                const msg = `Error while starting ThemeLibrary plugin`;
+                                const msg = "Error while starting ThemeLibrary plugin";
                                 console.error(msg);
                                 return;
                             }

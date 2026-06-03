@@ -1,12 +1,12 @@
 /*
-* Vencord, a modification for Discord's desktop app
-^ Copyright (c) 2024 Vendicated and contributors
-^
-^ SPDX-License-Identifier: GPL-3.0-or-later
-*/
-import { User } from "@vencord/discord-types";
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
+import { User } from "@vencord/discord-types";
 import { findByProps } from "@webpack";
 import { moment } from "@webpack/common";
 

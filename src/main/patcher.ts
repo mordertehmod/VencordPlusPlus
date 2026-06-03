@@ -37,7 +37,7 @@ const asarPath = join(dirname(injectorPath), "..", asarName);
 
 const discordPkg = require(join(asarPath, "package.json"));
 require.main!.filename = join(asarPath, discordPkg.main);
-if (IS_VESKTOP) require.main!.filename = join(dirname(injectorPath))
+if (IS_VESKTOP) require.main!.filename = join(dirname(injectorPath));
 
 // @ts-expect-error Untyped method? Dies from cringe
 app.setAppPath(asarPath);

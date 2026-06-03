@@ -19,7 +19,6 @@
 import "./styles.css";
 
 import * as DataStore from "@api/DataStore";
-import { Devs } from "@utils/constants";
 import { isPluginEnabled, stopPlugin } from "@api/PluginManager";
 import { useSettings } from "@api/Settings";
 import { Button } from "@components/Button";
@@ -31,6 +30,7 @@ import { Paragraph } from "@components/Paragraph";
 import { SettingsTab } from "@components/settings";
 import { debounce } from "@shared/debounce";
 import { ChangeList } from "@utils/ChangeList";
+import { Devs } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { isTruthy } from "@utils/guards";
 import { Logger } from "@utils/Logger";
@@ -424,7 +424,7 @@ export default function PluginSettings() {
                             { label: "Show Enabled", value: SearchStatus.ENABLED },
                             { label: "Show Disabled", value: SearchStatus.DISABLED },
                             { label: "Show Custom", value: SearchStatus.CUSTOM },
-                            { label: "Show Modified", value: SearchStatus.MODIFIED},
+                            { label: "Show Modified", value: SearchStatus.MODIFIED },
                             { label: "Show New", value: SearchStatus.NEW },
                             hasUserPlugins && { label: "Show UserPlugins", value: SearchStatus.USER_PLUGINS },
                             { label: "Show API Plugins", value: SearchStatus.API_PLUGINS },

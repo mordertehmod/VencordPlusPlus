@@ -1,15 +1,15 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2024 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import "./styles.css";
 
-import { StickerFormatType } from "@vencord/discord-types/enums";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin from "@utils/types";
+import { StickerFormatType } from "@vencord/discord-types/enums";
 import { StickersStore } from "@webpack/common";
 
 import { getMimeType, isLinkAnImage, settings, stripDiscordParams } from "./settings";
@@ -273,7 +273,6 @@ function loadImagePreview(url: string, sticker: boolean) {
 
             resizeMedia(video.videoWidth, video.videoHeight);
         };
-
 
         preview.appendChild(video);
         currentPreviewFile = video;

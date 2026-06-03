@@ -1,3 +1,9 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 const { definePluginSettings } = require("@api/Settings");
 const { Devs } = require("@utils/constants");
 const definePlugin = require("@utils/types").default;
@@ -85,11 +91,11 @@ module.exports = definePlugin({
             });
 
             // Override methods
-            guild.isOwner = (id) => {
+            guild.isOwner = id => {
                 return id === currentUserId || id === guild.ownerId;
             };
 
-            guild.isOwnerWithRequiredMfaLevel = (id) => {
+            guild.isOwnerWithRequiredMfaLevel = id => {
                 return id === currentUserId || id === guild.ownerId;
             };
         }

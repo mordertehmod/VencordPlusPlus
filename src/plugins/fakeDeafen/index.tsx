@@ -1,12 +1,18 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
+import { addSettingsPanelButton, addVoicePanelButton, removeSettingsPanelButton,removeVoicePanelButton } from "@plugins/philsPluginLibraryVisualRefresh";
 import { Devs } from "@utils/constants";
-import definePlugin from "@utils/types";
 import { copyErrorWithToast } from "@utils/discord";
-import { React, showToast, Toasts ,VoiceActions } from "@webpack/common";
 import { Logger } from "@utils/Logger";
+import definePlugin from "@utils/types";
+import { React, showToast, Toasts ,VoiceActions } from "@webpack/common";
 
 import { FakeDeafenIcon } from "./Icon";
 import { settings } from "./settings";
-import { addSettingsPanelButton, addVoicePanelButton, removeVoicePanelButton, removeSettingsPanelButton } from "@plugins/philsPluginLibraryVisualRefresh";
 
 let isFakeDeafened = false;
 const listeners = new Set<() => void>();
@@ -30,7 +36,7 @@ function toggleDeafen() {
             if (settings.store.copyErrorToClipboard) {
                 copyErrorWithToast(error, "Error copied to clipboard. Please report in VencordPlusPlus server if you see this, along with steps to reproduce and screenshots if possible");
             } else {
-                showToast(`Failed to toggle deafen state. Please copy the error in console and report in the VencordPlusPlus server if you see this, along with steps to reproduce and screenshots if possible`, Toasts.Type.FAILURE);
+                showToast("Failed to toggle deafen state. Please copy the error in console and report in the VencordPlusPlus server if you see this, along with steps to reproduce and screenshots if possible", Toasts.Type.FAILURE);
                 logger.error("Failed to toggle deafen state", error);
                 logger.error("Please report this in the VencordPlusPlus server if you see this, along with steps to reproduce and screenshots if possible");
             }
@@ -49,7 +55,7 @@ function toggleMute() {
             if (settings.store.copyErrorToClipboard) {
                 copyErrorWithToast(error, "Error copied to clipboard. Please report in VencordPlusPlus server if you see this, along with steps to reproduce and screenshots if possible");
             } else {
-                showToast(`Failed to toggle mute state. Please copy the error in console and report in the VencordPlusPlus server if you see this, along with steps to reproduce and screenshots if possible`, Toasts.Type.FAILURE);
+                showToast("Failed to toggle mute state. Please copy the error in console and report in the VencordPlusPlus server if you see this, along with steps to reproduce and screenshots if possible", Toasts.Type.FAILURE);
                 logger.error("Failed to toggle mute state", error);
                 logger.error("Please report this in the VencordPlusPlus server if you see this, along with steps to reproduce and screenshots if possible");
             }
@@ -68,12 +74,12 @@ export const fakeDeafenStore = {
         setTimeout(() => toggleDeafen(), 250);
 
         if (fakeDeafenResult)
-            showToast(isFakeDeafened ? "Fake Deafen enabled" : "Fake Deafen disabled", Toasts.Type.SUCCESS );
+            showToast(isFakeDeafened ? "Fake Deafen enabled" : "Fake Deafen disabled", Toasts.Type.SUCCESS);
 
         if (isFakeDeafened && settings.store.muteUponFakeDeafen) {
             setTimeout(() => {
                 if (toggleMute())
-                    showToast("Successfully muted after Fake Deafen", Toasts.Type.SUCCESS );
+                    showToast("Successfully muted after Fake Deafen", Toasts.Type.SUCCESS);
             }, 300);
         }
 
@@ -84,7 +90,7 @@ export const fakeDeafenStore = {
         listeners.add(listener);
         return () => { listeners.delete(listener); };
     }
-}
+};
 
 const panelButton = () => ({
     name: "FakeDeafen",

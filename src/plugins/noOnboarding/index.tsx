@@ -59,4 +59,3 @@ export default definePlugin({
         }).catch(() => { });
     }
 });
-

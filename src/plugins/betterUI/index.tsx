@@ -10,10 +10,9 @@ import definePlugin, { StartAt } from "@utils/types";
 import { SettingsRouter } from "@webpack/common";
 
 import { initSettings } from "./settings";
-
 import BetterUITab from "./tabs/BetterUiTab";
 
-function ComponentsIcon( props: React.SVGProps<SVGSVGElement> )
+function ComponentsIcon(props: React.SVGProps<SVGSVGElement>)
 {
     return (
         <svg
@@ -38,7 +37,7 @@ function ComponentsIcon( props: React.SVGProps<SVGSVGElement> )
     );
 }
 
-export default definePlugin( {
+export default definePlugin({
     name: "BetterUI",
     description: "Finally, the ability to customize the UI just how you want it!",
     authors: [ Devs.LSDZaddi ],
@@ -47,7 +46,7 @@ export default definePlugin( {
     toolboxActions: {
         "Open Better UI"()
         {
-            SettingsRouter.openUserSettings( "vencord_better_ui" );
+            SettingsRouter.openUserSettings("vencord_better_ui");
         },
     },
     start()
@@ -55,17 +54,17 @@ export default definePlugin( {
         initSettings();
 
         const { customEntries } = SettingsPlugin;
-        customEntries.push( {
+        customEntries.push({
             key: "vencord_better_ui",
             title: "Better UI",
             Component: BetterUITab,
             Icon: ComponentsIcon
-        } );
+        });
     },
     stop()
     {
         const { customEntries } = SettingsPlugin;
-        const entryIdx = customEntries.findIndex( e => e.key === "vencord_better_ui" );
-        if ( entryIdx !== -1 ) customEntries.splice( entryIdx, 1 );
+        const entryIdx = customEntries.findIndex(e => e.key === "vencord_better_ui");
+        if (entryIdx !== -1) customEntries.splice(entryIdx, 1);
     },
-} );
+});

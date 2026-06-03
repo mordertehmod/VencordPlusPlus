@@ -1,4 +1,11 @@
+/*
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import { findByPropsLazy } from "@webpack";
+
 import { settings } from "../settings";
 import { createNotifier, log } from "../util/utils";
 
@@ -69,9 +76,9 @@ function debugResolveAuth(): Promise<string | null> {
         {
             loading: "Resolving token…",
             success: () => "Auth token verified!",
-            error: (e) => `Token resolution failed: ${String(e?.message ?? e)}`
+            error: e => `Token resolution failed: ${String(e?.message ?? e)}`
         }
-    ).catch((err) => {
+    ).catch(err => {
         log.error("Error in debugResolveAuth: ", err);
         return null;
     });
@@ -146,7 +153,7 @@ async function debugFetchMessage(token: string, channelId: string, messageId: st
         {
             loading: "Fetching…",
             success: () => "Done!",
-            error: (e) => `Failed: ${String(e?.message ?? e)}`
+            error: e => `Failed: ${String(e?.message ?? e)}`
         }
     );
 }
@@ -211,8 +218,8 @@ async function debugSendInteraction(opts: {
         },
         {
             loading: "Sending interaction…",
-            success: (res) => `Sent (${res?.elapsed ?? "?"}ms)`,
-            error: (e) => `Interaction failed: ${String(e?.message ?? e)}`
+            success: res => `Sent (${res?.elapsed ?? "?"}ms)`,
+            error: e => `Interaction failed: ${String(e?.message ?? e)}`
         }
     );
 }
@@ -252,8 +259,8 @@ async function debugTestKeybind() {
         },
         {
             loading: "Sending keybind interaction…",
-            success: (t) => `Pressed ✓ (${t}ms)`,
-            error: (e) => `Failed ✗ ${String(e?.message ?? e)}`
+            success: t => `Pressed ✓ (${t}ms)`,
+            error: e => `Failed ✗ ${String(e?.message ?? e)}`
         }
     );
 }

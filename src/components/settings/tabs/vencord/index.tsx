@@ -27,11 +27,10 @@ import { isPluginDev } from "@utils/misc";
 import { relaunch } from "@utils/native";
 import { Alerts, React, useMemo, UserStore } from "@webpack/common";
 
-import { DonateButtonComponent } from "./DonateButton";
+import { DonateButtonComponent, isDonor } from "./DonateButton";
 import { MacOSVibrancySettings } from "./MacVibrancySettings";
 import { NotificationSection } from "./NotificationSettings";
 import { WindowsMaterialSettings } from "./WindowsMaterialSettings";
-import { isDonor } from './DonateButton';
 
 const DEFAULT_DONATE_IMAGE = "https://cdn.discordapp.com/emojis/1026533090627174460.png";
 const SHIGGY_DONATE_IMAGE = "https://equicord.org/assets/favicon.png";
