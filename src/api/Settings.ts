@@ -101,12 +101,6 @@ export interface Settings {
     };
 
     ignoreResetWarning: boolean;
-
-    userCssVars: {
-        [themeId: string]: {
-            [varName: string]: string;
-        };
-    };
 }
 
 const DefaultSettings: Settings = {
@@ -153,8 +147,6 @@ const DefaultSettings: Settings = {
     },
 
     ignoreResetWarning: false,
-
-    userCssVars: {}
 };
 
 const settings = !IS_REPORTER ? VencordNative.settings.get() : {} as Settings;
@@ -335,7 +327,7 @@ export function migrateSettingsFromPlugin(newPlugin: string, oldPlugin: string, 
     SettingsStore.markAsChanged();
 }
 
-export function migrateOldSettingToNewPlugin(newPlugin: string, newSetting: string, oldPlugin: string, oldSetting: string,) {
+export function migrateOldSettingToNewPlugin(newPlugin: string, newSetting: string, oldPlugin: string, oldSetting: string) {
     const { plugins } = SettingsStore.plain;
     const oldSettings = plugins[oldPlugin];
     const newSettings = plugins[newPlugin];

@@ -20,6 +20,7 @@ import { AudioProcessor } from "@api/AudioPlayer";
 import type { ProfileBadge } from "@api/Badges";
 import type { ChatBarButtonData, ChatBarButtonWrapperData } from "@api/ChatButtons";
 import type { NavContextMenuPatchCallback } from "@api/ContextMenu";
+import type { GifPickerContextMenuItemFactory } from "@api/GifPickerContextMenu";
 import { HeaderBarButtonData } from "@api/HeaderBar";
 import { Keybind, KeybindShortcut } from "@api/Keybinds/types";
 import type { MemberListDecoratorFactory } from "@api/MemberListDecorators";
@@ -242,6 +243,7 @@ export interface PluginDef {
     renderProfileCollection?: ProfileCollectionData;
     chatBarButtonWrapper?: ChatBarButtonWrapperData;
     renderProfileSection?: ProfileSectionData;
+    gifPickerContextMenu?: GifPickerContextMenuItemFactory;
 
     /**
      * A Vencord plugin that is modified for extra features
@@ -300,6 +302,7 @@ export type PluginSettingDef =
 
 export interface PluginSettingDefCommon extends IsDisabledOrHidden, IsValid<unknown> {
     description: string;
+    displayName?: string;
     placeholder?: string;
     onChange?(newValue: any): void;
     /**
@@ -397,7 +400,7 @@ export interface PluginSettingKeybindDef {
     onChange?(this: DefinedSettings, newValue: KeybindShortcut): void;
 }
 
-export interface PluginSettingComponentDef extends Omit<PluginSettingDefCommon, "description" | "placeholder"> {
+export interface PluginSettingComponentDef extends Omit<PluginSettingDefCommon, "description" | "placeholder" | "displayName"> {
     type: OptionType.COMPONENT;
     component: (props: PluginSettingComponentProps) => ReactNode | Promise<ReactNode>;
     default?: any;
