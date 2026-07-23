@@ -24,7 +24,7 @@ import { Button } from "@components/Button";
 import { Card } from "@components/Card";
 import { Link } from "@components/Link";
 import { SettingsTab, wrapTab } from "@components/settings/tabs/BaseTab";
-import { ThemeTab } from "@plugins/themeLibrary/components/ThemeTab";
+// import { ThemeTab } from "@plugins/themeLibrary/components/ThemeTab";
 import { getStylusWebStoreUrl } from "@utils/web";
 import { Forms, React, TabBar, useState } from "@webpack/common";
 
@@ -78,7 +78,6 @@ function ThemesTab() {
 
             {currentTab === ThemeTabs.LOCAL && <LocalThemesTab />}
             {currentTab === ThemeTabs.ONLINE && <OnlineThemesTab />}
-            {currentTab === ThemeTabs.THEME_LIBRARY && isPluginEnabled("ThemeLibrary") && <ThemeTab />}
             {currentTab === ThemeTabs.THEME_LIBRARY && !isPluginEnabled("ThemeLibrary") &&
                 <EnableThemeLibraryPlugin onEnabled={() => forceUpdate({})} />
             }

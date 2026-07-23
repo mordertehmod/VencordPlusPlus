@@ -19,7 +19,7 @@ export function VencordDonorModal() {
             props.onClose();
             VencordNative.native.openExternal("https://github.com/sponsors/Vendicated");
         }}>
-        <Modal
+            <Modal
                 {...props}
                 title={
                     <Heading
