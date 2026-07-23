@@ -4,15 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// Ported from BackgroundManager by Narukami
-// Original: https://github.com/Naru-kami/BackgroundManager-plugin
-
-import "./styles.css";
-
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { clear, createStore, del, entries, set } from "@api/DataStore";
 import { HeaderBarButton } from "@api/HeaderBar";
-import { definePluginSettings, Settings as AppSettings, useSettings } from "@api/Settings";
+import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Switch } from "@components/Switch";
 import { Devs } from "@utils/constants";
@@ -21,41 +15,53 @@ import { classes } from "@utils/misc";
 import definePlugin, { OptionType } from "@utils/types";
 import { chooseFile } from "@utils/web";
 import type { Message } from "@vencord/discord-types";
-import { Alerts, Dialog, Menu, Popout, ThemeStore, Toasts, Tooltip, useCallback, useEffect, useRef, useState } from "@webpack/common";
-import type { SVGProps } from "react";
+import { Alerts, Dialog, Menu, Popout, Toasts, Tooltip, useCallback, useEffect, useRef, useState } from "@webpack/common";
+import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, SVGProps } from "react";
+
+import {
+    addMediaBlob,
+    clearMediaLibrary,
+    ensureMediaItemsLoaded,
+    getLegacySelectedMediaId,
+    getMediaItems,
+    getPersistedActiveMediaId,
+    type MediaItem,
+    releaseMediaLibrary,
+    removeMediaItem,
+    setPersistedActiveMediaId,
+    subscribeToMediaItems
+} from "./store";
+import managedStyle from "./styles.css?managed";
 
 const cl = classNameFactory("vc-bgmanager-");
-const imageStore = createStore("BackgroundManager", "ImageStore");
-const SLIDESHOW_INTERVAL_MS = 5 * 60 * 1000;
-const THEME_BACKGROUND_PROP_RE = /background|bg|wallpaper|backdrop/i;
-const THEME_IMAGE_PROP_RE = /image|img/i;
+const DEFAULT_SLIDESHOW_INTERVAL_MINUTES = 5;
+const MAX_SLIDESHOW_INTERVAL_MINUTES = 60;
+const CURRENT_SETTINGS_MIGRATION_VERSION = 2;
+const MAX_DIMMING = 80;
+const MAX_BLUR = 10;
+const renderPercent = (value: number) => `${Math.round(value)}%`;
+const backgroundHeaderStyle = {
+    "--__header-bar-background": "transparent",
+    "--background-gradient-lower": "transparent"
+} as CSSProperties;
 
-type MediaKind = "image" | "video";
-type ThemeMode = "light" | "dark";
-
-interface StoredMedia {
-    blob: Blob;
-    width: number;
-    height: number;
-    selected: boolean;
-    kind: MediaKind;
+interface BackgroundManagerSettingsStore {
+    activeMediaId: string;
+    blur: number;
+    contrast: number;
+    dimming: number;
+    enableSlideshow: boolean;
+    enableTransition: boolean;
+    grayscale: number;
+    migrationVersion: number;
+    saturate: number;
+    shuffleSlideshow: boolean;
+    slideshowInterval: number;
+    transitionDuration: number;
 }
 
-interface MediaItem extends StoredMedia {
-    id: number;
-    src: string;
-}
-
-interface ThemeCssTarget {
-    property: string;
-    selector: string;
-}
-
-interface PendingMetadataRequest {
-    blob: Blob;
-    kind: MediaKind;
-    resolve: (metadata: Omit<MediaItem, "id" | "selected"> | null) => void;
-    src: string;
+interface LegacyBackgroundManagerSettingsStore extends BackgroundManagerSettingsStore {
+    activeId?: unknown;
 }
 
 interface ImageContextProps {
@@ -76,28 +82,147 @@ interface MessageContextProps {
     target?: MessageContextTarget;
 }
 
-type RuleWithChildren = CSSRule & {
-    cssRules?: CSSRuleList;
-};
-
-let mediaItems: MediaItem[] = [];
-let activeLayerIdx = 0;
-let currentMedia: MediaItem | null = null;
-let layerMedia: [MediaItem | null, MediaItem | null] = [null, null];
-let slideshowTimer: ReturnType<typeof setInterval> | null = null;
-let visCleanup: (() => void) | null = null;
-let pendingMetadataRequests: PendingMetadataRequest[] = [];
-
-const uiListeners = new Set<() => void>();
-const metadataListeners = new Set<() => void>();
-const themeCssTargetCache = new Map<string, ThemeCssTarget[]>();
-
-function notifyUI() {
-    uiListeners.forEach(listener => listener());
+interface RenderedLayer {
+    key: number;
+    media: MediaItem;
+    visible: boolean;
 }
 
-function notifyMetadataListeners() {
-    metadataListeners.forEach(listener => listener());
+const settings = definePluginSettings({
+    activeMediaId: {
+        type: OptionType.STRING,
+        hidden: true,
+        description: "",
+        default: ""
+    },
+    migrationVersion: {
+        type: OptionType.NUMBER,
+        hidden: true,
+        description: "",
+        default: 0
+    },
+    enableSlideshow: {
+        type: OptionType.BOOLEAN,
+        description: "Auto-cycle through backgrounds.",
+        default: false
+    },
+    slideshowInterval: {
+        type: OptionType.SLIDER,
+        description: "Slideshow interval in minutes.",
+        default: DEFAULT_SLIDESHOW_INTERVAL_MINUTES,
+        hidden: () => !settings.store.enableSlideshow,
+        markers: [1, 2, 5, 10, 15, 20, 30, 45, 60],
+        stickToMarkers: false,
+        componentProps: {
+            keyboardStep: 1,
+            onValueRender: (value: number) => `${Math.round(value)} min`
+        }
+    },
+    shuffleSlideshow: {
+        type: OptionType.BOOLEAN,
+        description: "Randomize slideshow order.",
+        default: true,
+        hidden: () => !settings.store.enableSlideshow
+    },
+    enableTransition: {
+        type: OptionType.BOOLEAN,
+        description: "Enable smooth crossfade transitions between backgrounds.",
+        default: true,
+        hidden: () => !settings.store.enableSlideshow
+    },
+    transitionDuration: {
+        type: OptionType.NUMBER,
+        description: "Transition duration in milliseconds.",
+        default: 1000,
+        hidden: () => !settings.store.enableSlideshow
+    },
+    dimming: {
+        type: OptionType.SLIDER,
+        description: "Background overlay opacity (%).",
+        default: 0,
+        markers: [0, 5, 10, 15, 20, 30, 40, 50, 60, 70, 80],
+        stickToMarkers: false,
+        componentProps: {
+            keyboardStep: 1,
+            onValueRender: renderPercent
+        }
+    },
+    blur: {
+        type: OptionType.SLIDER,
+        description: "Background blur (px).",
+        default: 0,
+        markers: [0, 0.5, 1, 2, 3, 5, 7.5, 10],
+        stickToMarkers: false,
+        componentProps: {
+            keyboardStep: 0.25,
+            onValueRender: (value: number) => `${formatSettingNumber(value)}px`
+        }
+    },
+    grayscale: {
+        type: OptionType.SLIDER,
+        description: "Grayscale filter (%).",
+        default: 0,
+        markers: [0, 25, 50, 75, 100],
+        stickToMarkers: false,
+        componentProps: {
+            keyboardStep: 1,
+            onValueRender: renderPercent
+        }
+    },
+    saturate: {
+        type: OptionType.SLIDER,
+        description: "Saturation (%).",
+        default: 100,
+        markers: [0, 50, 100, 200, 300],
+        stickToMarkers: false,
+        componentProps: {
+            keyboardStep: 1,
+            onValueRender: renderPercent
+        }
+    },
+    contrast: {
+        type: OptionType.SLIDER,
+        description: "Contrast (%).",
+        default: 100,
+        markers: [0, 50, 100, 200, 300],
+        stickToMarkers: false,
+        componentProps: {
+            keyboardStep: 1,
+            onValueRender: renderPercent
+        }
+    },
+    clearDatabase: {
+        type: OptionType.COMPONENT,
+        description: "Delete all stored background media.",
+        component: () => (
+            <button
+                className={cl("clear-button")}
+                onClick={() => {
+                    Alerts.show({
+                        title: "Delete All Backgrounds",
+                        body: "This will permanently delete all stored background media.",
+                        confirmText: "Delete",
+                        cancelText: "Cancel",
+                        onConfirm: async () => {
+                            await clearMediaLibrary();
+                            await clearActiveMedia();
+                            showSuccessToast("All backgrounds deleted");
+                        }
+                    });
+                }}
+            >
+                Delete All Backgrounds
+            </button>
+        )
+    }
+});
+
+function showSuccessToast(message: string) {
+    Toasts.show({
+        id: Toasts.genId(),
+        message,
+        type: Toasts.Type.SUCCESS
+    });
 }
 
 function showFailureToast(message: string) {
@@ -108,451 +233,187 @@ function showFailureToast(message: string) {
     });
 }
 
-function showSuccessToast(message: string) {
-    Toasts.show({
-        id: Toasts.genId(),
-        message,
-        type: Toasts.Type.SUCCESS
-    });
-}
-
 function getErrorMessage(error: unknown) {
     return error instanceof Error ? error.message : String(error);
 }
 
-function inferMediaKind(blob: Blob): MediaKind | null {
-    if (blob.type.startsWith("image/")) return "image";
-    if (blob.type === "video/mp4") return "video";
-    return null;
-}
-
-function queueMetadataRequest(blob: Blob, kind: MediaKind) {
-    return new Promise<Omit<MediaItem, "id" | "selected"> | null>(resolve => {
-        pendingMetadataRequests.push({
-            blob,
-            kind,
-            resolve,
-            src: URL.createObjectURL(blob)
-        });
-        notifyMetadataListeners();
-    });
-}
-
-function settleMetadataRequest(metadata: Omit<MediaItem, "id" | "selected"> | null) {
-    const request = pendingMetadataRequests.shift();
-    if (!request) return;
-
-    if (!metadata) {
-        URL.revokeObjectURL(request.src);
-    }
-
-    request.resolve(metadata);
-    notifyMetadataListeners();
-}
-
-function clearMetadataRequests() {
-    for (const request of pendingMetadataRequests) {
-        URL.revokeObjectURL(request.src);
-        request.resolve(null);
-    }
-
-    pendingMetadataRequests = [];
-    notifyMetadataListeners();
-}
-
-async function loadFromDB(): Promise<MediaItem[]> {
-    try {
-        const all = await entries<number, StoredMedia>(imageStore);
-        return all
-            .filter(([id]) => typeof id === "number")
-            .sort(([left], [right]) => left - right)
-            .map(([id, item]) => ({
-                ...item,
-                kind: item.kind ?? inferMediaKind(item.blob) ?? "image",
-                id,
-                src: URL.createObjectURL(item.blob)
-            }));
-    } catch {
-        return [];
-    }
-}
-
-async function saveMediaToDB(id: number, data: StoredMedia) {
-    await set(id, data, imageStore);
-}
-
-async function deleteMediaFromDB(id: number) {
-    await del(id, imageStore);
-}
-
-async function readMediaMetadata(blob: Blob): Promise<Omit<MediaItem, "id" | "selected"> | null> {
-    const kind = inferMediaKind(blob);
-    if (!kind) return null;
-
-    return queueMetadataRequest(blob, kind);
-}
-
-async function addMedia(blob: Blob): Promise<MediaItem | null> {
-    const metadata = await readMediaMetadata(blob);
-    if (!metadata) return null;
-
-    const nextId = mediaItems.length > 0 ? Math.max(...mediaItems.map(item => item.id)) + 1 : 0;
-    const item: MediaItem = {
-        id: nextId,
-        selected: false,
-        ...metadata
-    };
-
-    mediaItems.push(item);
-    await saveMediaToDB(nextId, {
-        blob,
-        width: metadata.width,
-        height: metadata.height,
-        selected: false,
-        kind: metadata.kind
-    });
-    notifyUI();
-    return item;
-}
-
-function removeMedia(id: number) {
-    const media = mediaItems.find(item => item.id === id);
-    if (!media) return;
-
-    URL.revokeObjectURL(media.src);
-    if (media.selected) removeBackground();
-    mediaItems = mediaItems.filter(item => item.id !== id);
-    void deleteMediaFromDB(id);
-    notifyUI();
-}
-
-async function selectMedia(id: number) {
-    for (const media of mediaItems) {
-        const wasSelected = media.selected;
-        media.selected = media.id === id;
-        if (wasSelected === media.selected) continue;
-
-        await saveMediaToDB(media.id, {
-            blob: media.blob,
-            width: media.width,
-            height: media.height,
-            selected: media.selected,
-            kind: media.kind
-        });
-    }
-
-    const selectedMedia = mediaItems.find(item => item.selected);
-    if (selectedMedia) setBackground(selectedMedia);
-    notifyUI();
-}
-
-function deselectAll() {
-    mediaItems.forEach(media => {
-        media.selected = false;
-        void saveMediaToDB(media.id, {
-            blob: media.blob,
-            width: media.width,
-            height: media.height,
-            selected: false,
-            kind: media.kind
-        });
-    });
-
-    removeBackground();
-    notifyUI();
-}
-
-function setBackground(media: MediaItem) {
-    currentMedia = media;
-    if (document.visibilityState === "visible") activeLayerIdx ^= 1;
-    layerMedia[activeLayerIdx] = media;
-    notifyUI();
-}
-
-function removeBackground() {
-    currentMedia = null;
-    layerMedia = [null, null];
-    activeLayerIdx = 0;
-    notifyUI();
-}
-
-function getThemeMode(): ThemeMode | undefined {
-    if (!ThemeStore) return undefined;
-    return ThemeStore.theme === "light" ? "light" : "dark";
-}
-
-function getThemeCssSignature(
-    enabledThemes: readonly string[],
-    enabledThemeLinks: readonly string[],
-    useQuickCss: boolean,
-    themeMode: ThemeMode | undefined
-) {
-    return [
-        themeMode ?? "unknown",
-        String(useQuickCss),
-        ...enabledThemes,
-        "",
-        ...enabledThemeLinks
-    ].join("\0");
-}
-
-function resolveThemeLink(rawLink: string, themeMode: ThemeMode | undefined) {
-    const match = /^@(light|dark) (.*)/.exec(rawLink);
-    if (!match) return rawLink;
-
-    const [, mode, link] = match;
-    return mode === themeMode ? link : null;
-}
-
-async function fetchCssSource(url: string) {
-    try {
-        const response = await fetch(url);
-        if (!response.ok) return "";
-        return await response.text();
-    } catch {
-        return "";
-    }
-}
-
-async function resolveCssImports(css: string, baseUrl?: string, seen = new Set<string>()) {
-    if (!baseUrl) return css;
-
-    const imports = Array.from(css.matchAll(/@import\s+(?:url\(\s*)?(?:(["'])(.*?)\1|([^"')\s;]+))\s*\)?[^;]*;/gi));
-    if (imports.length === 0) return css;
-
-    let resolvedCss = "";
-    let lastIndex = 0;
-
-    for (const match of imports) {
-        const index = match.index ?? 0;
-        resolvedCss += css.slice(lastIndex, index);
-        lastIndex = index + match[0].length;
-
-        const specifier = match[2] ?? match[3];
-        if (!specifier) continue;
-
-        let importUrl: string;
-        try {
-            importUrl = new URL(specifier, baseUrl).toString();
-        } catch {
-            continue;
-        }
-
-        if (seen.has(importUrl)) continue;
-        seen.add(importUrl);
-
-        const importedCss = await fetchCssSource(importUrl);
-        if (!importedCss) continue;
-
-        resolvedCss += await resolveCssImports(importedCss, importUrl, seen);
-    }
-
-    resolvedCss += css.slice(lastIndex);
-    return resolvedCss;
-}
-
-async function loadThemeCssSources(
-    enabledThemes: readonly string[],
-    enabledThemeLinks: readonly string[],
-    useQuickCss: boolean,
-    themeMode: ThemeMode | undefined
-) {
-    const cssSources: string[] = [];
-
-    if (useQuickCss) {
-        const quickCss = await VencordNative.quickCss.get();
-        if (quickCss.trim().length > 0) {
-            cssSources.push(quickCss);
-        }
-    }
-
-    const resolvedThemeLinks = enabledThemeLinks
-        .map(link => resolveThemeLink(link, themeMode))
-        .filter((link): link is string => link != null);
-
-    const onlineThemes = await Promise.all(resolvedThemeLinks.map(async link => {
-        const css = await fetchCssSource(link);
-        if (!css) return "";
-        return resolveCssImports(css, link, new Set([link]));
-    }));
-
-    cssSources.push(...onlineThemes.filter(css => css.length > 0));
-
-    if (IS_WEB) {
-        const localThemes = await Promise.all(enabledThemes.map(theme => VencordNative.themes.getThemeData(theme)));
-        cssSources.push(...localThemes.filter((css): css is string => !!css && css.trim().length > 0));
-        return cssSources;
-    }
-
-    const localThemes = await Promise.all(enabledThemes.map(async theme => {
-        const themeUrl = `vencord:///themes/${theme}?v=${Date.now()}`;
-        const css = await fetchCssSource(themeUrl);
-        if (!css) return "";
-        return resolveCssImports(css, themeUrl, new Set([themeUrl]));
-    }));
-
-    cssSources.push(...localThemes.filter(css => css.length > 0));
-    return cssSources;
-}
-
-function getStyleProperties(style: CSSStyleDeclaration) {
-    return Array.from({ length: style.length }, (_, index) => style.item(index));
-}
-
-function pickThemeCssTargets(targets: Map<string, ThemeCssTarget>) {
-    const properties = Array.from(targets.keys());
-    const selectedProperty = properties.length === 1
-        ? properties[0]
-        : properties.find(property => THEME_BACKGROUND_PROP_RE.test(property))
-        ?? properties.find(property => THEME_IMAGE_PROP_RE.test(property));
-
-    return selectedProperty ? [targets.get(selectedProperty)!] : [];
-}
-
-function collectThemeCssTargets(rules: CSSRuleList, targets: Map<string, ThemeCssTarget>) {
-    for (const rule of Array.from(rules)) {
-        if (rule instanceof CSSStyleRule) {
-            for (const property of getStyleProperties(rule.style)) {
-                const value = rule.style.getPropertyValue(property).trim();
-                if (!property.startsWith("--") || !value.startsWith("url")) continue;
-
-                targets.set(property, {
-                    property,
-                    selector: rule.selectorText ?? ":root"
-                });
-            }
-            continue;
-        }
-
-        const nestedRules = (rule as RuleWithChildren).cssRules;
-        if (nestedRules) collectThemeCssTargets(nestedRules, targets);
-    }
-}
-
-function parseThemeCssTargetsFromText(css: string) {
-    const targets = new Map<string, ThemeCssTarget>();
-
-    for (const block of css.matchAll(/([^{}]+)\{([^{}]+)\}/g)) {
-        const trimmedSelector = block[1].trim();
-        const selector = trimmedSelector.length > 0 ? trimmedSelector : ":root";
-
-        for (const declaration of block[2].matchAll(/(--[A-Za-z0-9_-]+)\s*:\s*url\([^;]+?\)/g)) {
-            const property = declaration[1];
-            targets.set(property, { property, selector });
-        }
-    }
-
-    return pickThemeCssTargets(targets);
-}
-
-async function parseThemeCssTargets(css: string) {
-    try {
-        const sheet = new CSSStyleSheet();
-        await sheet.replace(css);
-
-        const targets = new Map<string, ThemeCssTarget>();
-        collectThemeCssTargets(sheet.cssRules, targets);
-        return pickThemeCssTargets(targets);
-    } catch {
-        return parseThemeCssTargetsFromText(css);
-    }
-}
-
-async function getThemeCssTargets(
-    enabledThemes: readonly string[],
-    enabledThemeLinks: readonly string[],
-    useQuickCss: boolean,
-    themeMode: ThemeMode | undefined
-) {
-    const signature = getThemeCssSignature(enabledThemes, enabledThemeLinks, useQuickCss, themeMode);
-    const cachedTargets = themeCssTargetCache.get(signature);
-    if (cachedTargets) return cachedTargets;
-
-    const cssSources = await loadThemeCssSources(enabledThemes, enabledThemeLinks, useQuickCss, themeMode);
-    const targets = (await Promise.all(cssSources.map(parseThemeCssTargets))).flat();
-    themeCssTargetCache.set(signature, targets);
-    return targets;
-}
-
-function startSlideshow() {
-    stopSlideshow();
-    if (!settings.store.enableSlideshow || mediaItems.length < 2) return;
-
-    let hidden = false;
-    const onVisibilityChange = () => {
-        if (document.visibilityState === "visible") hidden = false;
-    };
-
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    visCleanup = () => document.removeEventListener("visibilitychange", onVisibilityChange);
-    slideshowTimer = setInterval(() => {
-        if (document.visibilityState === "hidden") {
-            if (hidden) return;
-            hidden = true;
-        }
-
-        nextImage();
-    }, settings.store.slideshowInterval ?? SLIDESHOW_INTERVAL_MS);
-}
-
-function stopSlideshow() {
-    if (slideshowTimer) {
-        clearInterval(slideshowTimer);
-        slideshowTimer = null;
-    }
-
-    visCleanup?.();
-    visCleanup = null;
-}
-
-function nextImage() {
-    if (mediaItems.length < 2) return;
-
-    const currentIndex = mediaItems.findIndex(item => item.selected);
-    let nextIndex: number;
-
-    if (settings.store.shuffleSlideshow || currentIndex === -1) {
-        let attempts = 0;
-        do {
-            nextIndex = Math.floor(Math.random() * mediaItems.length);
-        } while (nextIndex === currentIndex && attempts++ < 25);
-    } else {
-        nextIndex = (currentIndex + 1) % mediaItems.length;
-    }
-
-    void selectMedia(mediaItems[nextIndex].id);
-}
-
 function formatSize(bytes: number) {
     const units = ["B", "KiB", "MiB", "GiB"];
+    let value = bytes;
     let unitIndex = 0;
 
-    while (bytes >= 1024 && unitIndex < units.length - 1) {
-        bytes /= 1024;
+    while (value >= 1024 && unitIndex < units.length - 1) {
+        value /= 1024;
         unitIndex++;
     }
 
-    return `${unitIndex > 0 ? bytes.toFixed(1) : String(bytes)} ${units[unitIndex]}`;
+    return `${unitIndex > 0 ? value.toFixed(1) : String(value)} ${units[unitIndex]}`;
+}
+
+function formatIntervalMinutes(intervalMinutes: number) {
+    const minutes = normalizeSlideshowIntervalMinutes(intervalMinutes);
+    return `${minutes} minute${minutes === 1 ? "" : "s"}`;
+}
+
+function formatSettingNumber(value: number) {
+    return Number.isInteger(value)
+        ? String(value)
+        : value.toFixed(2).replace(/\.?0+$/, "");
+}
+
+function clamp(value: number, min: number, max: number) {
+    return Math.min(max, Math.max(min, value));
+}
+
+function normalizeSlideshowIntervalMinutes(value: number) {
+    if (!Number.isFinite(value)) return DEFAULT_SLIDESHOW_INTERVAL_MINUTES;
+    return clamp(Math.round(value), 1, MAX_SLIDESHOW_INTERVAL_MINUTES);
+}
+
+function normalizeDimming(value: number) {
+    if (!Number.isFinite(value)) return 0;
+    return clamp(value, 0, MAX_DIMMING);
+}
+
+function normalizeBlur(value: number) {
+    if (!Number.isFinite(value)) return 0;
+    return clamp(value, 0, MAX_BLUR);
+}
+
+function getSettingsStore() {
+    return settings.store as BackgroundManagerSettingsStore;
+}
+
+function getLegacySettingsStore() {
+    return settings.store as LegacyBackgroundManagerSettingsStore;
+}
+
+function syncActiveMediaId(id: string) {
+    getSettingsStore().activeMediaId = id;
+}
+
+function repairStoredSettings() {
+    const store = getSettingsStore();
+
+    const normalizedSlideshowInterval = normalizeSlideshowIntervalMinutes(store.slideshowInterval);
+    if (normalizedSlideshowInterval !== store.slideshowInterval) {
+        store.slideshowInterval = normalizedSlideshowInterval;
+    }
+
+    const normalizedDimming = normalizeDimming(store.dimming);
+    if (normalizedDimming !== store.dimming) {
+        store.dimming = normalizedDimming;
+    }
+
+    const normalizedBlur = normalizeBlur(store.blur);
+    if (normalizedBlur !== store.blur) {
+        store.blur = normalizedBlur;
+    }
+}
+
+function migrateStoredSettings() {
+    const store = getLegacySettingsStore();
+    if (store.migrationVersion >= CURRENT_SETTINGS_MIGRATION_VERSION) return;
+
+    if (store.migrationVersion < 1 && store.slideshowInterval > MAX_SLIDESHOW_INTERVAL_MINUTES) {
+        store.slideshowInterval = normalizeSlideshowIntervalMinutes(store.slideshowInterval / 60000);
+    }
+
+    if (store.migrationVersion < 2) {
+        const legacyActiveMediaId = typeof store.activeId === "string" ? store.activeId : "";
+        const migratedActiveMediaId = getValidActiveMediaId(getMediaItems(), legacyActiveMediaId);
+        if (!store.activeMediaId && migratedActiveMediaId) {
+            store.activeMediaId = migratedActiveMediaId;
+        }
+
+        delete store.activeId;
+    }
+
+    store.migrationVersion = CURRENT_SETTINGS_MIGRATION_VERSION;
+}
+
+function normalizeFetchedBlob(blob: Blob, contentType: string | null) {
+    if (!contentType || blob.type === contentType) return blob;
+    return blob.slice(0, blob.size, contentType);
+}
+
+function isValidMediaId(id: string, items = getMediaItems()) {
+    return id.length > 0 && items.some(media => media.id === id);
+}
+
+function getValidActiveMediaId(items = getMediaItems(), id = getSettingsStore().activeMediaId) {
+    return isValidMediaId(id, items) ? id : "";
+}
+
+async function restoreSelectedMediaFromSettings() {
+    const items = getMediaItems();
+    const activeMediaId = getValidActiveMediaId(items);
+    if (activeMediaId) {
+        await selectMediaById(activeMediaId);
+        return;
+    }
+
+    const persistedActiveMediaId = await getPersistedActiveMediaId();
+    if (isValidMediaId(persistedActiveMediaId, items)) {
+        await selectMediaById(persistedActiveMediaId);
+        return;
+    }
+
+    const legacySelectedMediaId = getLegacySelectedMediaId();
+    if (isValidMediaId(legacySelectedMediaId, items)) {
+        await selectMediaById(legacySelectedMediaId);
+        return;
+    }
+}
+
+async function selectMediaById(id: string) {
+    syncActiveMediaId(id);
+    await setPersistedActiveMediaId(id);
+}
+
+async function clearActiveMedia() {
+    syncActiveMediaId("");
+    await setPersistedActiveMediaId("");
+}
+
+async function removeMediaById(id: string) {
+    const mediaItems = getMediaItems();
+    const removedIndex = mediaItems.findIndex(media => media.id === id);
+    const wasActive = getValidActiveMediaId(mediaItems) === id;
+
+    const removed = await removeMediaItem(id);
+    if (!removed || !wasActive) return;
+
+    const remaining = getMediaItems();
+    const fallbackMedia = remaining[removedIndex] ?? remaining[removedIndex - 1] ?? remaining[0];
+    if (fallbackMedia) {
+        await selectMediaById(fallbackMedia.id);
+    } else {
+        await clearActiveMedia();
+    }
+}
+
+async function addMediaFromBlob(blob: Blob) {
+    const media = await addMediaBlob(blob);
+    if (!media) {
+        showFailureToast("Only images, GIFs, and supported videos can be used as backgrounds");
+        return null;
+    }
+
+    return media;
 }
 
 async function fetchAndAddMedia(src: string) {
     try {
         const url = new URL(src);
-        if (url.origin === "https://media.discordapp.net") {
-            url.host = "cdn.discordapp.com";
-            for (const param of ["size", "width", "height", "quality", "format"]) {
-                url.searchParams.delete(param);
-            }
-        }
-
         const response = await fetch(url.toString(), { mode: "cors" });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-        const blob = await response.blob();
-        const item = await addMedia(blob);
-        if (!item) {
-            throw new Error("Only images and MP4 videos are supported");
-        }
+        const contentType = response.headers.get("content-type")?.split(";")[0]?.trim() ?? null;
+        const blob = normalizeFetchedBlob(await response.blob(), contentType);
+
+        const media = await addMediaFromBlob(blob);
+        if (!media) return;
 
         showSuccessToast("Added to Background Manager");
     } catch (error) {
@@ -560,124 +421,399 @@ async function fetchAndAddMedia(src: string) {
     }
 }
 
-const settings = definePluginSettings({
-    enableTransition: {
-        type: OptionType.BOOLEAN,
-        description: "Enable smooth crossfade transitions between backgrounds.",
-        default: true,
-        onChange: notifyUI
-    },
-    transitionDuration: {
-        type: OptionType.NUMBER,
-        description: "Transition duration in milliseconds.",
-        default: 1000,
-        onChange: notifyUI
-    },
-    enableSlideshow: {
-        type: OptionType.BOOLEAN,
-        description: "Auto-cycle through backgrounds every 5 minutes.",
-        default: false,
-        onChange: enabled => enabled ? startSlideshow() : stopSlideshow()
-    },
-    slideshowInterval: {
-        type: OptionType.NUMBER,
-        description: "Slideshow interval in milliseconds.",
-        default: SLIDESHOW_INTERVAL_MS,
-        onChange: () => {
-            if (settings.store.enableSlideshow) startSlideshow();
-        }
-    },
-    shuffleSlideshow: {
-        type: OptionType.BOOLEAN,
-        description: "Randomize slideshow order.",
-        default: true
-    },
-    overwriteCSS: {
-        type: OptionType.BOOLEAN,
-        description: "Auto-detect and overwrite theme background CSS variables.",
-        default: true,
-        onChange: notifyUI
-    },
-    xPosition: {
-        type: OptionType.SLIDER,
-        description: "Horizontal position offset (%).",
-        default: 0,
-        markers: [-50, -25, 0, 25, 50],
-        onChange: notifyUI
-    },
-    yPosition: {
-        type: OptionType.SLIDER,
-        description: "Vertical position offset (%).",
-        default: 0,
-        markers: [-50, -25, 0, 25, 50],
-        onChange: notifyUI
-    },
-    dimming: {
-        type: OptionType.SLIDER,
-        description: "Background dimming (%).",
-        default: 0,
-        markers: [0, 25, 50, 75, 100],
-        onChange: notifyUI
-    },
-    blur: {
-        type: OptionType.SLIDER,
-        description: "Background blur (px).",
-        default: 0,
-        markers: [0, 25, 50, 75, 100],
-        onChange: notifyUI
-    },
-    grayscale: {
-        type: OptionType.SLIDER,
-        description: "Grayscale filter (%).",
-        default: 0,
-        markers: [0, 25, 50, 75, 100],
-        onChange: notifyUI
-    },
-    saturate: {
-        type: OptionType.SLIDER,
-        description: "Saturation (%).",
-        default: 100,
-        markers: [0, 50, 100, 200, 300],
-        onChange: notifyUI
-    },
-    contrast: {
-        type: OptionType.SLIDER,
-        description: "Contrast (%).",
-        default: 100,
-        markers: [0, 50, 100, 200, 300],
-        onChange: notifyUI
-    },
-    clearDatabase: {
-        type: OptionType.COMPONENT,
-        description: "Delete all stored background media.",
-        component: () => (
-            <button
-                className={cl("clear-btn")}
-                onClick={() => Alerts.show({
-                    title: "Delete All Backgrounds",
-                    body: "This will permanently delete all stored background media.",
-                    confirmColor: "vc-bgmanager-confirm-red",
-                    confirmText: "Delete",
-                    cancelText: "Cancel",
-                    onConfirm: async () => {
-                        mediaItems.forEach(media => URL.revokeObjectURL(media.src));
-                        mediaItems = [];
-                        removeBackground();
-                        stopSlideshow();
-                        clearMetadataRequests();
-                        await clear(imageStore);
-                        notifyUI();
-                        showSuccessToast("All backgrounds deleted");
-                    }
-                })}
-            >
-                Delete All Backgrounds
-            </button>
-        )
-    }
-});
+async function advanceSlideshow(items = getMediaItems(), activeMediaId = getValidActiveMediaId(items), shuffle = settings.store.shuffleSlideshow) {
+    if (items.length < 2) return;
 
-const imageCtxPatch: NavContextMenuPatchCallback = (children, { src }: ImageContextProps) => {
+    const currentIndex = items.findIndex(media => media.id === activeMediaId);
+    let nextIndex = 0;
+
+    if (shuffle) {
+        let attempts = 0;
+        do {
+            nextIndex = Math.floor(Math.random() * items.length);
+        } while (items.length > 1 && nextIndex === currentIndex && attempts++ < 25);
+    } else if (currentIndex >= 0) {
+        nextIndex = (currentIndex + 1) % items.length;
+    }
+
+    await selectMediaById(items[nextIndex].id);
+}
+
+function useMediaLibrary() {
+    const [items, setItems] = useState<MediaItem[]>(() => getMediaItems());
+
+    useEffect(() => {
+        const update = () => setItems([...getMediaItems()]);
+        const unsubscribe = subscribeToMediaItems(update);
+
+        update();
+        void ensureMediaItemsLoaded().then(update);
+
+        return unsubscribe;
+    }, []);
+
+    return items;
+}
+
+function useRenderedLayers(activeMedia: MediaItem | null, transitionDuration: number, transitionsEnabled: boolean) {
+    const [layers, setLayers] = useState<RenderedLayer[]>(() => activeMedia ? [{ key: 0, media: activeMedia, visible: true }] : []);
+    const nextKeyRef = useRef(1);
+
+    useEffect(() => {
+        if (!activeMedia) {
+            setLayers([]);
+            return;
+        }
+
+        setLayers(previousLayers => {
+            const currentLayer = previousLayers[previousLayers.length - 1];
+            if (currentLayer?.media.id === activeMedia.id) {
+                return previousLayers.map((layer, index) => ({
+                    ...layer,
+                    visible: index === previousLayers.length - 1
+                }));
+            }
+
+            const nextLayer: RenderedLayer = {
+                key: nextKeyRef.current++,
+                media: activeMedia,
+                visible: true
+            };
+
+            if (!transitionsEnabled || transitionDuration <= 0 || previousLayers.length === 0) {
+                return [nextLayer];
+            }
+
+            const previousLayer = previousLayers[previousLayers.length - 1];
+            return [
+                { ...previousLayer, visible: false },
+                nextLayer
+            ];
+        });
+    }, [activeMedia, transitionDuration, transitionsEnabled]);
+
+    useEffect(() => {
+        if (!transitionsEnabled || transitionDuration <= 0 || layers.length < 2) return;
+
+        const timeout = window.setTimeout(() => {
+            setLayers(previousLayers => previousLayers.slice(-1));
+        }, transitionDuration);
+
+        return () => window.clearTimeout(timeout);
+    }, [layers, transitionDuration, transitionsEnabled]);
+
+    return layers;
+}
+
+function BackgroundLayerRoot() {
+    const items = useMediaLibrary();
+    const store = settings.use();
+    const {
+        activeMediaId: storedActiveMediaId,
+        blur,
+        contrast,
+        dimming,
+        enableSlideshow,
+        enableTransition,
+        grayscale,
+        saturate,
+        shuffleSlideshow,
+        slideshowInterval,
+        transitionDuration
+    } = store;
+
+    const blurAmount = normalizeBlur(blur);
+    const dimmingAmount = normalizeDimming(dimming);
+    const slideshowIntervalMinutes = normalizeSlideshowIntervalMinutes(slideshowInterval);
+    const activeMediaId = getValidActiveMediaId(items, storedActiveMediaId);
+    const activeMedia = items.find(media => media.id === activeMediaId) ?? null;
+    const slideshowStateRef = useRef({ items, activeMediaId, shuffleSlideshow });
+
+    useEffect(() => {
+        slideshowStateRef.current = { items, activeMediaId, shuffleSlideshow };
+    }, [activeMediaId, items, shuffleSlideshow]);
+
+    useEffect(() => {
+        if (!enableSlideshow || items.length < 2 || !activeMediaId) return;
+
+        const interval = window.setInterval(() => {
+            const latest = slideshowStateRef.current;
+            void advanceSlideshow(latest.items, latest.activeMediaId, latest.shuffleSlideshow);
+        }, slideshowIntervalMinutes * 60 * 1000);
+
+        return () => window.clearInterval(interval);
+    }, [activeMediaId, enableSlideshow, items.length, slideshowIntervalMinutes]);
+
+    const layers = useRenderedLayers(
+        activeMedia,
+        transitionDuration,
+        enableTransition
+    );
+
+    if (layers.length === 0) return null;
+
+    const filterParts = [
+        `grayscale(${grayscale}%)`,
+        `contrast(${contrast}%)`,
+        `saturate(${saturate}%)`
+    ];
+
+    if (blurAmount > 0) {
+        filterParts.push(`blur(${blurAmount}px)`);
+    }
+
+    const style = {
+        "--vc-bgmanager-transition-ms": `${enableTransition ? transitionDuration : 0}ms`,
+        "--vc-bgmanager-filter": filterParts.join(" "),
+        "--vc-bgmanager-dimming": String(dimmingAmount / 100)
+    } as CSSProperties;
+
+    return (
+        <div className={cl("root")} style={style} aria-hidden="true">
+            {layers.map(layer => (
+                <div
+                    key={layer.key}
+                    className={classes(cl("layer"), layer.visible && cl("layer-visible"))}
+                >
+                    {layer.media.kind === "image" ? (
+                        <img className={cl("media")} src={layer.media.src} alt="" draggable={false} />
+                    ) : (
+                        <video
+                            className={cl("media")}
+                            src={layer.media.src}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            preload="auto"
+                        />
+                    )}
+                    {dimmingAmount > 0 && <div className={cl("overlay")} />}
+                </div>
+            ))}
+        </div>
+    );
+}
+
+const SafeBackgroundLayerRoot = ErrorBoundary.wrap(BackgroundLayerRoot, { noop: true });
+
+function GalleryIcon(props: SVGProps<SVGSVGElement>) {
+    return (
+        <svg {...props} viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 4v12H8V4zm0-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2m-8.5 9.67 1.69 2.26 2.48-3.1L19 15H9zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6z" />
+        </svg>
+    );
+}
+
+function SvgIcon({ d, size = 24 }: { d: string; size?: number; }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+            <path d={d} />
+        </svg>
+    );
+}
+
+const ICONS = {
+    upload: "M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2m0 12H4V6h5.17l2 2H20zM9.41 14.42 11 12.84V17h2v-4.16l1.59 1.59L16 13.01 12.01 9 8 13.01z",
+    remove: "M22 8h-8v-2h8v2zM19 10H12V5H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zM5 19l3-4 2 3 3-4 4 5H5z",
+    delete: "M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z",
+    next: "M5.7 6.71c-.39.39-.39 1.02 0 1.41L9.58 12 5.7 15.88c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l4.59-4.59c.39-.39.39-1.02 0-1.41L7.12 6.71c-.39-.39-1.03-.39-1.42 0M12.29 6.71c-.39.39-.39 1.02 0 1.41L16.17 12l-3.88 3.88c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l4.59-4.59c.39-.39.39-1.02 0-1.41L13.7 6.7c-.38-.38-1.02-.38-1.41.01"
+};
+
+function MediaThumbnail({ media, selected }: { media: MediaItem; selected: boolean; }) {
+    const [loaded, setLoaded] = useState(false);
+    const [hasError, setHasError] = useState(false);
+
+    const select = useCallback(() => {
+        void selectMediaById(media.id);
+    }, [media.id]);
+
+    const onKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDivElement>) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+
+        event.preventDefault();
+        select();
+    }, [select]);
+
+    return (
+        <div
+            className={classes(cl("card"), selected && cl("card-selected"))}
+            role="button"
+            tabIndex={0}
+            onClick={select}
+            onKeyDown={onKeyDown}
+        >
+            {!loaded && !hasError && <div className={cl("card-status")}>Loading...</div>}
+            {hasError && <div className={cl("card-status")}>Failed to load</div>}
+            {!hasError && media.kind === "image" && (
+                <img
+                    className={cl("card-media")}
+                    src={media.src}
+                    alt=""
+                    draggable={false}
+                    style={{ display: loaded ? "block" : "none" }}
+                    onLoad={() => setLoaded(true)}
+                    onError={() => setHasError(true)}
+                />
+            )}
+            {!hasError && media.kind === "video" && (
+                <video
+                    className={cl("card-media")}
+                    src={media.src}
+                    muted
+                    loop
+                    playsInline
+                    autoPlay
+                    preload="metadata"
+                    style={{ display: loaded ? "block" : "none" }}
+                    onLoadedData={() => setLoaded(true)}
+                    onError={() => setHasError(true)}
+                />
+            )}
+            <div className={cl("card-meta")}>
+                <span>{formatSize(media.blob.size)}</span>
+                <span>{media.width}x{media.height}</span>
+            </div>
+            <button
+                className={cl("delete-button")}
+                onClick={event => {
+                    event.stopPropagation();
+                    void removeMediaById(media.id);
+                }}
+            >
+                <SvgIcon d={ICONS.delete} size={16} />
+            </button>
+        </div>
+    );
+}
+
+function ManagerPopout() {
+    const items = useMediaLibrary();
+    const { enableSlideshow, slideshowInterval } = settings.use();
+    const activeMediaId = getValidActiveMediaId(items);
+    const totalSize = items.reduce((size, media) => size + media.blob.size, 0);
+
+    const uploadMedia = useCallback(async () => {
+        try {
+            const file = await chooseFile("image/*,video/*");
+            if (!file) return;
+
+            const media = await addMediaFromBlob(file);
+            if (!media) return;
+
+            showSuccessToast("Added to Background Manager");
+        } catch (error) {
+            showFailureToast(`Failed to add background media: ${getErrorMessage(error)}`);
+        }
+    }, []);
+
+    const toggleSlideshow = useCallback((enabled: boolean) => {
+        settings.store.enableSlideshow = enabled;
+        if (enabled && items.length > 0 && !activeMediaId) {
+            void selectMediaById(items[0].id);
+        }
+    }, [activeMediaId, items]);
+
+    return (
+        <Dialog className={cl("popout")}>
+            <div className={cl("popout-content")}>
+                <div className={cl("title-row")}>
+                    <span className={cl("title")}>Background Manager</span>
+                    {items.length > 0 && <span className={cl("summary")}>Total: {formatSize(totalSize)}</span>}
+                </div>
+
+                <div className={cl("controls")}>
+                    <div className={cl("slideshow-control")}>
+                        <div className={cl("slideshow-meta")}>
+                            <div className={cl("slideshow-label")}>Slideshow</div>
+                            <div className={cl("slideshow-note")}>{formatIntervalMinutes(slideshowInterval)}</div>
+                        </div>
+                        <Switch checked={enableSlideshow} onChange={toggleSlideshow} />
+                    </div>
+
+                    <Tooltip text="Upload Background">
+                        {tooltipProps => (
+                            <button
+                                {...tooltipProps}
+                                className={classes(cl("icon-button"), cl("icon-button-upload"))}
+                                onClick={uploadMedia}
+                            >
+                                <SvgIcon d={ICONS.upload} />
+                            </button>
+                        )}
+                    </Tooltip>
+
+                    <Tooltip text="Hide Background">
+                        {tooltipProps => (
+                            <button
+                                {...tooltipProps}
+                                className={classes(cl("icon-button"), cl("icon-button-remove"))}
+                                onClick={() => {
+                                    void clearActiveMedia();
+                                }}
+                            >
+                                <SvgIcon d={ICONS.remove} />
+                            </button>
+                        )}
+                    </Tooltip>
+                </div>
+
+                {enableSlideshow && items.length >= 2 && (
+                    <div className={cl("info-row")}>
+                        <span>Rotating every {formatIntervalMinutes(slideshowInterval)}</span>
+                        <Tooltip text="Next Background">
+                            {tooltipProps => (
+                                <button
+                                    {...tooltipProps}
+                                    className={cl("icon-button")}
+                                    onClick={() => {
+                                        void advanceSlideshow(items, activeMediaId, settings.store.shuffleSlideshow);
+                                    }}
+                                >
+                                    <SvgIcon d={ICONS.next} size={18} />
+                                </button>
+                            )}
+                        </Tooltip>
+                    </div>
+                )}
+
+                <div className={cl("grid")}>
+                    {items.map(media => <MediaThumbnail key={media.id} media={media} selected={media.id === activeMediaId} />)}
+                </div>
+            </div>
+        </Dialog>
+    );
+}
+
+function BackgroundManagerHeaderButton() {
+    const buttonRef = useRef<HTMLDivElement>(null);
+    const [open, setOpen] = useState(false);
+
+    return (
+        <Popout
+            position="bottom"
+            align="right"
+            spacing={8}
+            animation={Popout.Animation.NONE}
+            shouldShow={open}
+            targetElementRef={buttonRef}
+            onRequestClose={() => setOpen(false)}
+            renderPopout={() => <ErrorBoundary><ManagerPopout /></ErrorBoundary>}
+        >
+            {(_, { isShown }) => (
+                <HeaderBarButton
+                    ref={buttonRef}
+                    icon={GalleryIcon}
+                    tooltip={isShown ? null : "Background Manager"}
+                    selected={isShown}
+                    onClick={() => setOpen(current => !current)}
+                />
+            )}
+        </Popout>
+    );
+}
+
+const imageContextPatch: NavContextMenuPatchCallback = (children, { src }: ImageContextProps) => {
     if (!src) return;
 
     children.push(
@@ -685,15 +821,17 @@ const imageCtxPatch: NavContextMenuPatchCallback = (children, { src }: ImageCont
         <Menu.MenuItem
             id="vc-bgmanager-add"
             label="Add to Background Manager"
-            action={() => fetchAndAddMedia(src)}
+            action={() => {
+                void fetchAndAddMedia(src);
+            }}
         />
     );
 };
 
-const messageCtxPatch: NavContextMenuPatchCallback = (children, props: MessageContextProps) => {
+const messageContextPatch: NavContextMenuPatchCallback = (children, props: MessageContextProps) => {
     let src: string | undefined;
 
-    if (props.mediaItem?.contentType?.startsWith("image") || props.mediaItem?.contentType === "video/mp4") {
+    if (props.mediaItem?.contentType?.startsWith("image/") || props.mediaItem?.contentType?.startsWith("video/")) {
         src = props.mediaItem.url;
     } else if (props.target?.tagName === "VIDEO") {
         src = props.target.currentSrc ?? props.target.src;
@@ -708,461 +846,187 @@ const messageCtxPatch: NavContextMenuPatchCallback = (children, props: MessageCo
         <Menu.MenuItem
             id="vc-bgmanager-add"
             label="Add to Background Manager"
-            action={() => fetchAndAddMedia(src)}
-        />
-    );
-};
-
-function useMediaItems() {
-    const [, update] = useState(0);
-
-    useEffect(() => {
-        const listener = () => update(count => count + 1);
-        uiListeners.add(listener);
-        return () => {
-            uiListeners.delete(listener);
-        };
-    }, []);
-
-    return mediaItems;
-}
-
-function usePendingMetadataRequest() {
-    const [, update] = useState(0);
-
-    useEffect(() => {
-        const listener = () => update(count => count + 1);
-        metadataListeners.add(listener);
-        return () => {
-            metadataListeners.delete(listener);
-        };
-    }, []);
-
-    return pendingMetadataRequests[0] ?? null;
-}
-
-function useThemeMode() {
-    const [themeMode, setThemeMode] = useState<ThemeMode | undefined>(() => getThemeMode());
-
-    useEffect(() => {
-        if (!ThemeStore) return;
-
-        const updateThemeMode = () => setThemeMode(getThemeMode());
-        ThemeStore.addChangeListener(updateThemeMode);
-        updateThemeMode();
-
-        return () => {
-            ThemeStore.removeChangeListener(updateThemeMode);
-        };
-    }, []);
-
-    return themeMode;
-}
-
-function GalleryIcon(props: SVGProps<SVGSVGElement>) {
-    return <svg {...props} viewBox="0 0 24 24" fill="currentColor"><path d="M20 4v12H8V4zm0-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2m-8.5 9.67 1.69 2.26 2.48-3.1L19 15H9zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6z" /></svg>;
-}
-
-const SvgIcon = ({ d, size = 24 }: { d: string; size?: number; }) =>
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor"><path d={d} /></svg>;
-
-const ICONS = {
-    upload: "M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2m0 12H4V6h5.17l2 2H20zM9.41 14.42 11 12.84V17h2v-4.16l1.59 1.59L16 13.01 12.01 9 8 13.01z",
-    remove: "M22 8h-8v-2h8v2zM19 10H12V5H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zM5 19l3-4 2 3 3-4 4 5H5z",
-    del: "M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z",
-    next: "M5.7 6.71c-.39.39-.39 1.02 0 1.41L9.58 12 5.7 15.88c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l4.59-4.59c.39-.39.39-1.02 0-1.41L7.12 6.71c-.39-.39-1.03-.39-1.42 0M12.29 6.71c-.39.39-.39 1.02 0 1.41L16.17 12l-3.88 3.88c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l4.59-4.59c.39-.39.39-1.02 0-1.41L13.7 6.7c-.38-.38-1.02-.38-1.41.01",
-};
-
-function MetadataProbeHost() {
-    const request = usePendingMetadataRequest();
-    if (!request) return null;
-
-    if (request.kind === "image") {
-        return (
-            <img
-                key={request.src}
-                className={cl("probe")}
-                src={request.src}
-                onLoad={event => settleMetadataRequest({
-                    blob: request.blob,
-                    kind: request.kind,
-                    width: event.currentTarget.naturalWidth,
-                    height: event.currentTarget.naturalHeight,
-                    src: request.src
-                })}
-                onError={() => settleMetadataRequest(null)}
-            />
-        );
-    }
-
-    return (
-        <video
-            key={request.src}
-            className={cl("probe")}
-            src={request.src}
-            muted
-            preload="metadata"
-            onLoadedMetadata={event => settleMetadataRequest({
-                blob: request.blob,
-                kind: request.kind,
-                width: event.currentTarget.videoWidth,
-                height: event.currentTarget.videoHeight,
-                src: request.src
-            })}
-            onError={() => settleMetadataRequest(null)}
-        />
-    );
-}
-
-function BgStyleInjector() {
-    const [, update] = useState(0);
-    const appSettings = useSettings(["enabledThemes", "enabledThemeLinks", "useQuickCss"]);
-    const themeMode = useThemeMode();
-    const [themeOverrideCss, setThemeOverrideCss] = useState("");
-
-    useEffect(() => {
-        const listener = () => update(count => count + 1);
-        uiListeners.add(listener);
-        return () => {
-            uiListeners.delete(listener);
-        };
-    }, []);
-
-    const enabledThemesKey = appSettings.enabledThemes.join("\0");
-    const enabledThemeLinksKey = appSettings.enabledThemeLinks.join("\0");
-
-    useEffect(() => {
-        const media = currentMedia;
-        if (!settings.store.overwriteCSS || media?.kind !== "image") {
-            setThemeOverrideCss("");
-            return;
-        }
-
-        let cancelled = false;
-
-        void getThemeCssTargets(
-            appSettings.enabledThemes,
-            appSettings.enabledThemeLinks,
-            appSettings.useQuickCss,
-            themeMode
-        ).then(targets => {
-            if (cancelled) return;
-
-            setThemeOverrideCss(targets.map(({ property, selector }) =>
-                `${selector}{${property}:url('${media.src}')!important}`
-            ).join("\n"));
-        }).catch(() => {
-            if (!cancelled) setThemeOverrideCss("");
-        });
-
-        return () => {
-            cancelled = true;
-        };
-    }, [
-        appSettings.useQuickCss,
-        currentMedia?.kind,
-        currentMedia?.src,
-        enabledThemeLinksKey,
-        enabledThemesKey,
-        themeMode,
-        settings.store.overwriteCSS
-    ]);
-
-    const hasLayers = currentMedia != null || layerMedia[0] != null || layerMedia[1] != null;
-    if (!hasLayers) return <MetadataProbeHost />;
-
-    const pluginSettings = settings.store;
-    const transition = pluginSettings.enableTransition ? pluginSettings.transitionDuration : 0;
-    const filterParts = [
-        `grayscale(${pluginSettings.grayscale}%)`,
-        `contrast(${pluginSettings.contrast}%)`,
-        `saturate(${pluginSettings.saturate}%)`
-    ];
-    if (pluginSettings.blur > 0) {
-        filterParts.push(`blur(${pluginSettings.blur}px)`);
-    }
-
-    const filter = filterParts.join(" ");
-    const backgroundPosition = `calc(50% - ${pluginSettings.xPosition}%) calc(50% - ${pluginSettings.yPosition}%)`;
-    const dimming = pluginSettings.dimming / 100;
-    const shouldRenderThemeOverride = currentMedia?.kind === "image" && pluginSettings.overwriteCSS;
-
-    return (
-        <>
-            <MetadataProbeHost />
-            {layerMedia.map((media, index) => {
-                const isActive = activeLayerIdx === index && currentMedia != null;
-
-                return (
-                    <div
-                        key={`layer-${index}-${media?.id ?? "empty"}`}
-                        className={cl("layer", `layer-${index}`)}
-                        style={{
-                            opacity: isActive ? 1 : 0,
-                            transition: `opacity ${transition}ms ease-out`
-                        }}
-                    >
-                        {media?.kind === "image" && (
-                            <div
-                                className={cl("layer-image")}
-                                style={{
-                                    backgroundImage: `url(${media.src})`,
-                                    backgroundPosition,
-                                    filter
-                                }}
-                            />
-                        )}
-                        {media?.kind === "video" && (
-                            <video
-                                key={media.src}
-                                className={cl("layer-video")}
-                                src={media.src}
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                                style={{
-                                    filter,
-                                    objectPosition: backgroundPosition
-                                }}
-                            />
-                        )}
-                        {media && dimming > 0 && (
-                            <div
-                                className={cl("layer-dim")}
-                                style={{ opacity: dimming }}
-                            />
-                        )}
-                    </div>
-                );
-            })}
-            {shouldRenderThemeOverride && themeOverrideCss && <style>{themeOverrideCss}</style>}
-        </>
-    );
-}
-
-function MediaThumbnail({ media }: { media: MediaItem; }) {
-    const [loaded, setLoaded] = useState(false);
-    const [error, setError] = useState(false);
-
-    return (
-        <button
-            className={classes(cl("thumb"), media.selected && cl("selected"))}
-            onClick={() => {
-                void selectMedia(media.id);
-                if (settings.store.enableSlideshow) startSlideshow();
+            action={() => {
+                void fetchAndAddMedia(src);
             }}
-        >
-            {!loaded && !error && <span className={cl("thumb-loading")}>Loading...</span>}
-            {error && <span className={cl("thumb-error")}>Error</span>}
-            {!error && media.kind === "image" && (
-                <img
-                    className={loaded ? undefined : cl("hidden")}
-                    src={media.src}
-                    onLoad={() => setLoaded(true)}
-                    onError={() => setError(true)}
-                />
-            )}
-            {!error && media.kind === "video" && (
-                <video
-                    className={loaded ? undefined : cl("hidden")}
-                    src={media.src}
-                    muted
-                    loop
-                    playsInline
-                    autoPlay
-                    onLoadedData={() => setLoaded(true)}
-                    onError={() => setError(true)}
-                />
-            )}
-            <div className={cl("thumb-info")}>
-                <span>{formatSize(media.blob.size)}</span>
-                {media.width > 0 && media.height > 0 && <span>{media.width}x{media.height}</span>}
-            </div>
-            <button
-                className={cl("delete")}
-                onClick={event => {
-                    event.stopPropagation();
-                    removeMedia(media.id);
-                }}
-            >
-                <SvgIcon d={ICONS.del} size={16} />
-            </button>
-        </button>
+        />
     );
-}
-
-function ManagerPopout() {
-    const storedMedia = useMediaItems();
-    const totalSize = storedMedia.reduce((size, item) => size + item.blob.size, 0);
-
-    const handleFile = useCallback(async (blob: Blob) => {
-        try {
-            const item = await addMedia(blob);
-            if (item) return;
-
-            showFailureToast("Only images and MP4 videos are supported");
-        } catch (error) {
-            showFailureToast(`Failed to add background media: ${getErrorMessage(error)}`);
-        }
-    }, []);
-
-    const handleUpload = useCallback(async () => {
-        const files = await chooseFile("image/*,video/mp4");
-        if (!files) return;
-
-        const selectedFiles = Array.isArray(files) ? files : [files];
-        await Promise.all(selectedFiles.map(handleFile));
-    }, [handleFile]);
-
-    const toggleSlideshow = useCallback((enabled: boolean) => {
-        settings.store.slideshowInterval = SLIDESHOW_INTERVAL_MS;
-        settings.store.enableSlideshow = enabled;
-        if (enabled) {
-            startSlideshow();
-        } else {
-            stopSlideshow();
-        }
-
-        notifyUI();
-    }, []);
-
-    return (
-        <Dialog className={cl("popout")}>
-            <div className={cl("content")}>
-                <div className={cl("title-row")}>
-                    <span className={cl("title")}>Background Manager</span>
-                    {storedMedia.length > 0 && <span className={cl("summary")}>Total: {formatSize(totalSize)}</span>}
-                </div>
-                <div className={cl("input-row")}>
-                    <div className={cl("slideshow-control")}>
-                        <div className={cl("slideshow-meta")}>
-                            <span className={cl("slideshow-label")}>Slideshow</span>
-                            <span className={cl("slideshow-note")}>Every 5 minutes</span>
-                        </div>
-                        <Switch checked={settings.store.enableSlideshow} onChange={toggleSlideshow} />
-                    </div>
-                    <Tooltip text="Upload Backgrounds">
-                        {tooltipProps => (
-                            <button {...tooltipProps} className={cl("btn", "btn-upload")} onClick={handleUpload}>
-                                <SvgIcon d={ICONS.upload} />
-                            </button>
-                        )}
-                    </Tooltip>
-                    <Tooltip text="Remove Background">
-                        {tooltipProps => (
-                            <button {...tooltipProps} className={cl("btn", "btn-remove")} onClick={deselectAll}>
-                                <SvgIcon d={ICONS.remove} />
-                            </button>
-                        )}
-                    </Tooltip>
-                </div>
-                {storedMedia.length > 0 && settings.store.enableSlideshow && storedMedia.length >= 2 && (
-                    <div className={cl("info")}>
-                        <span>Every 5 minutes</span>
-                        <Tooltip text="Next Background">
-                            {tooltipProps => (
-                                <button {...tooltipProps} className={cl("btn", "btn-next")} onClick={nextImage}>
-                                    <SvgIcon d={ICONS.next} size={18} />
-                                </button>
-                            )}
-                        </Tooltip>
-                    </div>
-                )}
-                <div className={cl("grid")}>
-                    {storedMedia.map(media => <MediaThumbnail key={media.id} media={media} />)}
-                </div>
-            </div>
-        </Dialog>
-    );
-}
-
-function BgManagerHeaderButton() {
-    const buttonRef = useRef<HTMLDivElement>(null);
-    const [isOpen, setIsOpen] = useState(false);
-
-    return (
-        <Popout
-            position="bottom"
-            align="right"
-            spacing={8}
-            animation={Popout.Animation.NONE}
-            shouldShow={isOpen}
-            onRequestClose={() => setIsOpen(false)}
-            targetElementRef={buttonRef}
-            renderPopout={() => <ErrorBoundary><ManagerPopout /></ErrorBoundary>}
-        >
-            {(_, { isShown }) => (
-                <HeaderBarButton
-                    ref={buttonRef}
-                    icon={GalleryIcon}
-                    tooltip={isShown ? null : "Background Manager"}
-                    onClick={() => setIsOpen(open => !open)}
-                    selected={isShown}
-                />
-            )}
-        </Popout>
-    );
-}
+};
 
 export default definePlugin({
     name: "BackgroundManager",
-    description: "Manage custom background images and MP4 videos with slideshow, transitions, and adjustments. Originally by Narukami.",
+    description: "Manage custom background images, GIFs, and videos with slideshow support.",
     authors: [Devs.benjii],
+    requiresRestart: true,
+    managedStyle,
     settings,
 
     patches: [
         {
+            find: "name:\"Search\",renderLoader",
+            replacement: {
+                match: /className:(\i),innerClassName:(\i),toolbar:function/,
+                replace: "className:$self.withBackgroundHeaderClass($1),style:$self.getBackgroundHeaderStyle(),innerClassName:$2,toolbar:function"
+            }
+        },
+        {
+            find: "renderChat(),this.renderSidebar()",
+            replacement: [
+                {
+                    match: /("data-has-border":\i\.type!==\i\.\i\.GUILD_VOICE,className:)(\i\(\)\(\i\.\i,\{[^}]{0,60}\}\))(,children:\[)/,
+                    replace: "$1$self.withBackgroundChatClass($2)$3"
+                },
+                {
+                    match: /(className:)(\i\(\)\(\i\.\i,\{\[\i\.\i\]:\i===\i\.\i\.NO_CHAT\}\))(,children:\[this\.renderChat\(\),this\.renderSidebar\(\)\])/,
+                    replace: "$1$self.withBackgroundChatContentClass($2)$3"
+                }
+            ]
+        },
+        {
+            find: "content-inventory-feed",
+            replacement: [
+                {
+                    match: /(id:`members-\$\{\i\.id\}`,setFocus:\i,isEnabled:\i,scrollToStart:\i,scrollToEnd:\i\}\);return\(0,\i\.jsx\)\(\i\.\i,\{value:\i,children:\(0,\i\.jsx\)\("div",\{className:)(\i\(\)\(\i\.\i,\i\))/,
+                    replace: "$1$self.withBackgroundMembersClass($2)"
+                },
+                {
+                    match: /("aside",\{className:)(\i\(\)\(\i\.\i,\i\.\i\))(,"aria-labelledby":\i,children:\(0,\i\.jsx\)\(\i\.\i,\{component:)/,
+                    replace: "$1$self.withBackgroundMembersClass($2)$3"
+                },
+                {
+                    match: /(ref:\i=>\{this\._list=\i,this\.props\.listRef\.current=\i,\i\.current=\i\?\.getScrollerNode\(\)\?\?null\},className:)(\i\(\)\(\i\.\i,\{\[\i\.\i\]:\i\.\i\}\))(,paddingTop:0,sectionHeight:\i,rowHeight:this\.getRowHeightComputer\(\),renderSection:this\.renderSection,renderRow:this\.renderRow)/,
+                    replace: "$1$self.withBackgroundMembersClass($2)$3"
+                }
+            ]
+        },
+        {
+            find: "#{intl::GUILDS_BAR_A11Y_LABEL}",
+            replacement: {
+                match: /("nav",\{className:)(\i\(\)\(\i\.\i,\i,\i,\{\[\i\.\i\]:\i\}\))(,"aria-label":\i\.intl\.string\(\i\.t#{intl::GUILDS_BAR_A11Y_LABEL}\))/,
+                replace: "$1$self.withBackgroundGuildsClass($2)$3"
+            }
+        },
+        {
+            find: "CHANNEL_SIDEBAR_RESIZED,{width:",
+            replacement: [
+                {
+                    match: /(className:)(\i\.\i)(,children:\[\(0,\i\.jsx\)\(\i,\{\}\),\(0,\i\.jsx\)\(\i,\{isSidebarOpen:)/,
+                    replace: "$1$self.withBackgroundAppContentClass($2)$3"
+                },
+                {
+                    match: /(className:)(\i\.\i)(,"data-collapsed":!1)/,
+                    replace: "$1$self.withBackgroundPageClass($2)$3"
+                },
+                {
+                    match: /(className:)(\i\.\i)(,themeOverride:)/,
+                    replace: "$1$self.withBackgroundGuildsClass($2)$3"
+                },
+                {
+                    match: /(className:)(\i\(\)\(\i\.\i,\i,\{[^}]{0,120}\}\))(,children:\[\i&&\(0,\i\.jsx\)\(\i\.\i,\{[^}]{0,120}themeOverride:)/,
+                    replace: "$1$self.withBackgroundSidebarClass($2)$3"
+                },
+                {
+                    match: /let (\i)=\{className:(\i\(\)\(\i\.\i,\{\[\i\.\i\]:!\i\}\))\};/,
+                    replace: "let $1={className:$self.withBackgroundSidebarListClass($2)};"
+                }
+            ]
+        },
+        {
+            find: "refresh-title-bar-small",
+            replacement: [
+                {
+                    match: /(return\(0,\i\.jsxs\)\("div",\{className:)(\i\(\)\(\i\.\i,\{\[\i\.\i\]:\i\}\))(,children:\[\i,\i,\i\]\}\))/,
+                    replace: "$1$self.withBackgroundSystemBarTrailingClass($2)$3"
+                },
+                {
+                    match: /(className:)(\i\(\)\(\i\.\i,\i\))(,onDoubleClick:\i,(?:"data-window-chrome":"true",)?children:\[\(0,\i\.jsx\)\("div",\{className:\i\.\i,onDoubleClick:\i,children:\i\}\))/,
+                    replace: "$1$self.withBackgroundTitleBarClass($2)$3"
+                }
+            ]
+        },
+        {
             find: "this.renderArtisanalHack()",
             replacement: {
                 match: /children:(\i)=>\(0,(\i)\.jsx\)\("div",\{className:(\i)\(\)\((\i)\.bg,\1\)\}\)/,
-                replace: 'children:$1=>(0,$2.jsxs)("div",{className:$3()($4.bg,$1,$self.getHostClass()),children:[$self.renderBgStyles()]})'
+                replace: 'children:$1=>(0,$2.jsxs)("div",{className:$3()($4.bg,$1,$self.getBackgroundShellClass()),children:[$self.renderBackgroundLayer()]})'
             }
         }
     ],
 
     contextMenus: {
-        "image-context": imageCtxPatch,
-        message: messageCtxPatch,
+        "image-context": imageContextPatch,
+        message: messageContextPatch
     },
 
     headerBarButton: {
         icon: GalleryIcon,
-        render: BgManagerHeaderButton,
+        render: BackgroundManagerHeaderButton
     },
 
-    getHostClass() {
-        return cl("host");
+    getBackgroundShellClass() {
+        return cl("shell");
     },
 
-    renderBgStyles() {
-        return <BgStyleInjector />;
+    withBackgroundAppContentClass(className?: string) {
+        return classes(className, cl("app-content"));
+    },
+
+    withBackgroundPageClass(className?: string) {
+        return classes(className, cl("page"));
+    },
+
+    withBackgroundGuildsClass(className?: string) {
+        return classes(className, cl("guilds"));
+    },
+
+    withBackgroundSidebarClass(className?: string) {
+        return classes(className, cl("sidebar"));
+    },
+
+    withBackgroundSidebarListClass(className?: string) {
+        return classes(className, cl("sidebar-list"));
+    },
+
+    withBackgroundHeaderClass(className?: string) {
+        return classes(className, cl("header"));
+    },
+
+    getBackgroundHeaderStyle() {
+        return backgroundHeaderStyle;
+    },
+
+    withBackgroundChatClass(className?: string) {
+        return classes(className, cl("chat"));
+    },
+
+    withBackgroundChatContentClass(className?: string) {
+        return classes(className, cl("chat-content"));
+    },
+
+    withBackgroundMembersClass(className?: string) {
+        return classes(className, cl("members"));
+    },
+
+    withBackgroundSystemBarTrailingClass(className?: string) {
+        return classes(className, cl("systembar-trailing"));
+    },
+
+    withBackgroundTitleBarClass(className?: string) {
+        return classes(className, cl("titlebar"));
+    },
+
+    renderBackgroundLayer() {
+        return <SafeBackgroundLayerRoot />;
     },
 
     async start() {
-        mediaItems = await loadFromDB();
-        themeCssTargetCache.clear();
-
-        if (settings.store.overwriteCSS) {
-            void getThemeCssTargets(
-                AppSettings.enabledThemes,
-                AppSettings.enabledThemeLinks,
-                AppSettings.useQuickCss,
-                getThemeMode()
-            );
-        }
-
-        const selectedMedia = mediaItems.find(item => item.selected);
-        if (selectedMedia) setBackground(selectedMedia);
-        if (settings.store.enableSlideshow) startSlideshow();
+        await ensureMediaItemsLoaded();
+        migrateStoredSettings();
+        repairStoredSettings();
+        await restoreSelectedMediaFromSettings();
     },
 
     stop() {
-        stopSlideshow();
-        removeBackground();
-        clearMetadataRequests();
-        themeCssTargetCache.clear();
-        mediaItems.forEach(media => URL.revokeObjectURL(media.src));
-        mediaItems = [];
+        releaseMediaLibrary(false);
     }
 });
